@@ -1,8 +1,8 @@
-***About Me***
+# About Me
 
-**Biography**
+## Biography
 
-Hey there! I am a former student at the Information Technology department of West London College. Previously, I received my BTEC Diploma in Technology.
+Hey there! My name is Dominic, I am a former student at the Information Technology department of West London College. Previously, I received my [BTEC Diploma in Technology] from colleage [https://www.wlc.ac.uk/]
 
 I’m trying to find a balance between research and engineering.
 
@@ -10,20 +10,17 @@ My current research interests primarily focus on understanding and enhancing the
 
 I'm also learning full stack development and building machine learning software and systems.
 
-**Contact**
-**Contact me by:**
+## Contact
 
-**Email:** dominic.wokorach-o@outlook.com
+Contact me by:
 
-**Github:** @domwokorach
+- Email: [dominic.wokorach-o@outlook.com](milto:dominic.wokorach-o@outlook.com)
+- Github: [@domwokorach](https://github.com/domwokorach/Portfolio-Wokorach)
+- Linkedin: [Dominic_Wokorach-O](https://www.linkedin.com/in/dominic-w-3673523b/)
+- Personal Website: [Wokorach.me](portfolio-wokorach.vercel.app)
 
-Google Scholar
+## Resume
 
-**Linkedin:** dominicwokorach
+- Normal version: [English](https://drive.google.com/drive/folders/18Gf4U56ncAgdEzEogRow5dbd49SR3nbB?usp=drive_link)
 
-**Personal Website:**
-**Résumé:**
-
-**Normal version:** English
-
-**Interesting version:** portfolio.dom.me/resume.dom.io
+- Interesting version: [portfolio.dominic.me] (https://portfolio-wokorach.vercel.app/)
