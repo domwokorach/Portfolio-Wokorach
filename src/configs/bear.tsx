@@ -37,31 +37,31 @@ const bear: BearData[] = [
       {
         id: "flint",
         title: "Flint",
-        file: "https://raw.githubusercontent.com/Renovamen/flint/main/README.md",
+        file: "https://github.com/domwokorach/Portfolio-Wokorach/blob/master/README.md",
         icon: "i-heroicons-solid:fire",
         excerpt: "A deep learning framework implemented in Numpy...",
-        link: "https://github.com/Renovamen/flint"
+        link: "https://github.com/domwokorach/Portfolio-Wokorach"
       },
       {
         id: "portfolio-macos",
         title: "Portfolio macOS",
-        file: "https://raw.githubusercontent.com/Renovamen/playground-macos/main/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/Portfolio-Wokorach/main/README.md",
         icon: "i-ri:gamepad-line",
         excerpt: "My portfolio website simulating macOS's GUI...",
-        link: "https://github.com/Renovamen/playground-macos"
+        link: "https://github.com/domwokorach/Portfolio-Wokorach"
       },
       {
         id: "oh-my-cv",
         title: "Oh, My CV!",
-        file: "https://raw.githubusercontent.com/Renovamen/oh-my-cv/main/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/oh-my-cv/main/README.md",
         icon: "i-ri:newspaper-fill",
         excerpt: "Write your curriculum vitae / resume in Markdown online...",
-        link: "https://ohmycv.app"
+        link: "https://drive.google.com/drive/folders/18Gf4U56ncAgdEzEogRow5dbd49SR3nbB"
       },
       {
         id: "oh-vue-icons",
         title: "Oh, Vue Icons!",
-        file: "https://raw.githubusercontent.com/Renovamen/oh-vue-icons/master/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/oh-vue-icons/master/README.md",
         icon: "i-fa-brands:vuejs",
         excerpt: "Importing icons from different icon packs in Vue easily...",
         link: "https://oh-vue-icons.js.org"
@@ -69,7 +69,7 @@ const bear: BearData[] = [
       {
         id: "gungnir",
         title: "Gungnir",
-        file: "https://raw.githubusercontent.com/Renovamen/vuepress-theme-gungnir/main/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/vuepress-theme-gungnir/main/README.md",
         icon: "i-akar-icons:sword",
         excerpt: "A simple and beautiful blog theme for VuePress...",
         link: "https://vuepress-theme-gungnir.vercel.app"
