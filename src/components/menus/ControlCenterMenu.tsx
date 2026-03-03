@@ -111,7 +111,7 @@ export default function ControlCenterMenu({
           {dark ? (
             <span className="i-ion:moon text-base" />
           ) : (
-            <span className="i-ion:sunny text-base" />
+            <span className="i-ion:ios-sunny text-base" />
           )}
         </div>
         <div font-medium>{dark ? "Dark Mode" : "Light Mode"}</div>
@@ -137,11 +137,15 @@ export default function ControlCenterMenu({
       </div>
       <div className="cc-grid col-span-4 px-2.5 py-2 space-y-1 flex flex-col justify-around">
         <span className="font-medium ml-0.5">Display</span>
-        <SliderComponent icon="i-ion:sunny" value={brightness} setValue={setBrightness} />
+        <SliderComponent
+          icon="i-ion:ios-sunny"
+          value={brightness}
+          setValue={setBrightness}
+        />
       </div>
       <div className="cc-grid col-span-4 px-2.5 py-2 space-y-1 flex flex-col justify-around">
         <span className="font-medium ml-0.5">Sound</span>
-        <SliderComponent icon="i-ion:volume-high" value={volume} setValue={setVolume} />
+  <SliderComponent icon="i-ion:volume-high" value={volume} setValue={setVolume} />
       </div>
       <div className="cc-grid col-span-4 hstack space-x-2.5" p="y-2 l-2 r-4">
         <img className="w-12 rounded-lg" src={music.cover} alt="cover art" />
