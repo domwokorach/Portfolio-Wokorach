@@ -2,22 +2,22 @@ import type { LaunchpadData } from "~/types";
 
 const launchpadApps: LaunchpadData[] = [
   {
-    id: "flint",
-    title: "Flint",
-    img: "img/icons/launchpad/flint.png",
-    link: "https://github.com/Renovamen/flint"
+    id: "weather",
+    title: "Weather",
+    img: "img/icons/launchpad/weather.png",
+    link: "https://wokorach-weather.vercel.app"
   },
   {
-    id: "oh-my-cv",
-    title: "Oh, My CV!",
-    img: "https://ohmycv.app/pwa-512x512.png",
-    link: "https://ohmycv.app"
+    id: "F1 Calendar",
+    title: "F1 Calendar",
+    img: "img/icons/launchpad/f1calendar.png",
+    link: "https://wokorach-f1-calendar-2026.vercel.app/"
   },
   {
-    id: "oh-vue-icons",
-    title: "Oh, Vue Icons!",
-    img: "img/icons/launchpad/oh-vue-icons.png",
-    link: "https://oh-vue-icons.js.org"
+    id: "news",
+    title: "News",
+    img: "img/icons/launchpad/news.png",
+    link: "https://wokorach-news-api-git-master-domwokorachs-projects.vercel.app"
   },
   {
     id: "gungnir",
