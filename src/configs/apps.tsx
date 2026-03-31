@@ -9,24 +9,24 @@ const apps: AppsData[] = [
     img: "img/icons/launchpad.png"
   },
   {
-    id: "bear",
-    title: "Bear",
+    id: "dom's personal",
+    title: "Dom's Personal",
     desktop: true,
     width: 860,
     height: 500,
     show: true,
     y: -40,
-    img: "img/icons/bear.png",
+    img: "img/icons/folder.png",
     content: <Bear />
   },
   {
-    id: "typora",
-    title: "Typora",
+    id: "notes",
+    title: "Notes",
     desktop: true,
     width: 600,
     height: 580,
     y: -20,
-    img: "img/icons/typora.png",
+    img: "img/icons/notes.png",
     content: <Typora />
   },
   {
