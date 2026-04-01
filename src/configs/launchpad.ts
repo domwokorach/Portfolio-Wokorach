@@ -11,7 +11,7 @@ const launchpadApps: LaunchpadData[] = [
     id: "F1 Calendar",
     title: "F1 Calendar",
     img: "img/icons/launchpad/f1calendar.png",
-    link: "https://wokorach-f1-calendar-2026.vercel.app/"
+    link: "https://github.com/domwokorach/Wokorach-f1-track-replay.git"
   },
   {
     id: "news",
@@ -32,35 +32,35 @@ const launchpadApps: LaunchpadData[] = [
   //   link: "https://github.com/Renovamen/metallic"
   // },
   {
-    id: "what-if",
-    title: "My Notebook",
-    img: "img/icons/launchpad/notebook.png",
-    link: "https://note.zxh.io"
-  },
-  {
-    id: "cube",
-    title: "Cube Solver",
-    img: "img/icons/launchpad/cube.png",
-    link: "https://cube.zxh.io/"
-  },
-  {
-    id: "resume",
-    title: "Résumé",
-    img: "img/icons/launchpad/resume.png",
-    link: "https://resume.zxh.io/"
-  },
-  {
-    id: "zelda",
-    title: "Webpage for Zelda",
-    img: "img/icons/launchpad/zelda.png",
-    link: "https://zelda.zxh.io/"
-  },
-  {
-    id: "fishmail",
-    title: "Fishmail",
-    img: "img/icons/launchpad/fishmail.png",
-    link: "https://fishmail.vercel.app/"
+    id: "Election 2024",
+    title: "Election UI",
+    img: "img/icons/launchpad/election_24.png",
+    link: "https://elections-api-yaz3.vercel.app/"
   }
+  // {
+  //   id: "cube",
+  //   title: "Cube Solver",
+  //   img: "img/icons/launchpad/cube.png",
+  //   link: "https://cube.zxh.io/"
+  // },
+  // {
+  //   id: "resume",
+  //   title: "Résumé",
+  //   img: "img/icons/launchpad/resume.png",
+  //   link: "https://resume.zxh.io/"
+  // },
+  // {
+  //   id: "zelda",
+  //   title: "Webpage for Zelda",
+  //   img: "img/icons/launchpad/zelda.png",
+  //   link: "https://zelda.zxh.io/"
+  // },
+  // {
+  //   id: "fishmail",
+  //   title: "Fishmail",
+  //   img: "img/icons/launchpad/fishmail.png",
+  //   link: "https://fishmail.vercel.app/"
+  // }
 ];
 
 export default launchpadApps;

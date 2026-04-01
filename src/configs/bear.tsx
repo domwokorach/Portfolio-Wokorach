@@ -53,42 +53,51 @@ const bear: BearData[] = [
       {
         id: "Weather API",
         title: "Weather API",
-        file: "https://raw.githubusercontent.com/Renovamen/oh-vue-icons/master/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/wokorach-weather/refs/heads/master/README.md",
         icon: "i-simple-icons:typescript",
         excerpt: "Importing icons from different icon packs in Vue easily...",
-        link: "https://oh-vue-icons.js.org"
+        link: "https://wokorach-weather.vercel.app/"
       },
       {
         id: "F1 Track Replay",
         title: "F1 Track Replay",
-        file: "https://raw.githubusercontent.com/Renovamen/metallic/master/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/Wokorach-f1-track-replay/refs/heads/master/README.md",
         icon: "i-simple-icons:python",
-        excerpt: "A meta-learning library base on PyTorch...",
-        link: "https://github.com/Renovamen/metallic"
+        excerpt:
+          "A Python application for visualizing Formula 1 and replaying race events...",
+        link: "https://github.com/domwokorach/Wokorach-f1-track-replay"
       },
       {
         id: "News API",
         title: "News API",
-        file: "https://raw.githubusercontent.com/Renovamen/vuepress-theme-gungnir/main/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/Wokorac-News-API/refs/heads/master/README.md",
         icon: "i-simple-icons:javascript",
-        excerpt: "A simple and beautiful blog theme for VuePress...",
-        link: "https://vuepress-theme-gungnir.vercel.app"
+        excerpt: "NewsAPI requests made directly from the browser...",
+        link: "https://wokorach-news-api.vercel.app/"
       },
       {
         id: "Election UI",
         title: "Election UI",
-        file: "https://raw.githubusercontent.com/Renovamen/Text-Classification/master/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/elections-api/refs/heads/master/README.md",
         icon: "i-simple-icons:javascript",
         excerpt: "Election implementation of text classification models...",
-        link: "https://github.com/Renovamen/Text-Classification"
+        link: "https://elections-api-yaz3.vercel.app/"
       },
       {
         id: "Air Quality",
         title: "Air Quality",
-        file: "https://raw.githubusercontent.com/Renovamen/Speech-Emotion-Recognition/master/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/wokorach-air-quality/refs/heads/master/README.md",
         icon: "i-simple-icons:javascript",
-        excerpt: "Speech emotion recognition using Keras and sklearn...",
-        link: "https://github.com/Renovamen/Speech-Emotion-Recognition"
+        excerpt: "My solution for the Air Quality code test, built with Gridsome...",
+        link: "https://wokorach-air-quality.vercel.app/en/"
+      },
+      {
+        id: "World Map API",
+        title: "World Map",
+        file: "https://raw.githubusercontent.com/domwokorach/Wokorach-Map/master/README.md",
+        icon: "i-simple-icons:map",
+        excerpt: "Built with Next.js and Weather API, it offers a seamle...",
+        link: "https://github.com/domwokorach/Wokorach-Map.git"
       }
     ]
   }
