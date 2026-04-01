@@ -66,24 +66,43 @@
 
 /* --------- slider --------- */
 
+.slider {
+  @apply items-center;
+}
+
 .slider .rc-slider {
-  @apply bg-c-300 w-full h-7 shadow-none m-0 rounded-r-full border-t border-r border-b border-transparent;
+  @apply flex-1 h-1 rounded-full m-0 p-0 bg-transparent;
+  box-shadow: none;
 }
 
 .slider .rc-slider .rc-slider-rail {
-  @apply bg-c-300 h-7 rounded-r-full;
+  @apply bg-c-300 h-1 rounded-full top-0;
 }
 
 .slider .rc-slider .rc-slider-track {
-  @apply bg-c-100 h-7 rounded-none;
+  @apply bg-c-500 h-1 rounded-full top-0;
 }
 
 .slider .rc-slider .rc-slider-handle {
-  @apply border border-c-300 outline-none size-7 text-white bg-white;
-  box-shadow: -3px 0px 8px 0px rgba(17, 17, 17, 0.15);
+  @apply border border-c-300 outline-none bg-white opacity-100;
+  width: 1rem;
+  height: 1rem;
+  margin-top: -0.375rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .slider .rc-slider .rc-slider-handle::after {
+  @apply hidden;
+}
+
+.slider .rc-slider .rc-slider-handle:hover,
+.slider .rc-slider .rc-slider-handle:active,
+.slider .rc-slider .rc-slider-handle-dragging.rc-slider-handle-dragging.rc-slider-handle-dragging {
+  @apply border-c-400;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+
+.slider .rc-slider .rc-slider-step {
   @apply hidden;
 }
 
