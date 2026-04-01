@@ -22,7 +22,7 @@ const launchpadApps: LaunchpadData[] = [
   {
     id: "World Map",
     title: "World Map",
-    img: "img/icons/launchpad/worldmap.png",
+    img: "img/icons/launchpad/map.png",
     link: "https://world-map-api.vercel.app/"
   },
   // {
