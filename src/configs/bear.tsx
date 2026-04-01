@@ -4,7 +4,7 @@ const bear: BearData[] = [
   {
     id: "profile",
     title: "Profile",
-    icon: "i-fa-solid:paw",
+    icon: "i-fa-solid:code",
     md: [
       {
         id: "about-me",
@@ -35,18 +35,10 @@ const bear: BearData[] = [
     icon: "i-octicon:repo",
     md: [
       {
-        id: "flint",
-        title: "Flint",
-        file: "https://github.com/domwokorach/Portfolio-Wokorach/blob/master/README.md",
-        icon: "i-heroicons-solid:fire",
-        excerpt: "A deep learning framework implemented in Numpy...",
-        link: "https://github.com/domwokorach/Portfolio-Wokorach"
-      },
-      {
         id: "portfolio-macos",
         title: "Portfolio macOS",
-        file: "https://raw.githubusercontent.com/domwokorach/Portfolio-Wokorach/main/README.md",
-        icon: "i-ri:gamepad-line",
+        file: "https://raw.githubusercontent.com/domwokorach/Portfolio-Wokorach/refs/heads/master/README.md",
+        icon: "i-ri:macbook-line",
         excerpt: "My portfolio website simulating macOS's GUI...",
         link: "https://github.com/domwokorach/Portfolio-Wokorach"
       },
@@ -56,103 +48,47 @@ const bear: BearData[] = [
         file: "https://raw.githubusercontent.com/Renovamen/oh-my-cv/main/README.md",
         icon: "i-ri:newspaper-fill",
         excerpt: "Write your curriculum vitae / resume in Markdown online...",
-        link: "https://ohmycv.app"
+        link: "https://drive.google.com/file/d/1XNdEjtUgk8fUnqaJ0fkABxp1WEQxpbYz/view?usp=drive_link"
       },
       {
-        id: "oh-vue-icons",
-        title: "Oh, Vue Icons!",
+        id: "Weather API",
+        title: "Weather API",
         file: "https://raw.githubusercontent.com/Renovamen/oh-vue-icons/master/README.md",
-        icon: "i-fa-brands:vuejs",
+        icon: "i-simple-icons:typescript",
         excerpt: "Importing icons from different icon packs in Vue easily...",
         link: "https://oh-vue-icons.js.org"
       },
       {
-        id: "gungnir",
-        title: "Gungnir",
-        file: "https://raw.githubusercontent.com/Renovamen/vuepress-theme-gungnir/main/README.md",
-        icon: "i-akar-icons:sword",
-        excerpt: "A simple and beautiful blog theme for VuePress...",
-        link: "https://vuepress-theme-gungnir.vercel.app"
-      },
-      {
-        id: "metallic",
-        title: "Metallic",
+        id: "F1 Track Replay",
+        title: "F1 Track Replay",
         file: "https://raw.githubusercontent.com/Renovamen/metallic/master/README.md",
-        icon: "i-icon-park-outline:heavy-metal",
+        icon: "i-simple-icons:python",
         excerpt: "A meta-learning library base on PyTorch...",
         link: "https://github.com/Renovamen/metallic"
       },
       {
-        id: "text-classification",
-        title: "Text Classification",
+        id: "News API",
+        title: "News API",
+        file: "https://raw.githubusercontent.com/Renovamen/vuepress-theme-gungnir/main/README.md",
+        icon: "i-simple-icons:javascript",
+        excerpt: "A simple and beautiful blog theme for VuePress...",
+        link: "https://vuepress-theme-gungnir.vercel.app"
+      },
+      {
+        id: "Election UI",
+        title: "Election UI",
         file: "https://raw.githubusercontent.com/Renovamen/Text-Classification/master/README.md",
-        icon: "i-gg:format-text",
-        excerpt: "PyTorch implementation of text classificaiton models...",
+        icon: "i-simple-icons:javascript",
+        excerpt: "Election implementation of text classification models...",
         link: "https://github.com/Renovamen/Text-Classification"
       },
       {
-        id: "speech-emotion-recognition",
-        title: "Speech Emotion",
+        id: "Air Quality",
+        title: "Air Quality",
         file: "https://raw.githubusercontent.com/Renovamen/Speech-Emotion-Recognition/master/README.md",
-        icon: "i-ant-design:audio-filled",
+        icon: "i-simple-icons:javascript",
         excerpt: "Speech emotion recognition using Keras and sklearn...",
         link: "https://github.com/Renovamen/Speech-Emotion-Recognition"
-      },
-      {
-        id: "pcalg-py",
-        title: "PC Algorithm",
-        file: "https://raw.githubusercontent.com/Renovamen/pcalg-py/master/README.md",
-        icon: "i-tabler:atom-2",
-        excerpt: "Implement PC algorithm in Python...",
-        link: "https://github.com/Renovamen/pcalg-py"
-      },
-      {
-        id: "midgard",
-        title: "Midgard",
-        file: "https://raw.githubusercontent.com/Renovamen/midgard/master/README.md",
-        icon: "i-bx:game",
-        excerpt: "An interactive version of my resume, powered by Vue...",
-        link: "https://resume.zxh.io/"
-      },
-      {
-        id: "image-captioning",
-        title: "Image Captioning",
-        file: "https://raw.githubusercontent.com/Renovamen/Image-Captioning/master/README.md",
-        icon: "i-bi:image-fill",
-        excerpt: "PyTorch implementation of image captioning models...",
-        link: "https://github.com/Renovamen/Image-Captioning"
-      },
-      {
-        id: "wordle-helper",
-        title: "Wordle Helper",
-        file: "https://raw.githubusercontent.com/Renovamen/wordle-helper/main/README.md",
-        icon: "i-bi:grid-1x2",
-        excerpt: "Help you solve Wordle puzzles...",
-        link: "https://wordle.zxh.io"
-      },
-      {
-        id: "cube-solver",
-        title: "Cube Solver",
-        file: "https://raw.githubusercontent.com/Renovamen/Just-a-Cube/master/README.md",
-        icon: "i-bx:cube",
-        excerpt: "A rubik's cube solver (layer-by-layer & two-phase)...",
-        link: "https://cube.zxh.io"
-      },
-      {
-        id: "alkaid",
-        title: "Alkaid",
-        file: "https://raw.githubusercontent.com/Renovamen/alkaid/main/README.md",
-        icon: "i-simple-icons:stellar",
-        excerpt: "Minimal reinforcement-learning toolbox for PyTorch...",
-        link: "https://github.com/Renovamen/alkaid"
-      },
-      {
-        id: "fishmail",
-        title: "Fishmail",
-        file: "https://raw.githubusercontent.com/Renovamen/Fishmail/master/README.md",
-        icon: "i-game-icons:fish-escape",
-        excerpt: "上班的时候装作在 Gmail 上查邮件的样子看知乎摸鱼...",
-        link: "https://fishmail.vercel.app"
       }
     ]
   }

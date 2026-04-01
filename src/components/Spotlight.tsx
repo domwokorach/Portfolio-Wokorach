@@ -284,13 +284,13 @@ export default function Spotlight({
         )}
       </div>
       {searchText !== "" && (
-        <div flex h-85 bg-transparent border="t menu">
-          <div w="32 sm:72" border="r menu" p="x-2.5" overflow-y-scroll>
+        <div flex h-85 bg-transparent className="border-t border-menu">
+          <div w="32 sm:72" className="border-r border-menu" p="x-2.5" overflow-y-scroll>
             {appList}
           </div>
           {curDetails && (
             <div className="flex-1 vstack">
-              <div className="w-4/5 h-56" flex="center col" border="b menu">
+              <div className="w-4/5 h-56 border-b border-menu" flex="center col">
                 <img
                   w-32
                   src={curDetails.img}

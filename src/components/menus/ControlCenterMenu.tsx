@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import { music } from "~/configs";
@@ -11,7 +11,7 @@ interface SliderProps {
 
 const SliderComponent = ({ icon, value, setValue }: SliderProps) => (
   <div className="slider flex">
-    <div className="size-7 flex-center bg-c-100" border="t l b c-300 rounded-l-full">
+    <div className="size-7 flex-center bg-c-100 border-t border-l border-b border-c-300 rounded-l-full">
       <span className={icon} text="xs c-500" />
     </div>
     <Slider
@@ -65,9 +65,8 @@ export default function ControlCenterMenu({
 
   return (
     <div
-      className="w-80 h-96 max-w-full shadow-menu p-2.5 text-c-black bg-c-100/70"
+      className="w-80 h-96 max-w-full shadow-menu p-2.5 text-c-black bg-c-100/70 border border-menu rounded-2xl"
       pos="fixed top-9.5 right-0 sm:right-1.5"
-      border="~ menu rounded-2xl"
       grid="~ cols-4 rows-5 gap-2"
       ref={controlCenterRef}
     >
@@ -109,9 +108,9 @@ export default function ControlCenterMenu({
       <div className="cc-grid col-span-2 p-2 hstack space-x-3">
         <div className={`${dark ? "cc-btn" : "cc-btn-active"}`} onClick={toggleDark}>
           {dark ? (
-            <span className="i-ion:moon text-base" />
+            <span className="i-ion-moon text-base" />
           ) : (
-            <span className="i-ion:ios-sunny text-base" />
+            <span className="i-ion-sunny-outline text-base" />
           )}
         </div>
         <div font-medium>{dark ? "Dark Mode" : "Light Mode"}</div>
@@ -138,14 +137,14 @@ export default function ControlCenterMenu({
       <div className="cc-grid col-span-4 px-2.5 py-2 space-y-1 flex flex-col justify-around">
         <span className="font-medium ml-0.5">Display</span>
         <SliderComponent
-          icon="i-ion:ios-sunny"
+          icon="i-ion-sunny-outline"
           value={brightness}
           setValue={setBrightness}
         />
       </div>
       <div className="cc-grid col-span-4 px-2.5 py-2 space-y-1 flex flex-col justify-around">
         <span className="font-medium ml-0.5">Sound</span>
-  <SliderComponent icon="i-ion:volume-high" value={volume} setValue={setVolume} />
+        <SliderComponent icon="i-ion-volume-high" value={volume} setValue={setVolume} />
       </div>
       <div className="cc-grid col-span-4 hstack space-x-2.5" p="y-2 l-2 r-4">
         <img className="w-12 rounded-lg" src={music.cover} alt="cover art" />

@@ -23,7 +23,6 @@ declare global {
   const Typora: typeof import('./components/apps/Typora')['default']
   const VSCode: typeof import('./components/apps/VSCode')['default']
   const WifiMenu: typeof import('./components/menus/WifiMenu')['default']
-  const Window: typeof import('./components/Window')['default']
   const createRef: typeof import('react')['createRef']
   const forwardRef: typeof import('react')['forwardRef']
   const lazy: typeof import('react')['lazy']
@@ -50,4 +49,10 @@ declare global {
   const useSyncExternalStore: typeof import('react')['useSyncExternalStore']
   const useTransition: typeof import('react')['useTransition']
   const useWindowSize: typeof import('./hooks/useWindowSize')['useWindowSize']
+}
+// for type re-export
+declare global {
+  // @ts-ignore
+  export type { Terminal } from './components/apps/Terminal'
+  import('./components/apps/Terminal')
 }

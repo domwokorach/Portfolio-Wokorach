@@ -6,7 +6,7 @@ import rehypeExternalLinks from "rehype-external-links";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dracula, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import bear from "~/configs/bear";
-import type { BearMdData } from "~/types";
+import type { BearMdData, BearData } from "~/types";
 
 interface ContentProps {
   contentID: string;
@@ -65,7 +65,7 @@ const Sidebar = ({ cur, setMidBar }: SidebarProps) => {
         <span className="i-akar-icons:settings-vertical text-xl" />
       </div>
       <ul>
-        {bear.map((item, index) => (
+        {bear.map((item: BearData, index: number) => (
           <li
             key={`bear-sidebar-${item.id}`}
             className={`pl-6 h-8 hstack cursor-default ${
@@ -113,7 +113,7 @@ const Middlebar = ({ items, cur, setContent }: MiddlebarProps) => {
               )}
             </span>
           </div>
-          <div className="flex-1 ml-10" p="b-2 r-1" text="sm c-500" border="b c-300">
+          <div className="flex-1 ml-10 border-b border-c-300" p="b-2 r-1" text="sm c-500">
             {item.excerpt}
           </div>
         </li>
@@ -150,7 +150,7 @@ const fixImageURL = (text: string, contentURL: string): string => {
 
 const Content = ({ contentID, contentURL }: ContentProps) => {
   const [storeMd, setStoreMd] = useState<{ [key: string]: string }>({});
-  const dark = useStore((state) => state.dark);
+  const dark = useStore((state: { dark: boolean }) => state.dark);
 
   const fetchMarkdown = useCallback(
     (id: string, url: string) => {
@@ -220,7 +220,10 @@ const Bear = () => {
       <div className="w-44 overflow-auto bg-gray-700">
         <Sidebar cur={state.curSidebar} setMidBar={setMidBar} />
       </div>
-      <div className="w-60 overflow-auto" bg="gray-50 dark:gray-800" border="r c-300">
+      <div
+        className="w-60 overflow-auto border-r border-c-300"
+        bg="gray-50 dark:gray-800"
+      >
         <Middlebar
           items={state.midbarList}
           cur={state.curMidbar}

@@ -37,8 +37,7 @@ export default function Launchpad({ show, toggleLaunchpad }: LaunchpadProps) {
     >
       <div className="size-full absolute bg-gray-900/20 backdrop-blur-2xl">
         <div
-          className="mx-auto flex h-7 w-64 mt-5 bg-gray-200/10"
-          border="1 rounded-md gray-200/30"
+          className="mx-auto flex h-7 w-64 mt-5 bg-gray-200/10 border border-1 rounded-md border-gray-200/30"
           onClick={(e) => e.stopPropagation()}
           onFocus={() => setFocus(true)}
           onBlur={() => setFocus(false)}

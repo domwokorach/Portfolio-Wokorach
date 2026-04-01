@@ -12,7 +12,8 @@
     "dev": "vite --host",
     "lint": "eslint .",
     "prepare": "husky",
-    "serve": "vite preview --host"
+    "serve": "vite preview --host",
+    "test": "tsc --noEmit"
   },
   "lint-staged": {
     "*.{js,ts,tsx}": "eslint --fix",

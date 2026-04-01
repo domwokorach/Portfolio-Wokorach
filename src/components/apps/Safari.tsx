@@ -190,8 +190,7 @@ const Safari = ({ width }: SafariProps) => {
             value={state.currentURL}
             onChange={(e) => setState({ ...state, currentURL: e.target.value })}
             onKeyPress={pressURL}
-            className="h-6 w-full p-2 rounded font-normal no-outline text-sm text-center text-c-500 bg-c-200"
-            border="2 transparent focus:blue-400 dark:focus:blue-500"
+            className="h-6 w-full p-2 rounded font-normal no-outline text-sm text-center text-c-500 bg-c-200 border-2 border-transparent focus:border-blue-400 dark:focus:border-blue-500"
             placeholder="Search or enter website name"
           />
         </div>
