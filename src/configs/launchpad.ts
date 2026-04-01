@@ -20,10 +20,10 @@ const launchpadApps: LaunchpadData[] = [
     link: "https://wokorach-news-api-git-master-domwokorachs-projects.vercel.app"
   },
   {
-    id: "gungnir",
-    title: "Gungnir",
-    img: "img/icons/launchpad/gungnir.png",
-    link: "https://vuepress-theme-gungnir.vercel.app/"
+    id: "World Map",
+    title: "World Map",
+    img: "img/icons/launchpad/worldmap.png",
+    link: "https://world-map-api.vercel.app/"
   },
   // {
   //   id: "metallic",
