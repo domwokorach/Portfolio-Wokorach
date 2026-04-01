@@ -2,7 +2,7 @@
   "name": "dominic-wokorach-macos",
   "version": "1.0.0",
   "private": true,
-  "description": "My portfolio website simulating macOS's GUI: https://portfolio.zxh.me",
+  "description": "My portfolio website macOS's GUI: portfolio-wokorach.vercel.app",
   "license": "ISC",
   "author": "dominic wokorach-o",
   "type": "module",

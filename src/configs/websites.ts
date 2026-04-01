@@ -24,10 +24,10 @@ const websites: WebsitesData = {
         link: "https://www.linkedin.com/in/dominic-w-3673523b/"
       },
       // {
-      //   id: "my-google-scholar",
-      //   title: "Scholar",
+      //   id: "Air Quality Test",
+      //   title: "Air Quality Test",
       //   img: "img/sites/google-scholar.svg",
-      //   link: "https://scholar.google.com/citations?user=RuW6xgMAAAAJ"
+      //   link: "https://wokorach-air-quality.vercel.app/en/"
       // },
       {
         id: "my-twitter",
