@@ -1,8 +1,8 @@
-# playground-macos
+# wokorach-profile
 
 My portfolio website simulating macOS's GUI: https://portfolio-wokorach.vercel.app/
 
-Powered by [React](https://reactjs.org/) + [Zustand](https://zustand-demo.pmnd.rs/) + [UnoCSS](https://uno.antfu.me/) + [TypeScript](https://www.typescriptlang.org/) + [Vite](https://vitejs.dev/).
+Powered by [React](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/) + [Vite](https://vitejs.dev/).
 
 ![light mode](./public/screenshots/light.png)
 ![dark mode](./public/screenshots/dark.png)
