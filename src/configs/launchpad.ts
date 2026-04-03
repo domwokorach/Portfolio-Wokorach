@@ -25,17 +25,17 @@ const launchpadApps: LaunchpadData[] = [
     img: "img/icons/launchpad/map.png",
     link: "https://world-map-api.vercel.app/"
   },
-  // {
-  //   id: "metallic",
-  //   title: "Metallic",
-  //   img: "img/icons/launchpad/meta.png",
-  //   link: "https://github.com/Renovamen/metallic"
-  // },
   {
     id: "Election 2024",
     title: "Election UI",
     img: "img/icons/launchpad/election_24.png",
     link: "https://elections-api-yaz3.vercel.app/"
+  },
+  {
+    id: "MacBook",
+    title: "Mac",
+    img: "img/icons/launchpad/apple.png",
+    link: "https://wokorach-macbook.vercel.app"
   }
   // {
   //   id: "cube",
