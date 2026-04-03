@@ -98,6 +98,14 @@ const bear: BearData[] = [
         icon: "i-simple-icons:map",
         excerpt: "Built with Next.js and Weather API, it offers a seamle...",
         link: "https://github.com/domwokorach/Wokorach-Map.git"
+      },
+      {
+        id: "Wokorach MacBook",
+        title: "Wokorach MacBook",
+        file: "https://raw.githubusercontent.com/domwokorach/wokorach_mackbook/refs/heads/master/README.md",
+        icon: "i-simple-icons:macbook",
+        excerpt: "A macOS-inspired web application...",
+        link: "https://wokorach-macbook.vercel.app/"
       }
     ]
   }
