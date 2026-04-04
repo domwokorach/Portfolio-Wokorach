@@ -36,6 +36,12 @@ const launchpadApps: LaunchpadData[] = [
     title: "Mac",
     img: "img/icons/launchpad/apple.png",
     link: "https://wokorach-macbook.vercel.app"
+  },
+  {
+    id: "Gemini AI",
+    title: "Gemini AI",
+    img: "img/icons/launchpad/gemini-ai.png",
+    link: "https://wokorach-gemini-ai.vercel.app"
   }
   // {
   //   id: "cube",

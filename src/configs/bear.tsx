@@ -106,6 +106,14 @@ const bear: BearData[] = [
         icon: "i-simple-icons:macbook",
         excerpt: "A macOS-inspired web application...",
         link: "https://wokorach-macbook.vercel.app/"
+      },
+      {
+        id: "Gemini AI",
+        title: "Gemini AI",
+        file: "https://raw.githubusercontent.com/domwokorach/Wokorach-Gemini-AI/refs/heads/master/README.md",
+        icon: "i-simple-icons:gemini",
+        excerpt: "A macOS-inspired web application...",
+        link: "https://wokorach-gemini-ai.vercel.app/"
       }
     ]
   }
