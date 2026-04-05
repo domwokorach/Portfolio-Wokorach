@@ -45,10 +45,10 @@ const bear: BearData[] = [
       {
         id: "oh-my-cv",
         title: "Oh, My CV!",
-        file: "https://raw.githubusercontent.com/Renovamen/oh-my-cv/main/README.md",
+        file: "https://raw.githubusercontent.com/domwokorach/domiic_resume/refs/heads/master/README.md",
         icon: "i-ri:newspaper-fill",
         excerpt: "Write your curriculum vitae / resume in Markdown online...",
-        link: "https://drive.google.com/file/d/1XNdEjtUgk8fUnqaJ0fkABxp1WEQxpbYz/view?usp=drive_link"
+        link: "https://cv-resume-lilac.vercel.app/"
       },
       {
         id: "Weather API",
