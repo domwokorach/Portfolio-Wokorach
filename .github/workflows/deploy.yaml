@@ -34,6 +34,7 @@ jobs:
         run: pnpm build
 
       - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -41,9 +42,3 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: "--prod"
           working-directory: ./
-      - name: Deploy to Docker Hub
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/domwokorach/portfolio-wokorach:latest
