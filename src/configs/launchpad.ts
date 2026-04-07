@@ -42,6 +42,12 @@ const launchpadApps: LaunchpadData[] = [
     title: "Gemini AI",
     img: "img/icons/launchpad/gemini-ai.png",
     link: "https://wokorach-gemini-ai.vercel.app"
+  },
+  {
+    id: "My CV Resume",
+    title: "CV Resume",
+    img: "img/icons/launchpad/cv-resume.png",
+    link: "https://cv-resume-lilac.vercel.app"
   }
   // {
   //   id: "cube",

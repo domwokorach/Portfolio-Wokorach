@@ -114,6 +114,14 @@ const bear: BearData[] = [
         icon: "i-simple-icons:gemini",
         excerpt: "A macOS-inspired web application...",
         link: "https://wokorach-gemini-ai.vercel.app/"
+      },
+      {
+        id: "My CV Resume",
+        title: "My CV Resume",
+        file: "https://raw.githubusercontent.com/domwokorach/domiic_resume/refs/heads/master/README.md",
+        icon: "i-simple-icons:gemini",
+        excerpt: "The project aims to provide...",
+        link: "https://cv-resume-lilac.vercel.app/"
       }
     ]
   }
