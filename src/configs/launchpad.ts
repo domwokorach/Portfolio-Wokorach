@@ -26,12 +26,6 @@ const launchpadApps: LaunchpadData[] = [
     link: "https://world-map-api.vercel.app/"
   },
   {
-    id: "Election 2024",
-    title: "Election UI",
-    img: "img/icons/launchpad/election_24.png",
-    link: "https://elections-api-yaz3.vercel.app/"
-  },
-  {
     id: "MacBook",
     title: "Mac",
     img: "img/icons/launchpad/apple.png",

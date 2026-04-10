@@ -76,14 +76,6 @@ const bear: BearData[] = [
         link: "https://wokorach-news-api.vercel.app/"
       },
       {
-        id: "Election UI",
-        title: "Election UI",
-        file: "https://raw.githubusercontent.com/domwokorach/elections-api/refs/heads/master/README.md",
-        icon: "i-simple-icons:javascript",
-        excerpt: "Election implementation of text classification models...",
-        link: "https://elections-api-yaz3.vercel.app/"
-      },
-      {
         id: "Air Quality",
         title: "Air Quality",
         file: "https://raw.githubusercontent.com/domwokorach/wokorach-air-quality/refs/heads/master/README.md",
