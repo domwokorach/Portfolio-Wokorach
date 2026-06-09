@@ -42,13 +42,13 @@ const launchpadApps: LaunchpadData[] = [
     title: "CV Resume",
     img: "img/icons/launchpad/cv-resume.png",
     link: "https://cv-resume-lilac.vercel.app"
+  },
+  {
+    id: "Fifa World Cup 2026",
+    title: "World Cup 2026",
+    img: "img/icons/launchpad/wc26.png",
+    link: "https://world-cup-2026-gold.vercel.app/"
   }
-  // {
-  //   id: "cube",
-  //   title: "Cube Solver",
-  //   img: "img/icons/launchpad/cube.png",
-  //   link: "https://cube.zxh.io/"
-  // },
   // {
   //   id: "resume",
   //   title: "Résumé",

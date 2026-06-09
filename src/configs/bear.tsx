@@ -106,6 +106,14 @@ const bear: BearData[] = [
         icon: "i-simple-icons:gemini",
         excerpt: "A macOS-inspired web application...",
         link: "https://wokorach-gemini-ai.vercel.app/"
+      },
+      {
+        id: "World Cup 2026",
+        title: "World Cup 2026",
+        file: "https://raw.githubusercontent.com/domwokorach/World-Cup-2026/refs/heads/master/README.md",
+        icon: "i-simple-icons:world-cup",
+        excerpt: "A macOS-inspired web application...",
+        link: "https://wokorach-world-cup-2026.vercel.app/"
       }
     ]
   }

@@ -21,10 +21,25 @@ interface DesktopState {
   currentTitle: string;
   hideDockAndTopbar: boolean;
   spotlight: boolean;
+  folders: {
+    id: string;
+    name: string;
+    x?: number;
+    y?: number;
+    open?: boolean;
+  }[];
+  files: {
+    id: string;
+    name: string;
+    icon?: string;
+    folderId?: string;
+    x?: number;
+    y?: number;
+  }[];
 }
 
 export default function Desktop(props: MacActions) {
-  const [state, setState] = useState({
+  const initialState: DesktopState = {
     showApps: {},
     appsZ: {},
     maxApps: {},
@@ -33,8 +48,12 @@ export default function Desktop(props: MacActions) {
     showLaunchpad: false,
     currentTitle: "Finder",
     hideDockAndTopbar: false,
-    spotlight: false
-  } as DesktopState);
+    spotlight: false,
+    folders: [],
+    files: []
+  };
+
+  const [state, setState] = useState<DesktopState>(initialState);
 
   const [spotlightBtnRef, setSpotlightBtnRef] =
     useState<React.RefObject<HTMLDivElement> | null>(null);
@@ -74,7 +93,39 @@ export default function Desktop(props: MacActions) {
 
   useEffect(() => {
     getAppsData();
+    // load folders from localStorage (if any)
+    try {
+      const raw = localStorage.getItem("desktop_folders");
+      if (raw) {
+        const folders = JSON.parse(raw) as DesktopState["folders"];
+        setState((s) => ({ ...s, folders }) as DesktopState);
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
   }, []);
+
+  // persist folders whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem("desktop_folders", JSON.stringify(state.folders || []));
+      localStorage.setItem("desktop_files", JSON.stringify(state.files || []));
+    } catch (e) {}
+  }, [state.folders, state.files]);
+
+  // keyboard shortcut: Cmd/Ctrl+Shift+N -> create new folder
+  useEffect(() => {
+    const handler = (ev: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+      const mod = isMac ? ev.metaKey : ev.ctrlKey;
+      if (mod && ev.shiftKey && ev.key.toLowerCase() === "n") {
+        ev.preventDefault();
+        createFolder();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [state.folders]);
 
   const toggleLaunchpad = (target: boolean): void => {
     const r = document.querySelector(`#launchpad`) as HTMLElement;
@@ -148,6 +199,129 @@ export default function Desktop(props: MacActions) {
 
     // add it to the minimized app list
     setAppMin(id, true);
+  };
+
+  // --- Folder support -------------------------------------------------
+  const createFolder = (name?: string) => {
+    const id = `folder-${Date.now()}`;
+    const folderName = name || `New Folder`;
+    const folders = [...(state.folders || []), { id, name: folderName, open: false }];
+    setState({ ...state, folders });
+  };
+
+  const toggleFolderOpen = (id: string, target?: boolean) => {
+    const folders = (state.folders || []).map((f) =>
+      f.id === id ? { ...f, open: typeof target === "boolean" ? target : !f.open } : f
+    );
+    setState({ ...state, folders });
+  };
+
+  const renderFolderIcons = () => {
+    return (state.folders || []).map((f, idx) => {
+      return (
+        <div
+          key={`desktop-folder-${f.id}`}
+          className="desktop-folder text-center cursor-default select-none"
+          style={{ width: 84, margin: 12, display: "inline-block" }}
+          onDoubleClick={() => toggleFolderOpen(f.id, true)}
+        >
+          <img src={`img/icons/folder.png`} alt="folder" style={{ width: 64 }} />
+          <div
+            className="text-xs mt-1"
+            style={{
+              width: 84,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis"
+            }}
+          >
+            {f.name}
+          </div>
+        </div>
+      );
+    });
+  };
+
+  const renderFolderWindows = () => {
+    // simple folder windows that display the folder name; reuses AppWindow for consistency
+    return (state.folders || []).map((f) => {
+      if (!f.open) return <div key={`folder-window-${f.id}`} />;
+
+      const props = {
+        id: f.id,
+        title: f.name,
+        width: 480,
+        height: 360,
+        minWidth: 240,
+        minHeight: 160,
+        x: 120,
+        y: 120,
+        z: state.maxZ + 1,
+        max: false,
+        min: false,
+        close: () => toggleFolderOpen(f.id, false),
+        setMax: () => {},
+        setMin: () => {},
+        focus: () => toggleFolderOpen(f.id, true)
+      } as any;
+
+      const filesInFolder = (state.files || []).filter((file) => file.folderId === f.id);
+
+      return (
+        <AppWindow key={`folder-window-${f.id}`} {...props}>
+          <div
+            style={{ padding: 12 }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              const fileId = e.dataTransfer.getData("application/x-desktop-file");
+              if (fileId) moveFileToFolder(fileId, f.id);
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>{f.name}</div>
+
+            <div style={{ display: "flex", flexWrap: "wrap" }}>
+              {filesInFolder.length > 0 ? (
+                filesInFolder.map((file) => (
+                  <div
+                    key={file.id}
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("application/x-desktop-file", file.id);
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    className="text-center cursor-default select-none"
+                    style={{ width: 84, margin: 8 }}
+                  >
+                    <img
+                      src={file.icon ?? "img/icons/file.png"}
+                      alt={file.name}
+                      style={{ width: 48 }}
+                    />
+                    <div
+                      style={{
+                        fontSize: 12,
+                        marginTop: 6,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
+                      }}
+                    >
+                      {file.name}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-muted">(empty)</div>
+              )}
+            </div>
+          </div>
+        </AppWindow>
+      );
+    });
   };
 
   const closeApp = (id: string): void => {
@@ -235,6 +409,39 @@ export default function Desktop(props: MacActions) {
     });
   };
 
+  const moveFileToFolder = (fileId: string, folderId: string) => {
+    const files = (state.files || []).map((f) =>
+      f.id === fileId ? { ...f, folderId } : f
+    );
+    setState({ ...state, files });
+  };
+
+  const moveFileToDesktop = (fileId: string) => {
+    const files = (state.files || []).map((f) =>
+      f.id === fileId ? { ...f, folderId: undefined } : f
+    );
+    setState({ ...state, files });
+  };
+
+  const renderDesktopFiles = () => {
+    return (state.files || [])
+      .filter((file) => !file.folderId) // only files without a folderId
+      .map((file) => (
+        <div
+          key={file.id}
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData("application/x-desktop-file", file.id);
+            e.dataTransfer.effectAllowed = "move";
+          }}
+          className="desktop-file"
+        >
+          <img src={file.icon ?? "img/icons/file.png"} alt={file.name} />
+          <div>{file.name}</div>
+        </div>
+      ));
+  };
+
   return (
     <div
       className="size-full overflow-hidden bg-center bg-cover"
@@ -255,9 +462,28 @@ export default function Desktop(props: MacActions) {
         setSpotlightBtnRef={setSpotlightBtnRef}
       />
 
+      {/* Desktop Icons (folders) */}
+      <div
+        className="desktop-icons absolute z-0"
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          const fileId = e.dataTransfer.getData("application/x-desktop-file");
+          if (fileId) moveFileToDesktop(fileId);
+        }}
+        style={{ top: minMarginY + 24, left: 48, right: 48, padding: 12 }}
+      >
+        {renderFolderIcons()}
+        {renderDesktopFiles()}
+      </div>
+
       {/* Desktop Apps */}
       <div className="window-bound z-10 absolute" style={{ top: minMarginY }}>
         {renderAppWindows()}
+        {renderFolderWindows()}
       </div>
 
       {/* Spotlight */}
