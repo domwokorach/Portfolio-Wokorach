@@ -36,7 +36,7 @@ const bear: BearData[] = [
     md: [
       {
         id: "portfolio-macos",
-        title: "Portfolio macOS",
+        title: "Portfolio macOS Project",
         file: "https://raw.githubusercontent.com/domwokorach/Portfolio-Wokorach/refs/heads/master/README.md",
         icon: "i-ri:macbook-line",
         excerpt: "My portfolio website simulating macOS's GUI...",
@@ -60,7 +60,7 @@ const bear: BearData[] = [
       },
       {
         id: "F1 Track Replay",
-        title: "F1 Track Replay",
+        title: "F1 Track Replay Project",
         file: "https://raw.githubusercontent.com/domwokorach/Wokorach-f1-track-replay/refs/heads/master/README.md",
         icon: "i-simple-icons:python",
         excerpt:
@@ -69,7 +69,7 @@ const bear: BearData[] = [
       },
       {
         id: "News API",
-        title: "News API",
+        title: "News API Project",
         file: "https://raw.githubusercontent.com/domwokorach/Wokorac-News-API/refs/heads/master/README.md",
         icon: "i-simple-icons:javascript",
         excerpt: "NewsAPI requests made directly from the browser...",
@@ -77,7 +77,7 @@ const bear: BearData[] = [
       },
       {
         id: "Air Quality",
-        title: "Air Quality",
+        title: "Air Quality Project",
         file: "https://raw.githubusercontent.com/domwokorach/wokorach-air-quality/refs/heads/master/README.md",
         icon: "i-simple-icons:javascript",
         excerpt: "My solution for the Air Quality code test, built with Gridsome...",
@@ -93,7 +93,7 @@ const bear: BearData[] = [
       },
       {
         id: "Wokorach MacBook",
-        title: "Wokorach MacBook",
+        title: "Wokorach MacBook Project",
         file: "https://raw.githubusercontent.com/domwokorach/wokorach_mackbook/refs/heads/master/README.md",
         icon: "i-simple-icons:macbook",
         excerpt: "A macOS-inspired web application...",
@@ -101,7 +101,7 @@ const bear: BearData[] = [
       },
       {
         id: "Gemini AI",
-        title: "Gemini AI",
+        title: "Gemini AI Project",
         file: "https://raw.githubusercontent.com/domwokorach/Wokorach-Gemini-AI/refs/heads/master/README.md",
         icon: "i-simple-icons:gemini",
         excerpt: "A macOS-inspired web application...",
@@ -109,7 +109,7 @@ const bear: BearData[] = [
       },
       {
         id: "World Cup 2026",
-        title: "World Cup 2026",
+        title: "World Cup 2026 Project",
         file: "https://raw.githubusercontent.com/domwokorach/World-Cup-2026/refs/heads/master/README.md",
         icon: "i-simple-icons:world-cup",
         excerpt: "A macOS-inspired web application...",
