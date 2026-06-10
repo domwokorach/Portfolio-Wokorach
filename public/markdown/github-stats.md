@@ -2,6 +2,6 @@
 
 My GitHub stats (powered by [github-readme-stats](https://github.com/domwokorach)):
 
-[![github stats](https://github-readme-stats.vercel.app/api?username=Renovamen&show_icons=true&hide_title=true&hide_border=true)](https://portfolio-wokorach.vercel.app/)
+[![github stats](https://camo.githubusercontent.com/34fa0daabf9fc7b80a1f31b9e46721d0d4d0f0054ab0c2fd23f40e75d693f9b9/68747470733a2f2f6769746875622d726561646d652d73746174732e76657263656c2e6170702f6170693f757365726e616d653d646f6d776f6b6f726163682673686f775f69636f6e733d74727565266c6f63616c653d656e)](https://portfolio-wokorach.vercel.app/)
 
-[![top langs](https://github-readme-stats.vercel.app/api/top-langs/?username=Renovamen&layout=compact&hide_border=true)](https://portfolio-wokorach.vercel.app/)
+[![top langs](https://camo.githubusercontent.com/e974533aeafa555fdcf0e390738e94d0bc83eca50daa314272c967cd26d270ae/68747470733a2f2f6769746875622d726561646d652d73746174732e76657263656c2e6170702f6170692f746f702d6c616e67733f757365726e616d653d646f6d776f6b6f726163682673686f775f69636f6e733d74727565266c6f63616c653d656e266c61796f75743d636f6d70616374)
