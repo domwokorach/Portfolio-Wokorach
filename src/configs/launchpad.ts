@@ -15,13 +15,13 @@ const launchpadApps: LaunchpadData[] = [
   },
   {
     id: "news",
-    title: "News Project",
+    title: "News",
     img: "img/icons/launchpad/news.png",
     link: "https://wokorach-news-api-git-master-domwokorachs-projects.vercel.app"
   },
   {
     id: "World Map",
-    title: "World Map Project",
+    title: "World Map",
     img: "img/icons/launchpad/map.png",
     link: "https://world-map-api.vercel.app/"
   },
@@ -33,13 +33,13 @@ const launchpadApps: LaunchpadData[] = [
   },
   {
     id: "Gemini AI",
-    title: "Gemini AI Project",
+    title: "Gemini AI",
     img: "img/icons/launchpad/gemini-ai.png",
     link: "https://wokorach-gemini-ai.vercel.app"
   },
   {
     id: "My CV Resume",
-    title: "CV Resume Project",
+    title: "CV Resume",
     img: "img/icons/launchpad/cv-resume.png",
     link: "https://cv-resume-lilac.vercel.app"
   },
