@@ -93,7 +93,7 @@ const bear: BearData[] = [
       },
       {
         id: "Wokorach MacBook",
-        title: "Wokorach MacBook Project",
+        title: "Wokorach MacBook",
         file: "https://raw.githubusercontent.com/domwokorach/wokorach_mackbook/refs/heads/master/README.md",
         icon: "i-simple-icons:macbook",
         excerpt: "A macOS-inspired web application...",
@@ -101,7 +101,7 @@ const bear: BearData[] = [
       },
       {
         id: "Gemini AI",
-        title: "Gemini AI Project",
+        title: "Gemini AI",
         file: "https://raw.githubusercontent.com/domwokorach/Wokorach-Gemini-AI/refs/heads/master/README.md",
         icon: "i-simple-icons:gemini",
         excerpt: "A macOS-inspired web application...",

@@ -45,7 +45,7 @@ const launchpadApps: LaunchpadData[] = [
   },
   {
     id: "Fifa World Cup 2026",
-    title: "World Cup 2026 Project",
+    title: "World Cup 2026",
     img: "img/icons/launchpad/wc26.png",
     link: "https://world-cup-2026-gold.vercel.app/"
   }
