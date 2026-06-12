@@ -3,7 +3,7 @@ import type { LaunchpadData } from "~/types";
 const launchpadApps: LaunchpadData[] = [
   {
     id: "weather",
-    title: "Weather Project",
+    title: "Weather",
     img: "img/icons/launchpad/weather.png",
     link: "https://wokorach-weather.vercel.app"
   },
