@@ -50,3 +50,9 @@ declare global {
   const useTransition: typeof import('react')['useTransition']
   const useWindowSize: typeof import('./hooks/useWindowSize')['useWindowSize']
 }
+// for type re-export
+declare global {
+  // @ts-ignore
+  export type { Terminal } from './components/apps/Terminal'
+  import('./components/apps/Terminal')
+}
