@@ -1,13 +1,31 @@
 {
-  "name": "macos-portfolio",
+  "name": "dominic-portfolio",
+  "version": "1.0.0",
   "private": true,
+  "description": "**Live Demo:** [https://aakash-sharma.vercel.app](https://aakash-sharma.vercel.app)",
+  "homepage": "https://github.com/domwokorach/Portfolio-Wokorach#readme",
+  "bugs": {
+    "url": "https://github.com/domwokorach/Portfolio-Wokorach/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domwokorach/Portfolio-Wokorach.git"
+  },
+  "license": "ISC",
+  "author": "dominic wokorach olanya",
   "type": "module",
+  "main": "index.js",
   "scripts": {
     "build": "vite build",
     "dev": "vite --host",
     "lint": "eslint .",
     "prepare": "husky",
     "serve": "vite preview --host"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "@milkdown/core": "^7.3.6",

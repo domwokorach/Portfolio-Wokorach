@@ -1,10 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 
 const WORLD_CLOCKS = [
-  { city: "Jodhpur", timezone: "Asia/Kolkata", flag: "🇮🇳", offset: "+5:30" },
+  { city: "London", timezone: "Europe/London", flag: "🇬🇧", offset: "+1:00" },
   { city: "San Francisco", timezone: "America/Los_Angeles", flag: "🇺🇸", offset: "-7:00" },
   { city: "New York", timezone: "America/New_York", flag: "🇺🇸", offset: "-4:00" },
-  { city: "London", timezone: "Europe/London", flag: "🇬🇧", offset: "+1:00" },
   { city: "Tokyo", timezone: "Asia/Tokyo", flag: "🇯🇵", offset: "+9:00" },
   { city: "Berlin", timezone: "Europe/Berlin", flag: "🇩🇪", offset: "+2:00" },
 ];
@@ -24,6 +23,56 @@ const ALARMS: AlarmItem[] = [
 ];
 
 type Tab = "world" | "alarm" | "stopwatch" | "timer";
+
+type AnalogClockProps = {
+  size?: number;
+  secDeg: number;
+  minDeg: number;
+  hrDeg: number;
+};
+
+function AnalogClock({ size = 120, secDeg, minDeg, hrDeg }: AnalogClockProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 120 120">
+      {/* Face */}
+      <circle cx="60" cy="60" r="58" fill="var(--c-bg-secondary, rgba(30,30,35,0.95))" stroke="var(--c-border, rgba(255,255,255,0.1))" strokeWidth="1" />
+      {/* Hour markers */}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const angle = (i * 30 * Math.PI) / 180;
+        const x1 = 60 + 50 * Math.sin(angle);
+        const y1 = 60 - 50 * Math.cos(angle);
+        const x2 = 60 + 54 * Math.sin(angle);
+        const y2 = 60 - 54 * Math.cos(angle);
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--c-text-tertiary, rgba(255,255,255,0.4))" strokeWidth="2" strokeLinecap="round" />;
+      })}
+      {/* Hour hand */}
+      <line
+        x1="60" y1="60"
+        x2={60 + 28 * Math.sin((hrDeg * Math.PI) / 180)}
+        y2={60 - 28 * Math.cos((hrDeg * Math.PI) / 180)}
+        stroke="var(--c-text, white)" strokeWidth="3" strokeLinecap="round"
+        style={{ transition: "all 0.5s ease" }}
+      />
+      {/* Minute hand */}
+      <line
+        x1="60" y1="60"
+        x2={60 + 38 * Math.sin((minDeg * Math.PI) / 180)}
+        y2={60 - 38 * Math.cos((minDeg * Math.PI) / 180)}
+        stroke="var(--c-text, white)" strokeWidth="2" strokeLinecap="round"
+        style={{ transition: "all 0.5s ease" }}
+      />
+      {/* Second hand */}
+      <line
+        x1="60" y1="60"
+        x2={60 + 44 * Math.sin((secDeg * Math.PI) / 180)}
+        y2={60 - 44 * Math.cos((secDeg * Math.PI) / 180)}
+        stroke="#FF3B30" strokeWidth="1.5" strokeLinecap="round"
+      />
+      {/* Center dot */}
+      <circle cx="60" cy="60" r="3" fill="#FF3B30" />
+    </svg>
+  );
+}
 
 export default function Clock() {
   const [tab, setTab] = useState<Tab>("world");
@@ -111,46 +160,6 @@ export default function Clock() {
   const minDeg = min * 6 + sec * 0.1;
   const hrDeg = hr * 30 + min * 0.5;
 
-  const AnalogClock = ({ size = 120 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 120 120">
-      {/* Face */}
-      <circle cx="60" cy="60" r="58" fill="var(--c-bg-secondary, rgba(30,30,35,0.95))" stroke="var(--c-border, rgba(255,255,255,0.1))" strokeWidth="1" />
-      {/* Hour markers */}
-      {Array.from({ length: 12 }).map((_, i) => {
-        const angle = (i * 30 * Math.PI) / 180;
-        const x1 = 60 + 50 * Math.sin(angle);
-        const y1 = 60 - 50 * Math.cos(angle);
-        const x2 = 60 + 54 * Math.sin(angle);
-        const y2 = 60 - 54 * Math.cos(angle);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--c-text-tertiary, rgba(255,255,255,0.4))" strokeWidth="2" strokeLinecap="round" />;
-      })}
-      {/* Hour hand */}
-      <line
-        x1="60" y1="60"
-        x2={60 + 28 * Math.sin((hrDeg * Math.PI) / 180)}
-        y2={60 - 28 * Math.cos((hrDeg * Math.PI) / 180)}
-        stroke="var(--c-text, white)" strokeWidth="3" strokeLinecap="round"
-        style={{ transition: "all 0.5s ease" }}
-      />
-      {/* Minute hand */}
-      <line
-        x1="60" y1="60"
-        x2={60 + 38 * Math.sin((minDeg * Math.PI) / 180)}
-        y2={60 - 38 * Math.cos((minDeg * Math.PI) / 180)}
-        stroke="var(--c-text, white)" strokeWidth="2" strokeLinecap="round"
-        style={{ transition: "all 0.5s ease" }}
-      />
-      {/* Second hand */}
-      <line
-        x1="60" y1="60"
-        x2={60 + 44 * Math.sin((secDeg * Math.PI) / 180)}
-        y2={60 - 44 * Math.cos((secDeg * Math.PI) / 180)}
-        stroke="#FF3B30" strokeWidth="1.5" strokeLinecap="round"
-      />
-      {/* Center dot */}
-      <circle cx="60" cy="60" r="3" fill="#FF3B30" />
-    </svg>
-  );
 
   const TABS: { id: Tab; label: string }[] = [
     { id: "world", label: "World Clock" },
@@ -228,7 +237,7 @@ export default function Clock() {
               <div>
                 {/* Big local clock */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 0 16px" }}>
-                  <AnalogClock size={140} />
+                  <AnalogClock size={140} secDeg={secDeg} minDeg={minDeg} hrDeg={hrDeg} />
                   <div style={{ marginTop: "12px", fontSize: "13px", color: "var(--c-text-secondary)" }}>
                     {time.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                   </div>

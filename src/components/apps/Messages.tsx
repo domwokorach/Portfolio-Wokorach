@@ -21,7 +21,7 @@ interface Conversation {
 const CONVERSATIONS: Conversation[] = [
   {
     id: "1",
-    name: "Recruiter @ Google",
+    name: "Recruiter @ LinkedIn",
     avatar: "🏢",
     preview: "We'd love to schedule a call!",
     time: "Now",
@@ -48,7 +48,7 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: "3",
-    name: "Mom",
+    name: "User",
     avatar: "👩",
     preview: "Beta aa ja khaana thanda ho raha hai",
     time: "1h",
@@ -61,10 +61,10 @@ const CONVERSATIONS: Conversation[] = [
     id: "4",
     name: "GitHub Notifications",
     avatar: "🐙",
-    preview: "New star on macOS-Portfolio!",
+    preview: "New star on Portfolio-Wokorach!",
     time: "3h",
     messages: [
-      { id: "1", text: "⭐ aakashsharma003/macOS-Portfolio received a new star!", from: "them", time: "7:00 AM" },
+      { id: "1", text: "⭐ domwokorach/Portfolio-Wokorach received a new star!", from: "them", time: "7:00 AM" },
       { id: "2", text: "🔔 New issue opened: 'Feature request: Dark mode improvements'", from: "them", time: "7:30 AM" },
     ],
   },
@@ -109,7 +109,7 @@ export default function MessagesApp() {
       style={{
         display: "flex",
         height: "100%",
-        
+
         background: "rgba(248,248,250,0.99)",
         borderRadius: "0 0 14px 14px",
         overflow: "hidden",

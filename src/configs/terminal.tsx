@@ -13,8 +13,7 @@ const terminal: TerminalData[] = [
         content: (
           <div className="py-1">
             <div>
-              Hi, this is Akash. I am a Btech student at the Computer Science and
-              Engineering department of MBM University.
+              Hi, this is Dominic. I am a Software Engineer and Frontend Developer.
             </div>
           </div>
         )
@@ -42,29 +41,29 @@ const terminal: TerminalData[] = [
               Email:{" "}
               <a
                 className="text-blue-300"
-                href="mailto:aakash6263264@gmail.com"
+                href="mailto:dominic.wokorach-o@outlook.com"
                 target="_blank"
                 rel="noreferrer"
               >
-                aakash6263264@gmail.com
+                dominic.wokorach-o@outlook.com
               </a>
             </li>
             <li>
               Github:{" "}
               <a
                 className="text-blue-300"
-                href="https://github.com/aakashsharma003"
+                href="https://github.com/domwokorach"
                 target="_blank"
                 rel="noreferrer"
               >
-                @aakashsharma
+                @domwokorach
               </a>
             </li>
             <li>
               Linkedin:{" "}
               <a
                 className="text-blue-300"
-                href="https://www.linkedin.com/in/aakashsharma003"
+                href="https://www.linkedin.com/in/dominic-w-3673523b/"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -75,11 +74,11 @@ const terminal: TerminalData[] = [
               Personal Website:{" "}
               <a
                 className="text-blue-300"
-                href="https://aakash-sharma.vercel.app"
+                href="https://portfolio-wokorach.vercel.app/"
                 target="_blank"
                 rel="noreferrer"
               >
-                https://aakash-sharma.vercel.app
+                https://portfolio-wokorach.vercel.app/
               </a>
             </li>
             <li>

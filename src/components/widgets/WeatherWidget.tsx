@@ -1,18 +1,18 @@
 const WEATHER_DATA = {
-  temp: 79,
+  temp: 25,
   condition: "Mostly Clear",
   high: 84,
   low: 62,
-  location: "Memphis",
-  humidity: 52,
+  location: "London",
+  humidity: 32,
   wind: 8,
   alert: "Air quality alert",
   hourly: [
-    { time: "Now", icon: "partly-cloudy", temp: 79 },
-    { time: "1PM", icon: "sunny", temp: 82 },
-    { time: "2PM", icon: "sunny", temp: 84 },
-    { time: "3PM", icon: "cloudy", temp: 80 },
-    { time: "4PM", icon: "cloudy", temp: 76 },
+    { time: "Now", icon: "partly-cloudy", temp: 25 },
+    { time: "1PM", icon: "sunny", temp: 22 },
+    { time: "2PM", icon: "sunny", temp: 24 },
+    { time: "3PM", icon: "cloudy", temp: 20 },
+    { time: "4PM", icon: "cloudy", temp: 16 },
   ],
 };
 

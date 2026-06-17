@@ -1,23 +1,23 @@
 import { motion } from "framer-motion";
 
 const PLACES = [
-  { id: "1", name: "MBM University", type: "University", lat: 26.285, lng: 73.006, color: "#007AFF" },
-  { id: "2", name: "Jodhpur", type: "City", lat: 26.292, lng: 73.014, color: "#FF9500" },
+  { id: "1", name: "Home, London, UK", type: "City", lat: 26.285, lng: 73.006, color: "#007AFF" },
+  { id: "2", name: "London, UK", type: "City", lat: 26.292, lng: 73.014, color: "#FF9500" },
   { id: "3", name: "Mehrangarh Fort", type: "Landmark", lat: 26.298, lng: 72.978, color: "#FF3B30" },
   { id: "4", name: "Umaid Bhawan", type: "Palace", lat: 26.280, lng: 73.022, color: "#AF52DE" },
 ];
 
-export default function Maps() {
-  const [search, setSearch] = useState("");
-  const [activePlace, setActivePlace] = useState(PLACES[0]);
-  const [mapStyle, setMapStyle] = useState<"standard" | "satellite" | "transit">("standard");
+type MapStyle = "standard" | "satellite" | "transit";
 
-  const filtered = search.trim()
-    ? PLACES.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-    : PLACES;
+type MapViewProps = {
+  mapStyle: MapStyle;
+  activePlace: (typeof PLACES)[number];
+  onSelectPlace: (place: (typeof PLACES)[number]) => void;
+  onChangeMapStyle: (style: MapStyle) => void;
+};
 
-  // Simple SVG map representation
-  const MapView = () => (
+function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: MapViewProps) {
+  return (
     <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
       {/* Map background */}
       <div
@@ -73,18 +73,10 @@ export default function Maps() {
             const y = 60 + (i % 2) * 80;
             const isActive = activePlace.id === place.id;
             return (
-              <g key={place.id} onClick={() => setActivePlace(place)} style={{ cursor: "pointer" }}>
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={isActive ? 14 : 10}
-                  fill={place.color}
-                  opacity={isActive ? 1 : 0.8}
-                />
+              <g key={place.id} onClick={() => onSelectPlace(place)} style={{ cursor: "pointer" }}>
+                <circle cx={x} cy={y} r={isActive ? 14 : 10} fill={place.color} opacity={isActive ? 1 : 0.8} />
                 <circle cx={x} cy={y} r={isActive ? 7 : 5} fill="white" />
-                {isActive && (
-                  <circle cx={x} cy={y} r={22} fill="none" stroke={place.color} strokeWidth="2" opacity="0.4" />
-                )}
+                {isActive && <circle cx={x} cy={y} r={22} fill="none" stroke={place.color} strokeWidth="2" opacity="0.4" />}
               </g>
             );
           })}
@@ -108,7 +100,7 @@ export default function Maps() {
           {(["standard", "satellite", "transit"] as const).map((s) => (
             <button
               key={s}
-              onClick={() => setMapStyle(s)}
+              onClick={() => onChangeMapStyle(s)}
               style={{
                 background: mapStyle === s ? "#007AFF" : "transparent",
                 border: "none",
@@ -199,12 +191,8 @@ export default function Maps() {
             <span className="i-ph:map-pin" style={{ width: "18px", height: "18px", color: "white" }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: "14px", fontWeight: 600, color: "#1c1c1e" }}>
-              {activePlace.name}
-            </div>
-            <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.5)" }}>
-              {activePlace.type} · Jodhpur, Rajasthan
-            </div>
+            <div style={{ fontSize: "14px", fontWeight: 600, color: "#1c1c1e" }}>{activePlace.name}</div>
+            <div style={{ fontSize: "11px", color: "rgba(0,0,0,0.5)" }}>{activePlace.type} · London, United Kingdom</div>
           </div>
           <button
             style={{
@@ -224,13 +212,23 @@ export default function Maps() {
       </div>
     </div>
   );
+}
+
+export default function Maps() {
+  const [search, setSearch] = useState("");
+  const [activePlace, setActivePlace] = useState(PLACES[0]);
+  const [mapStyle, setMapStyle] = useState<MapStyle>("standard");
+
+  const filtered = search.trim()
+    ? PLACES.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    : PLACES;
 
   return (
     <div
       style={{
         display: "flex",
         height: "100%",
-        
+
         background: "#e8e8e0",
         borderRadius: "0 0 14px 14px",
         overflow: "hidden",
@@ -342,7 +340,12 @@ export default function Maps() {
 
       {/* Map */}
       <div style={{ flex: 1, position: "relative" }}>
-        <MapView />
+        <MapView
+          mapStyle={mapStyle}
+          activePlace={activePlace}
+          onSelectPlace={setActivePlace}
+          onChangeMapStyle={setMapStyle}
+        />
       </div>
     </div>
   );

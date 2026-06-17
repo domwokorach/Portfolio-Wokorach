@@ -31,7 +31,7 @@ const MESSAGES: MailMessage[] = [
     fromEmail: "noreply@vercel.com",
     subject: "Deployment successful — portfolio",
     preview: "Your project portfolio has been deployed to production.",
-    body: "Your project portfolio has been deployed to production.\n\nDeployment URL: https://portfolio.vercel.app\nBranch: main\nCommit: e160e02\n\nThis deployment is now live.",
+    body: "Your project portfolio has been deployed to production.\n\nDeployment URL: https://portfolio-wokorach.vercel.app\nBranch: main\nCommit: e160e02\n\nThis deployment is now live.",
     time: "10:38 AM",
     unread: true,
     avatar: "▲",
@@ -39,10 +39,10 @@ const MESSAGES: MailMessage[] = [
   {
     id: "3",
     from: "Recruiter @ Google",
-    fromEmail: "recruiter@google.com",
+    fromEmail: "recruiter@LinkedIn.com",
     subject: "Exciting opportunity — Software Engineer",
-    preview: "Hi Akash, I came across your portfolio and was impressed by your work.",
-    body: "Hi Akash,\n\nI came across your portfolio and was really impressed by your macOS-style portfolio project — the attention to detail with the Liquid Glass UI is exceptional.\n\nWe have an exciting Software Engineer opening at Google that I think would be a great fit. Would you be open to a quick call this week?\n\nBest,\nThe Google Recruiting Team",
+    preview: "Hi Dom, I came across your portfolio and was impressed by your work.",
+    body: "Hi Dom,\n\nI came across your portfolio and was really impressed by your portfolio project — the attention to detail with the Liquid Glass UI is exceptional.\n\nWe have an exciting Software Engineer opening at Google that I think would be a great fit. Would you be open to a quick call this week?\n\nBest,\nThe Google Recruiting Team",
     time: "9:15 AM",
     unread: true,
     starred: true,
@@ -50,8 +50,8 @@ const MESSAGES: MailMessage[] = [
   },
   {
     id: "4",
-    from: "Akash Sharma",
-    fromEmail: "aakashsharma003@gmail.com",
+    from: "Dominic",
+    fromEmail: "dominic.wokorach-o@outlook.com",
     subject: "Portfolio notes",
     preview: "Things to finish: Liquid Glass polish, macOS 26 branding update, new apps...",
     body: "Things to finish:\n• Liquid Glass polish\n• macOS 26 branding update\n• Add Mail + App Store to dock\n• Improve launchpad grid\n• Dynamic Island interactions",
@@ -94,7 +94,7 @@ export default function Mail() {
       style={{
         display: "flex",
         height: "100%",
-        
+
         background: "#f5f5f7",
         borderRadius: "0 0 14px 14px",
         overflow: "hidden",

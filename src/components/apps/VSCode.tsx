@@ -2,7 +2,7 @@ export default function VSCode() {
   return (
     <iframe
       className="size-full bg-[#202020]"
-      src="https://github1s.com/aakashsharma003/macOS-Portfolio/blob/main/README.md"
+      src="https://github.com/domwokorach/Portfolio-Wokorach/blob/master/README.md"
       title="VSCode"
     />
   );
