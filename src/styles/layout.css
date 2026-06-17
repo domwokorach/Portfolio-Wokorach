@@ -4,4 +4,9 @@
 
 html, body, #root {
   @apply h-full overflow-hidden;
+  font-family: var(--font-system);
+  overscroll-behavior: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }

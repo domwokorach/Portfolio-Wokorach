@@ -4,27 +4,27 @@ const bear: BearData[] = [
   {
     id: "profile",
     title: "Profile",
-    icon: "i-fa-solid:code",
+    icon: "i-ph:paw-print",
     md: [
       {
         id: "about-me",
         title: "About Me",
         file: "markdown/about-me.md",
-        icon: "i-la:dragon",
-        excerpt: "Hey there! I'm a dragon lost in human world..."
+        icon: "i-ph:shield-star",
+        excerpt: "Hey there! I'm the one who is building his own universe..."
       },
       {
         id: "github-stats",
         title: "Github Stats",
         file: "markdown/github-stats.md",
-        icon: "i-icon-park-outline:github",
+        icon: "i-fa6-brands:github",
         excerpt: "Here are some status about my github account..."
       },
       {
         id: "about-site",
         title: "About This Site",
         file: "markdown/about-site.md",
-        icon: "i-octicon:browser",
+        icon: "i-ph:browser",
         excerpt: "Something about this personal portfolio site..."
       }
     ]
@@ -32,88 +32,55 @@ const bear: BearData[] = [
   {
     id: "project",
     title: "Projects",
-    icon: "i-octicon:repo",
+    icon: "i-ph:git-branch",
     md: [
+      {
+        id: "paytm-web",
+        title: "PaytmWeb",
+        file: "https://raw.githubusercontent.com/aakashsharma003/PaytmWeb/main/README.md",
+        icon: "i-ph:credit-card",
+        excerpt: "A demonstration Project For Paytm transactions...",
+        link: "https://github.com/aakashsharma003/paytm-web"
+      },
       {
         id: "portfolio-macos",
         title: "Portfolio macOS",
-        file: "https://raw.githubusercontent.com/domwokorach/Portfolio-Wokorach/refs/heads/master/README.md",
-        icon: "i-ri:macbook-line",
+        file: "https://raw.githubusercontent.com/aakashsharma003/macOS-Portfolio/main/README.md",
+        icon: "i-ph:desktop",
         excerpt: "My portfolio website simulating macOS's GUI...",
-        link: "https://github.com/domwokorach/Portfolio-Wokorach"
+        link: "https://github.com/aakashsharma003/macos-portfolio"
       },
       {
-        id: "oh-my-cv",
-        title: "Oh, My CV!",
-        file: "https://raw.githubusercontent.com/domwokorach/domiic_resume/refs/heads/master/README.md",
-        icon: "i-ri:newspaper-fill",
-        excerpt: "Write your curriculum vitae / resume in Markdown online...",
-        link: "https://cv-resume-lilac.vercel.app/"
+        id: "medium-2.0",
+        title: "Medium 2.0",
+        file: "https://raw.githubusercontent.com/aakashsharma003/Medium/main/README.md",
+        icon: "i-ph:globe",
+        excerpt: "A medium modified version with serverless backend...",
+        link: "https://github.com/aakashsharma003/Medium"
       },
       {
-        id: "Weather API",
-        title: "Weather API",
-        file: "https://raw.githubusercontent.com/domwokorach/wokorach-weather/refs/heads/master/README.md",
-        icon: "i-simple-icons:typescript",
-        excerpt: "Importing icons from different icon packs in Vue easily...",
-        link: "https://wokorach-weather.vercel.app/"
+        id: "attendance-web",
+        title: "Mbm Attendance Web",
+        file: "https://raw.githubusercontent.com/aakashsharma003/Mbm-Attendance-Application/main/README.md",
+        icon: "i-ph:clipboard-text",
+        excerpt: "A attendance website for mbm university...",
+        link: "https://github.com/aakashsharma003/Mbm-Attendance-Application"
       },
       {
-        id: "F1 Track Replay",
-        title: "F1 Track Replay",
-        file: "https://raw.githubusercontent.com/domwokorach/Wokorach-f1-track-replay/refs/heads/master/README.md",
-        icon: "i-simple-icons:python",
-        excerpt:
-          "A Python application for visualizing Formula 1 and replaying race events...",
-        link: "https://github.com/domwokorach/Wokorach-f1-track-replay"
+        id: "aero-pay",
+        title: "AeroPay",
+        file: "https://raw.githubusercontent.com/aakashsharma003/AeroPay/main/README.md",
+        icon: "i-ph:money",
+        excerpt: "A payment transactions simulator...",
+        link: "https://github.com/aakashsharma003/AeroPay"
       },
       {
-        id: "News API",
-        title: "News API",
-        file: "https://raw.githubusercontent.com/domwokorach/Wokorac-News-API/refs/heads/master/README.md",
-        icon: "i-simple-icons:javascript",
-        excerpt: "NewsAPI requests made directly from the browser...",
-        link: "https://wokorach-news-api.vercel.app/"
-      },
-      {
-        id: "Air Quality",
-        title: "Air Quality",
-        file: "https://raw.githubusercontent.com/domwokorach/wokorach-air-quality/refs/heads/master/README.md",
-        icon: "i-simple-icons:javascript",
-        excerpt: "My solution for the Air Quality code test, built with Gridsome...",
-        link: "https://wokorach-air-quality.vercel.app/en/"
-      },
-      {
-        id: "World Map API",
-        title: "World Map",
-        file: "https://raw.githubusercontent.com/domwokorach/Wokorach-Map/master/README.md",
-        icon: "i-simple-icons:map",
-        excerpt: "Built with Next.js and Weather API, it offers a seamle...",
-        link: "https://github.com/domwokorach/Wokorach-Map.git"
-      },
-      {
-        id: "Wokorach MacBook",
-        title: "Wokorach MacBook",
-        file: "https://raw.githubusercontent.com/domwokorach/wokorach_mackbook/refs/heads/master/README.md",
-        icon: "i-simple-icons:macbook",
-        excerpt: "A macOS-inspired web application...",
-        link: "https://wokorach-macbook.vercel.app/"
-      },
-      {
-        id: "Gemini AI",
-        title: "Gemini AI",
-        file: "https://raw.githubusercontent.com/domwokorach/Wokorach-Gemini-AI/refs/heads/master/README.md",
-        icon: "i-simple-icons:gemini",
-        excerpt: "A macOS-inspired web application...",
-        link: "https://wokorach-gemini-ai.vercel.app/"
-      },
-      {
-        id: "World Cup 2026",
-        title: "World Cup 2026",
-        file: "https://raw.githubusercontent.com/domwokorach/World-Cup-2026/refs/heads/master/README.md",
-        icon: "i-simple-icons:world-cup",
-        excerpt: "A macOS-inspired web application...",
-        link: "https://wokorach-world-cup-2026.vercel.app/"
+        id: "rasl",
+        title: "rasl",
+        file: "https://raw.githubusercontent.com/Open-Source-Collab-Community/rasl/main/README.md",
+        icon: "i-ph:headphones",
+        excerpt: "A audio streaming library...",
+        link: "https://github.com/Open-Source-Collab-Community/rasl"
       }
     ]
   }

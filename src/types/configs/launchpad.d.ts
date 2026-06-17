@@ -3,4 +3,7 @@ export interface LaunchpadData {
   title: string;
   img: string;
   link: string;
+  hideOnMobile?: boolean;
+  mobileTitle?: string;
+  mobileImg?: string;
 }

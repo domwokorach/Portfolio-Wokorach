@@ -1,7 +1,5 @@
-type IntervalCallback = () => void;
-
-export function useInterval(callback: IntervalCallback, delay?: number | null) {
-  const savedCallback = useRef<IntervalCallback>(() => {});
+export function useInterval(callback: Function, delay?: number | null) {
+  const savedCallback = useRef<Function>(() => {});
 
   useEffect(() => {
     savedCallback.current = callback;

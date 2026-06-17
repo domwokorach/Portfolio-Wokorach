@@ -1,9 +1,9 @@
 import React from "react";
-import { terminal } from "~/configs";
+import terminal from "~/configs/terminal";
 import type { TerminalData } from "~/types";
 
-const CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789落霞与孤鹜齐飞秋水共长天一色";
-const EMOJIS = ["\\(o_o)/", "(˚Δ˚)b", "(^-^*)", "(╯‵□′)╯", "\\(°ˊДˋ°)/", "╰(‵□′)╯"];
+const CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const EMOJIS = ["\\(o_o)/", "(˚Δ˚)b", "(^-^*)", "(‵′)", "\\(°ˊДˋ°)/", "(‵′)"];
 
 const getEmoji = () => {
   return EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
@@ -84,7 +84,7 @@ const HowDare = ({ setRMRF }: { setRMRF: (value: boolean) => void }) => {
   );
 };
 
-export default class Terminal extends React.Component<object, TerminalState> {
+export default class Terminal extends React.Component<{}, TerminalState> {
   private history = [] as string[];
   private curHistory = 0;
   private curInputTimes = 0;
@@ -94,7 +94,7 @@ export default class Terminal extends React.Component<object, TerminalState> {
     [key: string]: { (): void } | { (arg?: string): void };
   };
 
-  constructor(props: object) {
+  constructor(props: {}) {
     super(props);
     this.state = {
       content: [],
@@ -342,7 +342,7 @@ export default class Terminal extends React.Component<object, TerminalState> {
       <div key={`terminal-input-row-${id}`} flex>
         <div className="w-max hstack space-x-1.5">
           <span text-yellow-200>
-            dom@macbook-pro <span text-green-300>{this.getCurDirName()}</span>
+            @demaxxer <span text-green-300>{this.getCurDirName()}</span>
           </span>
           <span text-red-400>{">"}</span>
         </div>
@@ -377,7 +377,7 @@ export default class Terminal extends React.Component<object, TerminalState> {
           <HowDare setRMRF={(value: boolean) => this.setState({ rmrf: value })} />
         )}
         <div p="y-2 x-1.5">
-          <span className="text-green-300">ヽ(ˋ▽ˊ)ノ</span>: Hey, you found the terminal!
+          <span className="text-green-300">help</span>: Hey, you found the terminal!
           Type `help` to get started.
         </div>
         <div id="terminal-content" p="x-1.5 b-2">

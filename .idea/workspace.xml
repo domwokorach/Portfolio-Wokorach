@@ -1,8 +1,158 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;settings.editor.selected.configurable&quot;: &quot;advanced.settings&quot;
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7139ec4d-f033-4434-96f0-bcc56a374c4e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/auto-imports.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/auto-imports.d.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_/Users/dominicolanya/Desktop/Portfolio-Wokorach" value="3FGVykjvxIpUhR8si6d1O7BnlvC" />
+    </persistenceIdMap>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="170" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "domwokorach"
   }
-}</component>
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/domwokorach/Portfolio-Wokorach.git",
+    "accountId": "e063a7f3-91c3-4d11-b8ae-d64d94e02ffb"
+  }
+}]]></component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0000002799245116" />
+      <entry key="MS500" value="1.1095663273043919" />
+      <entry key="S2" value="2.7816830046937673" />
+      <entry key="S5" value="4.284884553700238" />
+      <entry key="S10" value="5.04764378672864" />
+      <entry key="S30" value="5.658643752213175" />
+      <entry key="S60" value="5.826136071199302" />
+      <entry key="M2" value="5.912255909441628" />
+      <entry key="M5" value="5.964705410134449" />
+      <entry key="M10" value="5.982319707614621" />
+      <entry key="M15" value="5.988205792856938" />
+      <entry key="M30" value="5.994099220450243" />
+      <entry key="H1" value="5.997048690629713" />
+      <entry key="H2" value="5.998524115340853" />
+      <entry key="H4" value="5.999262000167529" />
+      <entry key="D1" value="5.999876992040611" />
+      <entry key="W1" value="5.999982427238756" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="5.128231002401293E-4" />
+      <entry key="MS500" value="0.3270463614606464" />
+      <entry key="S2" value="2.4515846367766114" />
+      <entry key="S5" value="4.132339139687074" />
+      <entry key="S10" value="4.967102852437913" />
+      <entry key="S30" value="5.63074225727878" />
+      <entry key="S60" value="5.81204599768808" />
+      <entry key="M2" value="5.905175440548684" />
+      <entry key="M5" value="5.961864640327695" />
+      <entry key="M10" value="5.980897885721212" />
+      <entry key="M15" value="5.987257591771004" />
+      <entry key="M30" value="5.993624959872065" />
+      <entry key="H1" value="5.996811520308665" />
+      <entry key="H2" value="5.998405520169443" />
+      <entry key="H4" value="5.999202700078739" />
+      <entry key="D1" value="5.999867108344799" />
+      <entry key="W1" value="5.999981015273696" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 4,
+  "fromUser": false
+}]]></component>
+  <component name="ProjectId" id="3FGVykjvxIpUhR8si6d1O7BnlvC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "master",
+    "javascript.preferred.runtime.type.id": "node",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/Users/dominicolanya/Desktop/Portfolio-Wokorach",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "advanced.settings",
+    "to.speed.mode.migration.done": "true",
+    "ts.external.directory.path": "/Users/dominicolanya/Desktop/Portfolio-Wokorach/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.25134.101" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7139ec4d-f033-4434-96f0-bcc56a374c4e" name="Changes" comment="" />
+      <created>1781701650171</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1781701650171</updated>
+      <workItem from="1781701651355" duration="2495000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
 </project>

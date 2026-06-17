@@ -6,7 +6,7 @@ import rehypeExternalLinks from "rehype-external-links";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dracula, prism } from "react-syntax-highlighter/dist/esm/styles/prism";
 import bear from "~/configs/bear";
-import type { BearMdData, BearData } from "~/types";
+import type { BearMdData } from "~/types";
 
 interface ContentProps {
   contentID: string;
@@ -61,16 +61,15 @@ const Sidebar = ({ cur, setMidBar }: SidebarProps) => {
   return (
     <div text-white>
       <div className="h-12 pr-3 hstack space-x-3 justify-end">
-        <span className="i-ic:baseline-cloud-off text-xl" />
-        <span className="i-akar-icons:settings-vertical text-xl" />
+        <span className="i-ph:cloud-slash text-xl" />
+        <span className="i-ph:sliders-horizontal text-xl" />
       </div>
       <ul>
-        {bear.map((item: BearData, index: number) => (
+        {bear.map((item, index) => (
           <li
             key={`bear-sidebar-${item.id}`}
-            className={`pl-6 h-8 hstack cursor-default ${
-              cur === index ? "bg-red-500" : "bg-transparent"
-            } ${cur === index ? "" : "hover:bg-gray-600"}`}
+            className={`pl-6 h-8 hstack cursor-default ${cur === index ? "bg-red-500" : "bg-transparent"
+              } ${cur === index ? "" : "hover:bg-gray-600"}`}
             onClick={() => setMidBar(item.md, index)}
           >
             <span className={item.icon} />
@@ -88,11 +87,10 @@ const Middlebar = ({ items, cur, setContent }: MiddlebarProps) => {
       {items.map((item: BearMdData, index: number) => (
         <li
           key={`bear-midbar-${item.id}`}
-          className={`h-24 flex flex-col cursor-default border-l-2 ${
-            cur === index
+          className={`h-24 flex flex-col cursor-default border-l-2 ${cur === index
               ? "border-red-500 bg-white dark:bg-gray-900"
               : "border-transparent bg-transparent"
-          } hover:(bg-white dark:bg-gray-900)`}
+            } hover:(bg-white dark:bg-gray-900)`}
           onClick={() => setContent(item.id, item.file, index)}
         >
           <div className="h-8 mt-3 hstack">
@@ -108,12 +106,12 @@ const Middlebar = ({ items, cur, setContent }: MiddlebarProps) => {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <span className="i-ant-design:link-outlined text-c-500" />
+                  <span className="i-ph:link text-c-500" />
                 </a>
               )}
             </span>
           </div>
-          <div className="flex-1 ml-10 border-b border-c-300" p="b-2 r-1" text="sm c-500">
+          <div className="flex-1 ml-10" p="b-2 r-1" text="sm c-500" border="b c-300">
             {item.excerpt}
           </div>
         </li>
@@ -150,7 +148,7 @@ const fixImageURL = (text: string, contentURL: string): string => {
 
 const Content = ({ contentID, contentURL }: ContentProps) => {
   const [storeMd, setStoreMd] = useState<{ [key: string]: string }>({});
-  const dark = useStore((state: { dark: boolean }) => state.dark);
+  const dark = useStore((state) => state.dark);
 
   const fetchMarkdown = useCallback(
     (id: string, url: string) => {
@@ -161,7 +159,7 @@ const Content = ({ contentID, contentURL }: ContentProps) => {
             storeMd[id] = fixImageURL(text, url);
             setStoreMd({ ...storeMd });
           })
-          .catch((error) => console.error(error));
+          .catch((error) => { /* console.error(error) */ });
       }
     },
     [storeMd]
@@ -217,13 +215,10 @@ const Bear = () => {
 
   return (
     <div className="bear font-avenir flex h-full">
-      <div className="w-44 overflow-auto bg-gray-700">
+      <div className="w-44 overflow-auto" style={{ background: "var(--lg-bg-tinted)", backdropFilter: "var(--lg-blur-menu)" }}>
         <Sidebar cur={state.curSidebar} setMidBar={setMidBar} />
       </div>
-      <div
-        className="w-60 overflow-auto border-r border-c-300"
-        bg="gray-50 dark:gray-800"
-      >
+      <div className="w-60 overflow-auto" bg="gray-50 dark:gray-800" border="r c-300">
         <Middlebar
           items={state.midbarList}
           cur={state.curMidbar}

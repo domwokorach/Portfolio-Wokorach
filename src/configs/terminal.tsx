@@ -7,14 +7,14 @@ const terminal: TerminalData[] = [
     type: "folder",
     children: [
       {
-        id: "about-bio",
-        title: "bio.txt",
+        id: "about-me",
+        title: "intro.txt",
         type: "file",
         content: (
           <div className="py-1">
             <div>
-              Hello, my name is Dominic Wokorach-Olanya. I am a Software Engineer with a
-              focus on Front-End Development.
+              Hi, this is Akash. I am a Btech student at the Computer Science and
+              Engineering department of MBM University.
             </div>
           </div>
         )
@@ -23,14 +23,14 @@ const terminal: TerminalData[] = [
         id: "about-interests",
         title: "interests.txt",
         type: "file",
-        content: "Machine Learning / Computer Vision / Multimodal Learning"
+        content: "MERN Stack / Open Source Contribution  / full stack developement"
       },
       {
         id: "about-who-cares",
         title: "who-cares.txt",
         type: "file",
         content:
-          "I am seeking a research position or contract opportunity in 2026. I am also open to collaborating on research projects"
+          "I'm looking for a SDE internship. I'm open to collaboration on full stack projects."
       },
       {
         id: "about-contact",
@@ -42,67 +42,57 @@ const terminal: TerminalData[] = [
               Email:{" "}
               <a
                 className="text-blue-300"
-                href="mailto:dominic.wokorach-o@outlook.com"
+                href="mailto:aakash6263264@gmail.com"
                 target="_blank"
                 rel="noreferrer"
               >
-                dominic.wokorach-o@outlook.com
+                aakash6263264@gmail.com
               </a>
             </li>
             <li>
               Github:{" "}
               <a
                 className="text-blue-300"
-                href="https://github.com/domwokorach"
+                href="https://github.com/aakashsharma003"
                 target="_blank"
                 rel="noreferrer"
               >
-                @DomWokorach
-              </a>
-            </li>
-            <li>
-              <a
-                className="text-blue-300"
-                href="https://scholar.google.com/citations?user=RuW6xgMAAAAJ"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Google Scholar
+                @aakashsharma
               </a>
             </li>
             <li>
               Linkedin:{" "}
               <a
                 className="text-blue-300"
-                href="https://www.linkedin.com/in/dominic-w-3673523b/"
+                href="https://www.linkedin.com/in/aakashsharma003"
                 target="_blank"
                 rel="noreferrer"
               >
-                dominic-w-3673523b
+                akash-sharma
               </a>
             </li>
             <li>
               Personal Website:{" "}
               <a
                 className="text-blue-300"
-                href="https://zxh.me"
+                href="https://aakash-sharma.vercel.app"
                 target="_blank"
                 rel="noreferrer"
               >
-                https://zxh.me
+                https://aakash-sharma.vercel.app
               </a>
             </li>
-            {/* <li>
-              知乎:{" "}
+            <li>
+              X:{" "}
               <a
                 className="text-blue-300"
-                href="https://www.zhihu.com/people/chao-neng-gui-su"
+                href="https://x.com/aakashsharma003"
                 target="_blank"
                 rel="noreferrer"
               >
-                @西伯利亚大恶龙
+               find me on x.com
               </a>
-            </li> */}
+            </li>
           </ul>
         )
       }

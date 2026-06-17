@@ -13,4 +13,10 @@ export interface AppsData {
   y?: number;
   content?: JSX.Element;
   link?: string;
+  hideFromDock?: boolean;
+  titlebar?: "default" | "transparent" | "hidden";
+  hideOnMobile?: boolean;
+  mobileTitle?: string;
+  mobileImg?: string;
+  dockOnMobile?: boolean;
 }

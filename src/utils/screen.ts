@@ -10,18 +10,32 @@ interface FsDocument extends Document {
   msFullscreenElement?: Element;
 }
 
-export const enterFullScreen = (): void => {
+export const enterFullScreen = async (): Promise<void> => {
   if (!isFullScreen()) {
     const element = document.documentElement as FsDocumentElement;
-    if (element.requestFullscreen) element.requestFullscreen();
-    else if (element.msRequestFullscreen) element.msRequestFullscreen();
-    else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
-    else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
+    try {
+      if (element.requestFullscreen) await element.requestFullscreen();
+      else if (element.msRequestFullscreen) element.msRequestFullscreen();
+      else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
+      else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
+      
+      // Try to lock the keyboard to capture system keys like Cmd/Ctrl+W, Cmd/Ctrl+Space
+      if ('keyboard' in navigator && (navigator as any).keyboard && (navigator as any).keyboard.lock) {
+         await (navigator as any).keyboard.lock();
+      }
+    } catch (e) {
+      console.warn("Fullscreen or keyboard lock failed:", e);
+    }
   }
 };
 
 export const exitFullScreen = (): void => {
-  if (isFullScreen()) document.exitFullscreen();
+  if (isFullScreen()) {
+    if ('keyboard' in navigator && (navigator as any).keyboard && (navigator as any).keyboard.unlock) {
+       (navigator as any).keyboard.unlock();
+    }
+    document.exitFullscreen();
+  }
 };
 
 export const isFullScreen = (): boolean => {

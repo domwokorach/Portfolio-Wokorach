@@ -1,454 +1,291 @@
 import React from "react";
-import { apps, wallpapers } from "~/configs";
-import { minMarginY } from "~/utils";
+import { apps, launchpadApps } from "~/configs";
+import { minMarginY, isFullScreen, enterFullScreen, exitFullScreen } from "~/utils";
 import type { MacActions } from "~/types";
+import DynamicIsland from "~/components/DynamicIsland";
+import NotificationCenter from "~/components/NotificationCenter";
+import AboutThisMacModal from "~/components/AboutThisMacModal";
+import CalendarWidget from "~/components/widgets/CalendarWidget";
+import WeatherWidget from "~/components/widgets/WeatherWidget";
+import ContextMenu from "~/components/menus/ContextMenu";
+import { FolderIcon, FolderHomeIcon, FolderDockIcon, PdfIcon } from "~/components/DesktopIcons";
+import { AnimatePresence, motion } from "framer-motion";
+import { useWindowSize } from "~/hooks";
 
 interface DesktopState {
-  showApps: {
-    [key: string]: boolean;
-  };
-  appsZ: {
-    [key: string]: number;
-  };
-  maxApps: {
-    [key: string]: boolean;
-  };
-  minApps: {
-    [key: string]: boolean;
-  };
+  showApps: { [key: string]: boolean };
+  appsZ: { [key: string]: number };
+  maxApps: { [key: string]: boolean };
+  minApps: { [key: string]: boolean };
   maxZ: number;
   showLaunchpad: boolean;
   currentTitle: string;
   hideDockAndTopbar: boolean;
   spotlight: boolean;
-  folders: {
-    id: string;
-    name: string;
-    x?: number;
-    y?: number;
-    open?: boolean;
-  }[];
-  files: {
-    id: string;
-    name: string;
-    icon?: string;
-    folderId?: string;
-    x?: number;
-    y?: number;
-  }[];
+  showNotificationCenter: boolean;
 }
 
+// Build the initial state map from apps config — includes ALL apps
+function buildInitialState(): Pick<DesktopState, "showApps" | "appsZ" | "maxApps" | "minApps"> {
+  const showApps: { [key: string]: boolean } = {};
+  const appsZ: { [key: string]: number } = {};
+  const maxApps: { [key: string]: boolean } = {};
+  const minApps: { [key: string]: boolean } = {};
+  apps.forEach((app) => {
+    showApps[app.id] = !!app.show;
+    appsZ[app.id] = 2;
+    maxApps[app.id] = false;
+    minApps[app.id] = false;
+  });
+  return { showApps, appsZ, maxApps, minApps };
+}
+
+const INITIAL = buildInitialState();
+
 export default function Desktop(props: MacActions) {
-  const initialState: DesktopState = {
-    showApps: {},
-    appsZ: {},
-    maxApps: {},
-    minApps: {},
+  const [state, setState] = useState<DesktopState>({
+    ...INITIAL,
     maxZ: 2,
     showLaunchpad: false,
     currentTitle: "Finder",
     hideDockAndTopbar: false,
     spotlight: false,
-    folders: [],
-    files: []
-  };
-
-  const [state, setState] = useState<DesktopState>(initialState);
+    showNotificationCenter: false,
+  });
 
   const [spotlightBtnRef, setSpotlightBtnRef] =
     useState<React.RefObject<HTMLDivElement> | null>(null);
+  const [showAboutMac, setShowAboutMac] = useState(false);
 
-  const { dark, brightness } = useStore((state) => ({
-    dark: state.dark,
-    brightness: state.brightness
+  const { dark, brightness, getWallpaper } = useStore((s) => ({
+    dark: s.dark,
+    brightness: s.brightness,
+    getWallpaper: s.getWallpaper,
   }));
 
-  const getAppsData = (): void => {
-    let showApps = {},
-      appsZ = {},
-      maxApps = {},
-      minApps = {};
+  const { isMobile } = useWindowSize();
 
-    apps.forEach((app) => {
-      showApps = {
-        ...showApps,
-        [app.id]: !!app.show
-      };
-      appsZ = {
-        ...appsZ,
-        [app.id]: 2
-      };
-      maxApps = {
-        ...maxApps,
-        [app.id]: false
-      };
-      minApps = {
-        ...minApps,
-        [app.id]: false
-      };
-    });
+  const activeWallpaper = getWallpaper();
 
-    setState({ ...state, showApps, appsZ, maxApps, minApps });
+  const handleLaunchpadAppClick = (e: React.MouseEvent, link: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    useStore.getState().setSafariUrl(link);
+    window.dispatchEvent(new CustomEvent("launchpad:openSafari"));
   };
 
+  // Listen for cross-component events and global keyboard shortcuts
   useEffect(() => {
-    getAppsData();
-    // load folders from localStorage (if any)
-    try {
-      const raw = localStorage.getItem("desktop_folders");
-      if (raw) {
-        const folders = JSON.parse(raw) as DesktopState["folders"];
-        setState((s) => ({ ...s, folders }) as DesktopState);
+    const handleOpenSafari = () => {
+      toggleLaunchpad(false);
+      openApp("safari");
+    };
+    const handleOpenLaunchpad = () => toggleLaunchpad(true);
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // System independent Command key (Cmd on Mac, Ctrl on Windows/Linux)
+      const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+
+      // Spotlight: Cmd/Ctrl + Space
+      if (isCmdOrCtrl && e.code === 'Space') {
+        e.preventDefault();
+        toggleSpotlight();
       }
-    } catch (e) {
-      // ignore parse errors
-    }
-  }, []);
 
-  // persist folders whenever they change
-  useEffect(() => {
-    try {
-      localStorage.setItem("desktop_folders", JSON.stringify(state.folders || []));
-      localStorage.setItem("desktop_files", JSON.stringify(state.files || []));
-    } catch (e) {}
-  }, [state.folders, state.files]);
+      // Full screen: Cmd/Ctrl + F OR F11
+      if ((isCmdOrCtrl && e.key.toLowerCase() === 'f') || e.key === 'F11') {
+        e.preventDefault();
+        if (isFullScreen()) {
+          exitFullScreen();
+          useStore.getState().toggleFullScreen(false);
+        } else {
+          enterFullScreen();
+          useStore.getState().toggleFullScreen(true);
+        }
+      }
 
-  // keyboard shortcut: Cmd/Ctrl+Shift+N -> create new folder
-  useEffect(() => {
-    const handler = (ev: KeyboardEvent) => {
-      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
-      const mod = isMac ? ev.metaKey : ev.ctrlKey;
-      if (mod && ev.shiftKey && ev.key.toLowerCase() === "n") {
-        ev.preventDefault();
-        createFolder();
+      // Brightness Down: Cmd/Ctrl + Down Arrow OR F1
+      if ((isCmdOrCtrl && e.key === 'ArrowDown') || e.key === 'F1') {
+        e.preventDefault();
+        const currentBrightness = useStore.getState().brightness as number;
+        useStore.getState().setBrightness(Math.max(currentBrightness - 10, 1));
+      }
+
+      // Brightness Up: Cmd/Ctrl + Up Arrow OR F2
+      if ((isCmdOrCtrl && e.key === 'ArrowUp') || e.key === 'F2') {
+        e.preventDefault();
+        const currentBrightness = useStore.getState().brightness as number;
+        useStore.getState().setBrightness(Math.min(currentBrightness + 10, 100));
       }
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [state.folders]);
+
+    window.addEventListener("launchpad:openSafari", handleOpenSafari);
+    window.addEventListener("siri:openLaunchpad", handleOpenLaunchpad);
+    window.addEventListener("keydown", handleKeyDown);
+    
+    return () => {
+      window.removeEventListener("launchpad:openSafari", handleOpenSafari);
+      window.removeEventListener("siri:openLaunchpad", handleOpenLaunchpad);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [state]);  // re-bind when state updates so closures are fresh
 
   const toggleLaunchpad = (target: boolean): void => {
-    const r = document.querySelector(`#launchpad`) as HTMLElement;
-    if (target) {
-      r.style.transform = "scale(1)";
-      r.style.transition = "ease-in 0.2s";
-    } else {
-      r.style.transform = "scale(1.1)";
-      r.style.transition = "ease-out 0.2s";
-    }
-
-    setState({ ...state, showLaunchpad: target });
+    setState((prev) => ({ ...prev, showLaunchpad: target }));
   };
 
   const toggleSpotlight = (): void => {
-    setState({ ...state, spotlight: !state.spotlight });
+    setState((prev) => ({ ...prev, spotlight: !prev.spotlight }));
+  };
+
+  const toggleNotificationCenter = (): void => {
+    setState((prev) => ({ ...prev, showNotificationCenter: !prev.showNotificationCenter }));
   };
 
   const setWindowPosition = (id: string): void => {
     const r = document.querySelector(`#window-${id}`) as HTMLElement;
+    if (!r) return;
     const rect = r.getBoundingClientRect();
-    r.style.setProperty(
-      "--window-transform-x",
-      // "+ window.innerWidth" because of the boundary for windows
-      (window.innerWidth + rect.x).toFixed(1).toString() + "px"
-    );
-    r.style.setProperty(
-      "--window-transform-y",
-      // "- minMarginY" because of the boundary for windows
-      (rect.y - minMarginY).toFixed(1).toString() + "px"
-    );
+    r.style.setProperty("--window-transform-x", (window.innerWidth + rect.x).toFixed(1) + "px");
+    r.style.setProperty("--window-transform-y", (rect.y - minMarginY).toFixed(1) + "px");
   };
 
   const setAppMax = (id: string, target?: boolean): void => {
-    const maxApps = state.maxApps;
-    if (target === undefined) target = !maxApps[id];
-    maxApps[id] = target;
-    setState({
-      ...state,
-      maxApps: maxApps,
-      hideDockAndTopbar: target
-    });
-  };
-
-  const setAppMin = (id: string, target?: boolean): void => {
-    const minApps = state.minApps;
-    if (target === undefined) target = !minApps[id];
-    minApps[id] = target;
-    setState({
-      ...state,
-      minApps: minApps
+    setState((prev) => {
+      const maxApps = { ...prev.maxApps };
+      if (target === undefined) target = !maxApps[id];
+      maxApps[id] = target!;
+      return { ...prev, maxApps, hideDockAndTopbar: target! };
     });
   };
 
   const minimizeApp = (id: string): void => {
     setWindowPosition(id);
-
-    // get the corrosponding dock icon's position
-    let r = document.querySelector(`#dock-${id}`) as HTMLElement;
-    const dockAppRect = r.getBoundingClientRect();
-
-    r = document.querySelector(`#window-${id}`) as HTMLElement;
-    // const appRect = r.getBoundingClientRect();
-    const posY = window.innerHeight - r.offsetHeight / 2 - minMarginY;
-    // "+ window.innerWidth" because of the boundary for windows
-    const posX = window.innerWidth + dockAppRect.x - r.offsetWidth / 2 + 25;
-
-    // translate the window to that position
-    r.style.transform = `translate(${posX}px, ${posY}px) scale(0.2)`;
-    r.style.transition = "ease-out 0.3s";
-
-    // add it to the minimized app list
-    setAppMin(id, true);
-  };
-
-  // --- Folder support -------------------------------------------------
-  const createFolder = (name?: string) => {
-    const id = `folder-${Date.now()}`;
-    const folderName = name || `New Folder`;
-    const folders = [...(state.folders || []), { id, name: folderName, open: false }];
-    setState({ ...state, folders });
-  };
-
-  const toggleFolderOpen = (id: string, target?: boolean) => {
-    const folders = (state.folders || []).map((f) =>
-      f.id === id ? { ...f, open: typeof target === "boolean" ? target : !f.open } : f
-    );
-    setState({ ...state, folders });
-  };
-
-  const renderFolderIcons = () => {
-    return (state.folders || []).map((f, idx) => {
-      return (
-        <div
-          key={`desktop-folder-${f.id}`}
-          className="desktop-folder text-center cursor-default select-none"
-          style={{ width: 84, margin: 12, display: "inline-block" }}
-          onDoubleClick={() => toggleFolderOpen(f.id, true)}
-        >
-          <img src={`img/icons/folder.png`} alt="folder" style={{ width: 64 }} />
-          <div
-            className="text-xs mt-1"
-            style={{
-              width: 84,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis"
-            }}
-          >
-            {f.name}
-          </div>
-        </div>
-      );
-    });
-  };
-
-  const renderFolderWindows = () => {
-    // simple folder windows that display the folder name; reuses AppWindow for consistency
-    return (state.folders || []).map((f) => {
-      if (!f.open) return <div key={`folder-window-${f.id}`} />;
-
-      const props = {
-        id: f.id,
-        title: f.name,
-        width: 480,
-        height: 360,
-        minWidth: 240,
-        minHeight: 160,
-        x: 120,
-        y: 120,
-        z: state.maxZ + 1,
-        max: false,
-        min: false,
-        close: () => toggleFolderOpen(f.id, false),
-        setMax: () => {},
-        setMin: () => {},
-        focus: () => toggleFolderOpen(f.id, true)
-      } as any;
-
-      const filesInFolder = (state.files || []).filter((file) => file.folderId === f.id);
-
-      return (
-        <AppWindow key={`folder-window-${f.id}`} {...props}>
-          <div
-            style={{ padding: 12 }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.dataTransfer.dropEffect = "move";
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              const fileId = e.dataTransfer.getData("application/x-desktop-file");
-              if (fileId) moveFileToFolder(fileId, f.id);
-            }}
-          >
-            <div style={{ fontWeight: 600, marginBottom: 8 }}>{f.name}</div>
-
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
-              {filesInFolder.length > 0 ? (
-                filesInFolder.map((file) => (
-                  <div
-                    key={file.id}
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData("application/x-desktop-file", file.id);
-                      e.dataTransfer.effectAllowed = "move";
-                    }}
-                    className="text-center cursor-default select-none"
-                    style={{ width: 84, margin: 8 }}
-                  >
-                    <img
-                      src={file.icon ?? "img/icons/file.png"}
-                      alt={file.name}
-                      style={{ width: 48 }}
-                    />
-                    <div
-                      style={{
-                        fontSize: 12,
-                        marginTop: 6,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis"
-                      }}
-                    >
-                      {file.name}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-sm text-muted">(empty)</div>
-              )}
-            </div>
-          </div>
-        </AppWindow>
-      );
-    });
+    const dock = document.querySelector(`#dock-${id}`) as HTMLElement;
+    const win = document.querySelector(`#window-${id}`) as HTMLElement;
+    if (!dock || !win) return;
+    const dockRect = dock.getBoundingClientRect();
+    const posY = window.innerHeight - win.offsetHeight / 2 - minMarginY;
+    const posX = window.innerWidth + dockRect.x - win.offsetWidth / 2 + 25;
+    win.style.transform = `translate(${posX}px, ${posY}px) scale(0.2)`;
+    win.style.transition = "ease-out 0.3s";
+    setState((prev) => ({ ...prev, minApps: { ...prev.minApps, [id]: true } }));
   };
 
   const closeApp = (id: string): void => {
-    setAppMax(id, false);
-    const showApps = state.showApps;
-    showApps[id] = false;
-    setState({
-      ...state,
-      showApps: showApps,
-      hideDockAndTopbar: false
-    });
+    setState((prev) => ({
+      ...prev,
+      showApps: { ...prev.showApps, [id]: false },
+      maxApps: { ...prev.maxApps, [id]: false },
+      hideDockAndTopbar: false,
+    }));
   };
 
   const openApp = (id: string): void => {
-    // add it to the shown app list
-    const showApps = state.showApps;
-    showApps[id] = true;
-
-    // move to the top (use a maximum z-index)
-    const appsZ = state.appsZ;
-    const maxZ = state.maxZ + 1;
-    appsZ[id] = maxZ;
-
-    // get the title of the currently opened app
-    const currentApp = apps.find((app) => {
-      return app.id === id;
-    });
-    if (currentApp === undefined) {
-      throw new TypeError(`App ${id} is undefined.`);
+    const appDef = apps.find((a) => a.id === id);
+    if (!appDef) {
+      console.warn(`openApp: unknown app id "${id}"`);
+      return;
     }
 
-    setState({
-      ...state,
-      showApps: showApps,
-      appsZ: appsZ,
-      maxZ: maxZ,
-      currentTitle: currentApp.title
-    });
+    setState((prev) => {
+      const maxZ = prev.maxZ + 1;
+      const showApps = { ...prev.showApps, [id]: true };
+      const appsZ = { ...prev.appsZ, [id]: maxZ };
 
-    const minApps = state.minApps;
-    // if the app has already been shown but minimized
-    if (minApps[id]) {
-      // move to window's last position
-      const r = document.querySelector(`#window-${id}`) as HTMLElement;
-      r.style.transform = `translate(${r.style.getPropertyValue(
-        "--window-transform-x"
-      )}, ${r.style.getPropertyValue("--window-transform-y")}) scale(1)`;
-      r.style.transition = "ease-in 0.3s";
-      // remove it from the minimized app list
-      minApps[id] = false;
-      setState({ ...state, minApps });
-    }
+      // Un-minimize if needed
+      const minApps = { ...prev.minApps };
+      if (minApps[id]) {
+        const win = document.querySelector(`#window-${id}`) as HTMLElement;
+        if (win) {
+          win.style.transform = `translate(${win.style.getPropertyValue("--window-transform-x")}, ${win.style.getPropertyValue("--window-transform-y")}) scale(1)`;
+          win.style.transition = "ease-in 0.3s";
+        }
+        minApps[id] = false;
+      }
+
+      return {
+        ...prev,
+        showApps,
+        appsZ,
+        maxZ,
+        minApps,
+        currentTitle: appDef.title,
+      };
+    });
   };
 
   const renderAppWindows = () => {
     return apps.map((app) => {
-      if (app.desktop && state.showApps[app.id]) {
-        const props = {
-          id: app.id,
-          title: app.title,
-          width: app.width,
-          height: app.height,
-          minWidth: app.minWidth,
-          minHeight: app.minHeight,
-          aspectRatio: app.aspectRatio,
-          x: app.x,
-          y: app.y,
-          z: state.appsZ[app.id],
-          max: state.maxApps[app.id],
-          min: state.minApps[app.id],
-          close: closeApp,
-          setMax: setAppMax,
-          setMin: minimizeApp,
-          focus: openApp
-        };
+      if (!app.desktop) return null;
 
+      if (app.id === "siri" && state.showApps[app.id]) {
         return (
-          <AppWindow key={`desktop-app-${app.id}`} {...props}>
-            {app.content}
-          </AppWindow>
+          <div
+            key={`desktop-app-${app.id}`}
+            className="fixed top-8 right-4 z-[1000] drop-shadow-2xl flex items-start justify-end"
+          >
+            {React.cloneElement(app.content as React.ReactElement, {
+              closeSiri: () => closeApp("siri"),
+            })}
+          </div>
         );
-      } else {
-        return <div key={`desktop-app-${app.id}`} />;
       }
+
+      if (!app.content) return null;
+
+      const windowProps = {
+        id: app.id,
+        title: app.title,
+        width: app.width,
+        height: app.height,
+        minWidth: app.minWidth,
+        minHeight: app.minHeight,
+        aspectRatio: app.aspectRatio,
+        x: app.x,
+        y: app.y,
+        z: state.appsZ[app.id] ?? 2,
+        max: state.maxApps[app.id] ?? false,
+        min: state.minApps[app.id] ?? false,
+        titlebar: app.titlebar,
+        close: closeApp,
+        setMax: setAppMax,
+        setMin: minimizeApp,
+        focus: openApp,
+      };
+
+      return (
+        <AnimatePresence key={`desktop-app-${app.id}`}>
+          {state.showApps[app.id] && (
+            <AppWindow {...windowProps}>
+              {app.content}
+            </AppWindow>
+          )}
+        </AnimatePresence>
+      );
     });
   };
 
-  const moveFileToFolder = (fileId: string, folderId: string) => {
-    const files = (state.files || []).map((f) =>
-      f.id === fileId ? { ...f, folderId } : f
-    );
-    setState({ ...state, files });
+  const bgStyle: any = {
+    backgroundImage: `url(${dark ? activeWallpaper.night : activeWallpaper.day})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    filter: `brightness(${(brightness as number) * 0.7 + 50}%)`
   };
+  bgStyle["trans" + "ition"] = "filter 0.3s ea" + "se";
 
-  const moveFileToDesktop = (fileId: string) => {
-    const files = (state.files || []).map((f) =>
-      f.id === fileId ? { ...f, folderId: undefined } : f
-    );
-    setState({ ...state, files });
-  };
+  const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0 });
 
-  const renderDesktopFiles = () => {
-    return (state.files || [])
-      .filter((file) => !file.folderId) // only files without a folderId
-      .map((file) => (
-        <div
-          key={file.id}
-          draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData("application/x-desktop-file", file.id);
-            e.dataTransfer.effectAllowed = "move";
-          }}
-          className="desktop-file"
-        >
-          <img src={file.icon ?? "img/icons/file.png"} alt={file.name} />
-          <div>{file.name}</div>
-        </div>
-      ));
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ show: true, x: e.clientX, y: e.clientY });
   };
 
   return (
     <div
       className="size-full overflow-hidden bg-center bg-cover"
-      style={{
-        backgroundImage: `url(${dark ? wallpapers.night : wallpapers.day})`,
-        filter: `brightness( ${(brightness as number) * 0.7 + 50}% )`
-      }}
+      style={bgStyle}
+      onContextMenu={handleContextMenu}
     >
       {/* Top Menu Bar */}
       <TopBar
@@ -460,31 +297,83 @@ export default function Desktop(props: MacActions) {
         toggleSpotlight={toggleSpotlight}
         hide={state.hideDockAndTopbar}
         setSpotlightBtnRef={setSpotlightBtnRef}
+        openApp={openApp}
+        toggleNotificationCenter={toggleNotificationCenter}
+        showNotificationCenter={state.showNotificationCenter}
+        openAboutMac={() => setShowAboutMac(true)}
       />
 
-      {/* Desktop Icons (folders) */}
+      {/* Dynamic Island */}
+      <DynamicIsland currentApp={state.currentTitle} />
+
+      {/* Desktop-pinned widgets — top-left, always visible, matches Tahoe ref */}
       <div
-        className="desktop-icons absolute z-0"
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "move";
+        style={{
+          position: "fixed",
+          top: 48,
+          left: 16,
+          zIndex: 55,
+          display: "flex",
+          flexDirection: "row",
+          gap: 16,
+          pointerEvents: "none",
         }}
-        onDrop={(e) => {
-          e.preventDefault();
-          const fileId = e.dataTransfer.getData("application/x-desktop-file");
-          if (fileId) moveFileToDesktop(fileId);
-        }}
-        style={{ top: minMarginY + 24, left: 48, right: 48, padding: 12 }}
       >
-        {renderFolderIcons()}
-        {renderDesktopFiles()}
+        <div style={{ pointerEvents: "auto" }}>
+          <CalendarWidget compact={false} />
+        </div>
+        <div style={{ pointerEvents: "auto" }}>
+          <WeatherWidget compact={false} />
+        </div>
       </div>
 
-      {/* Desktop Apps */}
-      <div className="window-bound z-10 absolute" style={{ top: minMarginY }}>
-        {renderAppWindows()}
-        {renderFolderWindows()}
+      {/* Desktop Icons - top-right */}
+      <div
+        style={{
+          position: "fixed",
+          top: 48,
+          right: 24,
+          zIndex: 55,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 24,
+        }}
+      >
       </div>
+
+      {isMobile && (
+        <div className="absolute top-[48px] left-0 right-0 bottom-24 p-6 grid grid-cols-4 gap-y-6 gap-x-2 content-start z-40">
+          {apps.filter(a => !a.hideOnMobile && !a.dockOnMobile && a.id !== "launchpad").map(app => (
+            <div key={app.id} className="flex flex-col items-center gap-1.5 cursor-pointer" onClick={() => openApp(app.id)}>
+              <div className="w-[60px] h-[60px] bg-transparent rounded-[22.5%] shadow-sm overflow-hidden flex items-center justify-center border border-black/5 dark:border-white/5">
+                <img src={app.mobileImg || app.img} alt={app.title} className="w-full h-full object-cover" />
+              </div>
+              <span className="text-white text-xs font-light text-center tracking-wide" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}>
+                {app.mobileTitle || app.title}
+              </span>
+            </div>
+          ))}
+          {launchpadApps.map(app => (
+            <div key={app.id} className="flex flex-col items-center gap-1.5 cursor-pointer" onClick={(e) => handleLaunchpadAppClick(e, app.link)}>
+              <div className={`w-[60px] h-[60px] rounded-[22.5%] shadow-sm overflow-hidden flex items-center justify-center border border-black/10 dark:border-white/10 ${app.img.includes('skill-exchange') ? 'bg-black' : 'bg-white'}`}>
+                <img src={app.mobileImg || app.img} alt={app.title} className="w-[60%] h-[60%] object-contain" />
+              </div>
+              <span className="text-white text-xs font-light text-center tracking-wide" style={{ textShadow: "0 1px 3px rgba(0,0,0,0.6)" }}>
+                {app.mobileTitle || app.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Desktop App Windows */}
+      <div className="window-bound absolute" style={{ top: minMarginY, zIndex: 60, pointerEvents: "none" }}>
+        {renderAppWindows()}
+      </div>
+
+      {/* About This Mac modal */}
+      <AboutThisMacModal show={showAboutMac} onClose={() => setShowAboutMac(false)} />
 
       {/* Spotlight */}
       {state.spotlight && (
@@ -499,6 +388,12 @@ export default function Desktop(props: MacActions) {
       {/* Launchpad */}
       <Launchpad show={state.showLaunchpad} toggleLaunchpad={toggleLaunchpad} />
 
+      {/* Notification Center */}
+      <NotificationCenter
+        show={state.showNotificationCenter}
+        onClose={toggleNotificationCenter}
+      />
+
       {/* Dock */}
       <Dock
         open={openApp}
@@ -506,6 +401,15 @@ export default function Desktop(props: MacActions) {
         showLaunchpad={state.showLaunchpad}
         toggleLaunchpad={toggleLaunchpad}
         hide={state.hideDockAndTopbar}
+      />
+
+      {/* Context Menu */}
+      <ContextMenu
+        x={contextMenu.x}
+        y={contextMenu.y}
+        show={contextMenu.show}
+        onClose={() => setContextMenu({ ...contextMenu, show: false })}
+        openApp={openApp}
       />
     </div>
   );

@@ -1,14 +1,16 @@
 export function useWindowSize() {
   const [state, setState] = useState({
     winWidth: window.innerWidth,
-    winHeight: window.innerHeight
+    winHeight: window.innerHeight,
+    isMobile: window.innerWidth < 768
   });
 
   useEffect(() => {
     const handler = () => {
       setState({
         winWidth: window.innerWidth,
-        winHeight: window.innerHeight
+        winHeight: window.innerHeight,
+        isMobile: window.innerWidth < 768
       });
     };
 

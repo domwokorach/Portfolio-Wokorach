@@ -1,4 +1,5 @@
 import React from "react";
+import "react-rangeslider/lib/index.css";
 
 interface WifiMenuProps {
   toggleWifiMenu: () => void;
@@ -18,6 +19,7 @@ export default function WifiMenu({ toggleWifiMenu, btnRef }: WifiMenuProps) {
     <div
       className="menu-box hstack justify-between h-11 w-80 max-w-full right-0 sm:right-2 px-2 py-0.5"
       ref={wifiRef}
+      style={{ fontFamily: "var(--font-system)" }}
     >
       <div className="px-2.5 font-medium">Wi-Fi</div>
       <div className="px-2.5">

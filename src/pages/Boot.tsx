@@ -10,6 +10,13 @@ const bootingInterval = 500;
 export default function Boot({ restart, sleep, setBooting }: BootProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [percent, setPercent] = useState<number>(0);
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    // Fade in the Apple logo
+    const timer = setTimeout(() => setShowContent(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (restart && !sleep) setLoading(true);
@@ -35,21 +42,56 @@ export default function Boot({ restart, sleep, setBooting }: BootProps) {
   };
 
   return (
-    <div className="size-full bg-black flex-center" onClick={handleClick}>
-      <div className="i-fa-brands:apple text-white -mt-4 size-20 sm:size-24" />
+    <div
+      className="size-full bg-black flex-center"
+      onClick={handleClick}
+      style={{ position: 'relative' }}
+    >
+      <div
+        style={{
+          opacity: showContent ? 1 : 0,
+          transform: showContent ? 'scale(1)' : 'scale(0.9)',
+          transition: 'opacity 0.8s ease, transform 0.8s ease',
+        }}
+      >
+        <div className="i-fa6-brands:apple text-white -mt-4 size-20 sm:size-24" />
+      </div>
       {loading && (
-        <div className="absolute top-1/2 inset-x-0 w-56 h-1 sm:h-1.5 bg-gray-500 rounded overflow-hidden mt-16 sm:mt-24 mx-auto">
+        <div
+          className="absolute inset-x-0 w-48 sm:w-56 mx-auto overflow-hidden"
+          style={{
+            top: '58%',
+            height: '4px',
+            borderRadius: '2px',
+            backgroundColor: 'rgba(255,255,255,0.15)',
+            opacity: showContent ? 1 : 0,
+            transition: 'opacity 0.4s ease 0.2s',
+          }}
+        >
           <span
-            className="absolute top-0 bg-white h-full rounded-sm"
+            className="absolute top-0 left-0 h-full"
             style={{
-              width: `${percent.toString()}%`
+              width: `${percent}%`,
+              borderRadius: '2px',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.9), white)',
+              transition: 'width 0.05s linear',
             }}
           />
         </div>
       )}
       {!restart && !loading && (
-        <div className="absolute top-1/2 inset-x-0 mt-16 sm:mt-20 mx-auto text-sm text-gray-200 text-center">
-          Click to {sleep ? "wake up" : "boot"}
+        <div
+          className="absolute inset-x-0 text-center"
+          style={{
+            top: '58%',
+            opacity: showContent ? 0.6 : 0,
+            transition: 'opacity 0.8s ease 0.5s',
+            animation: showContent ? 'subtlePulse 2s ease-in-out infinite 1.5s' : 'none',
+          }}
+        >
+          <span className="text-sm text-gray-300 tracking-wide">
+            Click to {sleep ? "wake up" : "boot"}
+          </span>
         </div>
       )}
     </div>
