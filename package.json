@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@iconify/json": "^2.2.205",
-    "@renovamen/eslint-config": "^0.1.7",
+    "@renovamen/eslint-config": "^0.1.10",
     "@renovamen/prettier-config": "^0.1.7",
     "@types/node": "^20.12.8",
     "@types/react": "^18.3.1",
