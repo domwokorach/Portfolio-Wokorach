@@ -67,7 +67,7 @@ const terminal: TerminalData[] = [
                 target="_blank"
                 rel="noreferrer"
               >
-                akash-sharma
+                Dominic
               </a>
             </li>
             <li>
@@ -85,7 +85,7 @@ const terminal: TerminalData[] = [
               X:{" "}
               <a
                 className="text-blue-300"
-                href="https://x.com/aakashsharma003"
+                href="https://x.com/do3inic"
                 target="_blank"
                 rel="noreferrer"
               >
