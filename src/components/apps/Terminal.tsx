@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import terminal from "~/configs/terminal";
+import { useInterval } from "~/hooks";
 import type { TerminalData } from "~/types";
 
 const CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -12,6 +13,10 @@ const getEmoji = () => {
 interface TerminalState {
   rmrf: boolean;
   content: JSX.Element[];
+}
+
+interface TerminalProps {
+  [key: string]: never;
 }
 
 // rain animation is adopted from: https://codepen.io/P3R0/pen/MwgoKv
@@ -84,20 +89,20 @@ const HowDare = ({ setRMRF }: { setRMRF: (value: boolean) => void }) => {
   );
 };
 
-export default class Terminal extends React.Component<{}, TerminalState> {
+export default class Terminal extends React.Component<TerminalProps, TerminalState> {
   private history = [] as string[];
   private curHistory = 0;
   private curInputTimes = 0;
-  private curDirPath = [] as any;
-  private curChildren = terminal as any;
+  private curDirPath: string[] = [];
+  private curChildren: TerminalData[] = terminal;
   private commands: {
     [key: string]: { (): void } | { (arg?: string): void };
   };
 
-  constructor(props: {}) {
+  constructor(props: TerminalProps) {
     super(props);
     this.state = {
-      content: [],
+      content: [this.createInputRow(this.curInputTimes)],
       rmrf: false
     };
     this.commands = {
@@ -110,21 +115,18 @@ export default class Terminal extends React.Component<{}, TerminalState> {
   }
 
   componentDidMount() {
-    this.reset();
-    this.generateInputRow(this.curInputTimes);
+    this.focusOnInput(this.curInputTimes);
   }
 
   reset = () => {
-    const terminal = document.querySelector("#terminal-content") as HTMLElement;
-    terminal.innerHTML = "";
+    this.setState({ content: [] });
   };
 
   addRow = (row: JSX.Element) => {
-    if (this.state.content.find((item) => item.key === row.key)) return;
-
-    const content = this.state.content;
-    content.push(row);
-    this.setState({ content });
+    this.setState((prevState) => {
+      if (prevState.content.some((item) => item.key === row.key)) return null;
+      return { content: [...prevState.content, row] };
+    });
   };
 
   getCurDirName = () => {
@@ -133,11 +135,12 @@ export default class Terminal extends React.Component<{}, TerminalState> {
   };
 
   getCurChildren = () => {
-    let children = terminal as any;
+    let children: TerminalData[] = terminal;
     for (const name of this.curDirPath) {
-      children = children.find((item: TerminalData) => {
+      const folder = children.find((item: TerminalData) => {
         return item.title === name && item.type === "folder";
-      }).children;
+      });
+      children = folder?.children ?? [];
     }
     return children;
   };
@@ -167,7 +170,7 @@ export default class Terminal extends React.Component<{}, TerminalState> {
           <span>{`cd: no such file or directory: ${args}`}</span>
         );
       } else {
-        this.curChildren = target.children;
+        this.curChildren = target.children ?? [];
         this.curDirPath.push(target.title);
       }
     }
@@ -210,7 +213,6 @@ export default class Terminal extends React.Component<{}, TerminalState> {
 
   // clear terminal
   clear = () => {
-    this.curInputTimes += 1;
     this.reset();
   };
 
@@ -277,13 +279,16 @@ export default class Terminal extends React.Component<{}, TerminalState> {
     const keyCode = e.key;
     const inputElement = document.querySelector(
       `#terminal-input-${this.curInputTimes}`
-    ) as HTMLInputElement;
+    ) as HTMLInputElement | null;
+
+    if (!inputElement) return;
+
     const inputText = inputElement.value.trim();
     const input = inputText.split(" ");
 
     if (keyCode === "Enter") {
       // ----------- run command -----------
-      this.history.push(inputText);
+      if (inputText) this.history.push(inputText);
 
       const cmd = input[0];
       const args = input[1];
@@ -291,8 +296,10 @@ export default class Terminal extends React.Component<{}, TerminalState> {
       // we can't edit the past input
       inputElement.setAttribute("readonly", "true");
 
-      if (inputText.substring(0, 6) === "rm -rf") this.setState({ rmrf: true });
-      else if (cmd && Object.keys(this.commands).includes(cmd)) {
+      if (!cmd) {
+        // empty enter creates a fresh prompt without an error row
+      } else if (inputText.substring(0, 6) === "rm -rf") this.setState({ rmrf: true });
+      else if (Object.keys(this.commands).includes(cmd)) {
         this.commands[cmd](args);
       } else {
         this.generateResultRow(
@@ -311,18 +318,14 @@ export default class Terminal extends React.Component<{}, TerminalState> {
       // ----------- previous history command -----------
       if (this.history.length > 0) {
         if (this.curHistory > 0) this.curHistory--;
-        const historyCommand = this.history[this.curHistory];
-        inputElement.value = historyCommand;
+        inputElement.value = this.history[this.curHistory];
       }
     } else if (keyCode === "ArrowDown") {
       // ----------- next history command -----------
       if (this.history.length > 0) {
         if (this.curHistory < this.history.length) this.curHistory++;
         if (this.curHistory === this.history.length) inputElement.value = "";
-        else {
-          const historyCommand = this.history[this.curHistory];
-          inputElement.value = historyCommand;
-        }
+        else inputElement.value = this.history[this.curHistory];
       }
     } else if (keyCode === "Tab") {
       // ----------- auto complete -----------
@@ -333,16 +336,16 @@ export default class Terminal extends React.Component<{}, TerminalState> {
   };
 
   focusOnInput = (id: number) => {
-    const input = document.querySelector(`#terminal-input-${id}`) as HTMLInputElement;
-    input.focus();
+    const input = document.querySelector(`#terminal-input-${id}`) as HTMLInputElement | null;
+    input?.focus();
   };
 
-  generateInputRow = (id: number) => {
-    const newRow = (
+  createInputRow = (id: number) => {
+    return (
       <div key={`terminal-input-row-${id}`} flex>
         <div className="w-max hstack space-x-1.5">
           <span text-yellow-200>
-            @demaxxer <span text-green-300>{this.getCurDirName()}</span>
+            @dominic <span text-green-300>{this.getCurDirName()}</span>
           </span>
           <span text-red-400>{">"}</span>
         </div>
@@ -354,7 +357,10 @@ export default class Terminal extends React.Component<{}, TerminalState> {
         />
       </div>
     );
-    this.addRow(newRow);
+  };
+
+  generateInputRow = (id: number) => {
+    this.addRow(this.createInputRow(id));
   };
 
   generateResultRow = (id: number, result: JSX.Element) => {
