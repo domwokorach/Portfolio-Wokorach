@@ -1,6 +1,6 @@
 # macOS Tahoe Portfolio
 
-**Live Demo:** [https://aakash-sharma.vercel.app](https://aakash-sharma.vercel.app)
+**Live Demo:** [https://portfolio-wokorach.vercel.app/](https://aakash-sharma.vercel.app)
 
 I've never owned a MacBook. But I've always been kind of obsessed with how macOS looks and feels — the way everything just... flows. So at some point I stopped wishing and started building.
 
@@ -24,10 +24,3 @@ pnpm install
 pnpm dev      # dev server with hot reloading
 pnpm build    # production build → dist/
 ```
-
-&nbsp;
-
-## Credits
-
-- [macOS Tahoe 26](https://www.apple.com/newsroom/2025/06/macos-tahoe-26-makes-the-mac-more-capable-productive-and-intelligent-than-ever/)
-- [iOS 26](https://support.apple.com/en-us/123075)
