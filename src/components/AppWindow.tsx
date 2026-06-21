@@ -91,7 +91,10 @@ const TrafficLights = ({ id, close, aspectRatio, max, setMax, setMin }: TrafficP
       </button>
       <button
         style={{ ...btnStyle, backgroundColor: disableMax ? "#999" : "#28C840", opacity: disableMax ? 0.5 : 1 }}
-        onClick={(e) => { e.stopPropagation(); !disableMax && setMax(id); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!disableMax) setMax(id);
+        }}
         disabled={disableMax}
       >
         {hovered && !disableMax && (max ? <ExitFullIcon size={8} /> : <FullIcon size={6} />)}
@@ -115,20 +118,20 @@ const Window = (props: WindowProps) => {
     y: (winHeight - initHeight - dockSize - minMarginY) / 2 + (props.y || 0),
   });
 
-  useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      width: Math.min(winWidth, prev.width),
-      height: Math.min(winHeight, prev.height),
-    }));
-  }, [winWidth, winHeight]);
-
   const isMobile = winWidth < 768;
   const round = (props.max || isMobile) ? "rounded-none" : "";
   const minimized = props.min ? "opacity-0 invisible transition-opacity duration-300" : "";
-  const width = (props.max || isMobile) ? winWidth : state.width;
-  const height = (props.max || isMobile) ? winHeight : state.height;
+  const boundedWidth = Math.min(winWidth, state.width);
+  const boundedHeight = Math.min(winHeight, state.height);
+  const width = (props.max || isMobile) ? winWidth : boundedWidth;
+  const height = (props.max || isMobile) ? winHeight : boundedHeight;
   const disableMax = props.aspectRatio !== undefined;
+
+  const isTerminal = props.id === "terminal";
+  const contentDelay = isTerminal ? 0 : 0.35;
+  const shellTransition = isTerminal
+    ? { duration: 0.18, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] }
+    : { duration: 0.42, ease: [0.32, 0.72, 0, 1] as [number, number, number, number] };
 
   const children = React.cloneElement(props.children as React.ReactElement, { width });
 
@@ -139,7 +142,7 @@ const Window = (props: WindowProps) => {
       position={{
         x: (props.max || isMobile)
           ? winWidth
-          : Math.min(winWidth * 2 - minMarginX, Math.max(winWidth - state.width + minMarginX, state.x)),
+          : Math.min(winWidth * 2 - minMarginX, Math.max(winWidth - boundedWidth + minMarginX, state.x)),
         y: (props.max || isMobile)
           ? -minMarginY
           : Math.min(winHeight - minMarginY - (dockSize + 15 + minMarginY), Math.max(0, state.y)),
@@ -167,20 +170,20 @@ const Window = (props: WindowProps) => {
     >
       {/* macOS Tahoe Liquid Glass window shell */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.3, y: "100vh", borderRadius: 28 }}
+        initial={isTerminal ? false : { opacity: 0, scale: 0.3, y: "100vh", borderRadius: 28 }}
         animate={{ opacity: 1, scale: 1, y: 0, borderRadius: props.max ? 0 : 12 }}
-        exit={{ 
-          opacity: [1, 0, 0], 
-          scale: 0.3, 
-          y: "100vh", 
+        exit={{
+          opacity: [1, 0, 0],
+          scale: 0.3,
+          y: "100vh",
           borderRadius: 28,
-          transition: { 
-            duration: 0.35, 
+          transition: {
+            duration: 0.35,
             ease: [0.32, 0.72, 0, 1],
             opacity: { times: [0, 0.8, 1], ease: "linear" }
-          } 
+          }
         }}
-        transition={{ duration: 0.42, ease: [0.32, 0.72, 0, 1] }}
+        transition={shellTransition}
         style={{
           width: "100%",
           height: "100%",
@@ -243,12 +246,12 @@ const Window = (props: WindowProps) => {
         )}
 
         {/* Window content */}
-        <motion.div 
-          className="w-full overflow-y-hidden" 
+        <motion.div
+          className="w-full overflow-y-hidden"
           style={{ height: props.titlebar === "transparent" || props.titlebar === "hidden" ? "100%" : "calc(100% - 32px)" }}
-          initial={{ opacity: 0, filter: "blur(8px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          transition={{ duration: 0.15, delay: 0.35, ease: "easeOut" }}
+          initial={isTerminal ? false : { opacity: 0, filter: "blur(8px)" }}
+          animate={isTerminal ? { opacity: 1 } : { opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.12, delay: contentDelay, ease: "easeOut" }}
         >
           {children}
         </motion.div>
