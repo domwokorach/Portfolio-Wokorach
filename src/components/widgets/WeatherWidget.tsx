@@ -1,20 +1,38 @@
-const WEATHER_DATA = {
+import { useEffect, useState } from "react";
+
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY as string;
+const CITY = "London";
+
+interface WeatherData {
+  temp: number;
+  condition: string;
+  high: number;
+  low: number;
+  location: string;
+  humidity: number;
+  wind: number;
+  alert: string;
+  icon: string;
+}
+
+const FALLBACK: WeatherData = {
   temp: 25,
   condition: "Mostly Clear",
   high: 84,
   low: 62,
-  location: "London",
+  location: CITY,
   humidity: 32,
   wind: 8,
   alert: "Air quality alert",
-  hourly: [
-    { time: "Now", icon: "partly-cloudy", temp: 25 },
-    { time: "1PM", icon: "sunny", temp: 22 },
-    { time: "2PM", icon: "sunny", temp: 24 },
-    { time: "3PM", icon: "cloudy", temp: 20 },
-    { time: "4PM", icon: "cloudy", temp: 16 },
-  ],
+  icon: "partly-cloudy",
 };
+
+function owmIconToLocal(icon: string): string {
+  if (icon.startsWith("01")) return "sunny";
+  if (icon.startsWith("09") || icon.startsWith("10")) return "rainy";
+  if (icon.startsWith("02") || icon.startsWith("03") || icon.startsWith("04")) return "cloudy";
+  return "partly-cloudy";
+}
 
 // SF Symbol-style SVG weather icons
 const WeatherIcon = ({ type, size = 36 }: { type: string; size?: number }) => {
@@ -67,6 +85,35 @@ interface WeatherWidgetProps {
 }
 
 export default function WeatherWidget({ compact }: WeatherWidgetProps) {
+  const [data, setData] = useState<WeatherData>(FALLBACK);
+  const [loading, setLoading] = useState(!!API_KEY);
+
+  useEffect(() => {
+    if (!API_KEY) return;
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&units=metric&appid=${API_KEY}`
+    )
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.cod === 200) {
+          setData({
+            temp: Math.round(json.main.temp),
+            condition: json.weather[0].description
+              .replace(/\b\w/g, (c: string) => c.toUpperCase()),
+            high: Math.round(json.main.temp_max),
+            low: Math.round(json.main.temp_min),
+            location: json.name,
+            humidity: json.main.humidity,
+            wind: Math.round(json.wind.speed * 3.6),
+            alert: `Feels like ${Math.round(json.main.feels_like)}°C`,
+            icon: owmIconToLocal(json.weather[0].icon),
+          });
+        }
+      })
+      .catch(() => {/* keep fallback */})
+      .finally(() => setLoading(false));
+  }, []);
+
   const GLASS: React.CSSProperties = {
     background: "linear-gradient(145deg, rgba(22,28,42,0.84) 0%, rgba(16,22,36,0.92) 100%)",
     backdropFilter: "blur(64px) saturate(200%)",
@@ -84,10 +131,12 @@ export default function WeatherWidget({ compact }: WeatherWidgetProps) {
         padding: "14px 16px 12px",
         userSelect: "none",
         width: 162,
+        opacity: loading ? 0.6 : 1,
+        transition: "opacity 0.3s",
       }}>
         {/* Location */}
         <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.72)", marginBottom: 4 }}>
-          {WEATHER_DATA.location}
+          {data.location}
         </div>
         {/* Big temp */}
         <div style={{
@@ -99,7 +148,7 @@ export default function WeatherWidget({ compact }: WeatherWidgetProps) {
           fontVariantNumeric: "tabular-nums",
           marginBottom: 6,
         }}>
-          {WEATHER_DATA.temp}°
+          {data.temp}°
         </div>
         {/* Alert row */}
         <div style={{
@@ -111,7 +160,7 @@ export default function WeatherWidget({ compact }: WeatherWidgetProps) {
         }}>
           <WeatherIcon type="moon" size={14} />
           <span style={{ fontSize: 10, color: "rgba(255,255,255,0.55)", letterSpacing: "0.01em" }}>
-            {WEATHER_DATA.alert}
+            {data.alert}
           </span>
         </div>
       </div>
@@ -119,28 +168,28 @@ export default function WeatherWidget({ compact }: WeatherWidgetProps) {
   }
 
   return (
-    <div style={{ ...GLASS, borderRadius: 18, padding: "16px 18px", userSelect: "none", width: 200 }}>
+    <div style={{ ...GLASS, borderRadius: 18, padding: "16px 18px", userSelect: "none", width: 200, opacity: loading ? 0.6 : 1, transition: "opacity 0.3s" }}>
       {/* Top row */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginBottom: 4, fontWeight: 500 }}>
-            {WEATHER_DATA.location}
+            {data.location}
           </div>
           <div style={{ fontSize: 42, fontWeight: 200, color: "white", lineHeight: 1, letterSpacing: "-1.5px" }}>
-            {WEATHER_DATA.temp}°
+            {data.temp}°
           </div>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", marginTop: 5 }}>
-            {WEATHER_DATA.condition}
+            {data.condition}
           </div>
         </div>
-        <WeatherIcon type="partly-cloudy" size={48} />
+        <WeatherIcon type={data.icon} size={48} />
       </div>
 
       {/* Stats */}
       <div style={{ display: "flex", gap: 14, marginTop: 12, paddingTop: 10, borderTop: "0.5px solid rgba(255,255,255,0.09)" }}>
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>H:{WEATHER_DATA.high}° L:{WEATHER_DATA.low}°</span>
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>💧 {WEATHER_DATA.humidity}%</span>
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>💨 {WEATHER_DATA.wind}km/h</span>
+        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>H:{data.high}° L:{data.low}°</span>
+        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>💧 {data.humidity}%</span>
+        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)" }}>💨 {data.wind}km/h</span>
       </div>
 
       {/* Alert */}
@@ -153,7 +202,7 @@ export default function WeatherWidget({ compact }: WeatherWidgetProps) {
         borderTop: "0.5px solid rgba(255,255,255,0.07)",
       }}>
         <WeatherIcon type="moon" size={16} />
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.50)" }}>{WEATHER_DATA.alert}</span>
+        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.50)" }}>{data.alert}</span>
       </div>
     </div>
   );
