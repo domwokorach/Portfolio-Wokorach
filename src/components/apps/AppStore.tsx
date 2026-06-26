@@ -129,21 +129,21 @@ function FeaturedCard({ app, index }: { app: AppEntry; index: number }) {
         }}
       >
         {app.preview ? (
-          <img 
-            src={app.preview} 
-            alt={app.name} 
-            style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+          <img
+            src={app.preview}
+            alt={app.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         ) : null}
         {/* Fallback pattern if image is missing */}
         <div style={{ position: "absolute", opacity: 0.1, backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "16px 16px", inset: 0 }} />
       </div>
-      
-      <div 
-        style={{ 
+
+      <div
+        style={{
             flex: 1,
-            padding: "16px 20px", 
+            padding: "16px 20px",
             background: "var(--c-bg)",
             display: "flex",
             alignItems: "center",
@@ -208,12 +208,12 @@ function AppRow({ app, index, showBorder = true }: { app: AppEntry; index: numbe
       whileHover={{ backgroundColor: "var(--c-bg-tertiary)", borderRadius: "8px", paddingLeft: "8px", paddingRight: "8px", margin: "0 -8px" }}
     >
       <AppIcon icon={app.icon} color={app.color} size={64} />
-      
+
       <div style={{ flex: 1, minWidth: 0, marginLeft: "16px", paddingRight: "16px" }}>
         <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--c-text)", letterSpacing: "-0.2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.name}</div>
         <div style={{ fontSize: "13px", color: "var(--c-text-secondary)", marginTop: "2px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.subtitle || app.category}</div>
       </div>
-      
+
       <button
         style={{
           background: "var(--c-bg-tertiary)",
@@ -283,12 +283,12 @@ export default function AppStore() {
       >
         {/* Search */}
         <div style={{ marginBottom: "20px", padding: "0 4px" }}>
-            <div style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                background: "var(--c-bg-tertiary)", 
-                borderRadius: "6px", 
-                padding: "6px 8px", 
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                background: "var(--c-bg-tertiary)",
+                borderRadius: "6px",
+                padding: "6px 8px",
                 gap: "8px",
                 border: "0.5px solid var(--c-border)"
             }}>
@@ -323,7 +323,7 @@ export default function AppStore() {
             </button>
           );
         })}
-        
+
         {/* User Account Item at the bottom */}
         <div style={{ flex: 1 }} />
         <button
@@ -348,7 +348,7 @@ export default function AppStore() {
           <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--system-blue, #007AFF)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold" }}>
             A
           </div>
-          <span style={{ fontSize: "14px", flex: 1 }}>Dominic Sharma</span>
+          <span style={{ fontSize: "14px", flex: 1 }}>Dominic</span>
         </button>
       </div>
 
@@ -356,7 +356,7 @@ export default function AppStore() {
       <div style={{ flex: 1, overflowY: "auto", background: "var(--c-bg)", position: "relative", WebkitFontSmoothing: "antialiased" }}>
         {activeTab === "discover" ? (
           <div style={{ padding: "48px 56px", maxWidth: "1040px", margin: "0 auto" }}>
-            
+
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", borderBottom: "0.5px solid var(--c-border)", paddingBottom: "16px" }}>
               <h1 style={{ fontSize: "34px", fontWeight: 700, color: "var(--c-text)", margin: 0, letterSpacing: "-0.5px" }}>Discover</h1>
@@ -364,7 +364,7 @@ export default function AppStore() {
                 <span className="i-ph:bell" style={{ width: "22px", height: "22px", cursor: "pointer" }} />
               </div>
             </div>
-            
+
             {/* Horizontal Scroll section (Large Featured Cards) */}
             <div style={{ marginBottom: "56px" }}>
               <div style={{ display: "flex", gap: "24px", overflowX: "auto", paddingBottom: "24px", margin: "0 -8px", padding: "0 8px 24px", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>

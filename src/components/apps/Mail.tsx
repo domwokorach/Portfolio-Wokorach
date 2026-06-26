@@ -53,7 +53,7 @@ const MESSAGES: MailMessage[] = [
     from: "Dominic",
     fromEmail: "dominic.wokorach-o@outlook.com",
     subject: "Portfolio notes",
-    preview: "Things to finish: Liquid Glass polish, macOS 26 branding update, new apps...",
+    preview: "Things to finish: Liquid Glass polish, macOS 27 branding update, new apps...",
     body: "Things to finish:\n• Liquid Glass polish\n• macOS 26 branding update\n• Add Mail + App Store to dock\n• Improve launchpad grid\n• Dynamic Island interactions",
     time: "Yesterday",
     avatar: "A",
