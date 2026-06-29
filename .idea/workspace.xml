@@ -9,8 +9,7 @@
   <component name="ChangeListManager">
     <list default="true" id="7139ec4d-f033-4434-96f0-bcc56a374c4e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/apps/AppStore.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/apps/AppStore.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/apps/Mail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/apps/Mail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/markdown/about-me.md" beforeDir="false" afterPath="$PROJECT_DIR$/public/markdown/about-me.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,23 +50,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000002799245116" />
-      <entry key="MS500" value="1.1095663273043919" />
-      <entry key="S2" value="2.7816830046937673" />
-      <entry key="S5" value="4.284884553700238" />
-      <entry key="S10" value="5.04764378672864" />
-      <entry key="S30" value="5.658643752213175" />
-      <entry key="S60" value="5.826136071199302" />
-      <entry key="M2" value="5.912255909441628" />
-      <entry key="M5" value="5.964705410134449" />
-      <entry key="M10" value="5.982319707614621" />
-      <entry key="M15" value="5.988205792856938" />
-      <entry key="M30" value="5.994099220450243" />
-      <entry key="H1" value="5.997048690629713" />
-      <entry key="H2" value="5.998524115340853" />
-      <entry key="H4" value="5.999262000167529" />
-      <entry key="D1" value="5.999876992040611" />
-      <entry key="W1" value="5.999982427238756" />
+      <entry key="MS100" value="2.069016155568585" />
+      <entry key="MS500" value="4.6912594642387955" />
+      <entry key="S2" value="6.259452902565996" />
+      <entry key="S5" value="6.688272964667744" />
+      <entry key="S10" value="7.071732348480984" />
+      <entry key="S30" value="17.370773951190632" />
+      <entry key="S60" value="38.42108624954637" />
+      <entry key="M2" value="64.9527405199839" />
+      <entry key="M5" value="93.61394778378666" />
+      <entry key="M10" value="106.92940122957197" />
+      <entry key="M15" value="111.94460709647518" />
+      <entry key="M30" value="117.29130510575568" />
+      <entry key="H1" value="120.09835789534037" />
+      <entry key="H2" value="121.53708663406115" />
+      <entry key="H4" value="122.2654858028421" />
+      <entry key="D1" value="122.87715334883617" />
+      <entry key="W1" value="122.9824399671977" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -89,23 +88,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="5.128231002401293E-4" />
-      <entry key="MS500" value="0.3270463614606464" />
-      <entry key="S2" value="2.4515846367766114" />
-      <entry key="S5" value="4.132339139687074" />
-      <entry key="S10" value="4.967102852437913" />
-      <entry key="S30" value="5.63074225727878" />
-      <entry key="S60" value="5.81204599768808" />
-      <entry key="M2" value="5.905175440548684" />
-      <entry key="M5" value="5.961864640327695" />
-      <entry key="M10" value="5.980897885721212" />
-      <entry key="M15" value="5.987257591771004" />
-      <entry key="M30" value="5.993624959872065" />
-      <entry key="H1" value="5.996811520308665" />
-      <entry key="H2" value="5.998405520169443" />
-      <entry key="H4" value="5.999202700078739" />
-      <entry key="D1" value="5.999867108344799" />
-      <entry key="W1" value="5.999981015273696" />
+      <entry key="MS100" value="1.954006447398351" />
+      <entry key="MS500" value="4.628480142741593" />
+      <entry key="S2" value="6.237059069790237" />
+      <entry key="S5" value="6.678564317040116" />
+      <entry key="S10" value="7.066537113343157" />
+      <entry key="S30" value="17.365558568243372" />
+      <entry key="S60" value="38.41415080184453" />
+      <entry key="M2" value="64.94558124953674" />
+      <entry key="M5" value="93.60876021665713" />
+      <entry key="M10" value="106.926112899505" />
+      <entry key="M15" value="111.94222266653118" />
+      <entry key="M30" value="117.29000504264057" />
+      <entry key="H1" value="120.09767844184107" />
+      <entry key="H2" value="121.53673921946033" />
+      <entry key="H4" value="122.26531013037187" />
+      <entry key="D1" value="122.87712379340371" />
+      <entry key="W1" value="122.98243573816761" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -131,34 +130,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "master",
-    "javascript.preferred.runtime.type.id": "node",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/Users/dominicolanya/Desktop/Portfolio-Wokorach",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.sync",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "/Users/dominicolanya/Desktop/Portfolio-Wokorach/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/dominicolanya/Desktop/Portfolio-Wokorach&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/dominicolanya/Desktop/Portfolio-Wokorach/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -177,7 +176,8 @@
       <workItem from="1782309491852" duration="218000" />
       <workItem from="1782324391841" duration="1518000" />
       <workItem from="1782457795185" duration="2510000" />
-      <workItem from="1782461787980" duration="347000" />
+      <workItem from="1782461787980" duration="3652000" />
+      <workItem from="1782750727675" duration="310000" />
     </task>
     <servers />
   </component>
