@@ -34,5 +34,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          file: ./Dockerfile.dev
           tags: ${{ env.DOCKERHUB_USERNAME != '' && format('{0}/portfolio-wokorach:latest', env.DOCKERHUB_USERNAME) || 'portfolio-wokorach:latest' }}
           push: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
