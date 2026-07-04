@@ -10,21 +10,26 @@ interface Photo {
 
 // Using Picsum for placeholder photos
 const PHOTOS: Photo[] = [
-  { id: "1", url: "https://picsum.photos/seed/macos1/400/300", label: "Jodhpur Sunset", date: "Jun 1, 2025" },
-  { id: "2", url: "https://picsum.photos/seed/macos2/400/300", label: "Mehrangarh Fort", date: "May 28, 2025", liked: true },
-  { id: "3", url: "https://picsum.photos/seed/macos3/400/300", label: "Blue City", date: "May 20, 2025" },
-  { id: "4", url: "https://picsum.photos/seed/macos4/400/300", label: "MBM Campus", date: "May 15, 2025", liked: true },
-  { id: "5", url: "https://picsum.photos/seed/macos5/400/300", label: "Umaid Bhawan", date: "May 10, 2025" },
-  { id: "6", url: "https://picsum.photos/seed/macos6/400/300", label: "Desert View", date: "Apr 30, 2025" },
-  { id: "7", url: "https://picsum.photos/seed/macos7/400/300", label: "Portfolio Screenshot", date: "Apr 20, 2025" },
-  { id: "8", url: "https://picsum.photos/seed/macos8/400/300", label: "Coding Session", date: "Apr 10, 2025" },
-  { id: "9", url: "https://picsum.photos/seed/macos9/400/300", label: "Hackathon", date: "Apr 1, 2025" },
+
+  { id: "1", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_5_22_zcvdyy.jpg", label: "Presentation", date: "Jun, 2024" },
+  { id: "2", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_6_3_rnijtv.jpg", label: "Sky Centre", date: "June, 2024", liked: true },
+  { id: "3", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_9_1_9_q1mlb2.jpg", label: "Listen", date: "June, 2024" },
+  { id: "4", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_15_24_ceele4.jpg", label: "Sky Campus", date: "June, 2024", liked: true },
+  { id: "5", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_11_6_wp2ekp.jpg", label: "Focus", date: "June, 2024" },
+  { id: "6", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_16_95_rmoy4j.jpg", label: "Headshot", date: "June, 2024" },
+  { id: "7", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_12_1_80_ly9jkk.jpg", label: "Portfolio Screenshot", date: "June 7, 2024" },
+  { id: "8", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_3_94_wt7pck.jpg", label: "Shadow Session", date: "June, 2025" },
+  { id: "9", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2532_btmgaz.jpg", label: "The Millennium Bridge", date: "March, 2017" },
+  { id: "10", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2531_m1l87j.jpg", label: "London Bridge", date: "March, 2017" },
+  { id: "11", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168925/IMG_2530_hp9xn9.jpg", label: "Banking Office", date: "March, 2017" },
+  { id: "12", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2533_ixz36y.jpg", label: "Leonard Cheshire", date: "March, 2015" },
+  { id: "13", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2528_oqrwfb.jpg", label: "Leonard Cheshire", date: "March, 2015" },
 ];
 
 const ALBUMS = [
   { id: "recents", label: "Recents", icon: "i-ph:clock", count: 9 },
   { id: "favorites", label: "Favourites", icon: "i-ph:heart-fill", count: 2 },
-  { id: "jodhpur", label: "Jodhpur", icon: "i-ph:castle-turret", count: 4 },
+  { id: "dominic", label: "dominic", icon: "i-ph:castle-turret", count: 4 },
   { id: "projects", label: "Projects", icon: "i-ph:laptop", count: 2 },
   { id: "people", label: "People", icon: "i-ph:users", count: 3 },
 ];
@@ -61,15 +66,15 @@ export default function Photos() {
       <style>{`
         .mobile-only { display: none !important; }
         .mobile-only-block { display: none !important; }
-        
+
         @media (max-width: 768px) {
           .mobile-only { display: flex !important; }
           .mobile-only-block { display: block !important; }
           .desktop-only { display: none !important; }
-          
+
           .photos-sidebar { display: none !important; }
           .photos-main-area { background: #F2F2F7 !important; }
-          
+
           .photos-header {
             padding: 24px 20px 8px 20px !important;
             border-bottom: none !important;
@@ -79,7 +84,7 @@ export default function Photos() {
             position: relative;
             display: flex !important;
           }
-          
+
           .photos-header-title {
             font-size: 28px !important;
             font-weight: 700 !important;
@@ -88,13 +93,13 @@ export default function Photos() {
             margin-bottom: 2px !important;
             line-height: 1.2 !important;
           }
-          
+
           .photos-header-subtitle {
             font-size: 13px !important;
             color: #8E8E93 !important;
             margin-left: 0 !important;
           }
-          
+
           .photos-select-btn {
             position: absolute;
             top: 24px;
@@ -108,7 +113,7 @@ export default function Photos() {
             border: none;
             cursor: pointer;
           }
-          
+
           .photos-mobile-chips {
             flex-direction: row !important;
             overflow-x: auto !important;
@@ -120,7 +125,7 @@ export default function Photos() {
             box-sizing: border-box;
           }
           .photos-mobile-chips::-webkit-scrollbar { display: none; }
-          
+
           .photos-chip {
             background: #E5E5EA !important;
             border-radius: 16px !important;
@@ -136,17 +141,17 @@ export default function Photos() {
             background: #000 !important;
             color: #fff !important;
           }
-          
+
           .photos-grid-container {
             padding: 0 !important;
             padding-bottom: 83px !important;
           }
-          
+
           .photos-grid {
             grid-template-columns: repeat(3, 1fr) !important;
             gap: 2px !important;
           }
-          
+
           .photo-thumb {
             aspect-ratio: 1/1 !important;
             border-radius: 4px !important;
@@ -157,9 +162,9 @@ export default function Photos() {
             transform: scale(0.97) !important;
             transition: transform 0.1s !important;
           }
-          
+
           .photo-hover-label, .photo-like-badge { display: none !important; }
-          
+
           .mobile-tab-bar {
             position: absolute;
             bottom: 0;
@@ -177,7 +182,7 @@ export default function Photos() {
             display: flex !important;
             box-sizing: border-box;
           }
-          
+
           .mobile-tab-item {
             display: flex;
             flex-direction: column;
@@ -189,9 +194,9 @@ export default function Photos() {
             cursor: pointer;
             width: 80px;
           }
-          
+
           .mobile-tab-item.active { color: #007AFF; }
-          
+
           @media (prefers-color-scheme: dark) {
             .photos-main-area, .photos-header, .photos-mobile-chips { background: #000 !important; }
             .photos-header-title { color: #fff !important; }
@@ -304,7 +309,7 @@ export default function Photos() {
         >
           <span className="desktop-only">{ALBUMS.find((a) => a.id === activeAlbum)?.label}</span>
           <span className="mobile-only-block photos-header-title">Library</span>
-          
+
           <span
             className="photos-header-subtitle"
             style={{
@@ -513,21 +518,21 @@ export default function Photos() {
 
       {/* Mobile Tab Bar */}
       <div className="mobile-only mobile-tab-bar">
-        <div 
+        <div
           className="mobile-tab-item active"
           onClick={() => { if (window.innerWidth <= 768) setActiveAlbum("recents"); }}
         >
           <span className="i-ph:images mobile-tab-icon" style={{ width: "24px", height: "24px" }} />
           <span>Library</span>
         </div>
-        <div 
+        <div
           className="mobile-tab-item"
           onClick={() => { if (window.innerWidth <= 768) setActiveAlbum("projects"); }}
         >
           <span className="i-ph:squares-four mobile-tab-icon" style={{ width: "24px", height: "24px" }} />
           <span>Collections</span>
         </div>
-        <div 
+        <div
           className="mobile-tab-item"
         >
           <span className="i-ph:magnifying-glass mobile-tab-icon" style={{ width: "24px", height: "24px" }} />
