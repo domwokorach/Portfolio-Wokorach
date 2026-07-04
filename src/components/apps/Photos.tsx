@@ -19,11 +19,12 @@ const PHOTOS: Photo[] = [
   { id: "6", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_16_95_rmoy4j.jpg", label: "Headshot", date: "June, 2024" },
   { id: "7", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_12_1_80_ly9jkk.jpg", label: "Portfolio Screenshot", date: "June 7, 2024" },
   { id: "8", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168000/BSL_Dominic_Day_3_94_wt7pck.jpg", label: "Shadow Session", date: "June, 2025" },
-  { id: "9", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2532_btmgaz.jpg", label: "The Millennium Bridge", date: "March, 2017" },
-  { id: "10", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2531_m1l87j.jpg", label: "London Bridge", date: "March, 2017" },
-  { id: "11", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168925/IMG_2530_hp9xn9.jpg", label: "Banking Office", date: "March, 2017" },
-  { id: "12", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2533_ixz36y.jpg", label: "Leonard Cheshire", date: "March, 2015" },
-  { id: "13", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2528_oqrwfb.jpg", label: "Leonard Cheshire", date: "March, 2015" },
+  { id: "9", url: "https://res.cloudinary.com/dkkuwmr42/video/upload/v1783171340/IMG_0340_ftara5.mp4", label: "Real Life", date: "March, 2017" },
+  { id: "10", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2532_btmgaz.jpg", label: "The Millennium Bridge", date: "March, 2017" },
+  { id: "11", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2531_m1l87j.jpg", label: "London Bridge", date: "March, 2017" },
+  { id: "12", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168925/IMG_2530_hp9xn9.jpg", label: "Banking Office", date: "March, 2017" },
+  { id: "13", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2533_ixz36y.jpg", label: "Leonard Cheshire", date: "March, 2015" },
+  { id: "14", url: "https://res.cloudinary.com/dkkuwmr42/image/upload/v1783168924/IMG_2528_oqrwfb.jpg", label: "Leonard Cheshire", date: "March, 2015" },
 ];
 
 const ALBUMS = [
@@ -50,6 +51,8 @@ export default function Photos() {
     if (viewPhoto?.id === id)
       setViewPhoto((prev) => prev && { ...prev, liked: !prev.liked });
   };
+
+  const isVideo = (url: string) => /\.(mp4|webm|mov)(\?|#|$)/i.test(url) || url.includes("/video/upload/");
 
   return (
     <div
@@ -373,12 +376,24 @@ export default function Photos() {
               whileHover={{ scale: 1.03, boxShadow: "0 6px 18px rgba(0,0,0,0.2)" }}
               onMouseDown={() => setSelected(photo.id)}
             >
+            {isVideo(photo.url) ? (
+              <video
+                src={photo.url}
+                aria-label={photo.label}
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              />
+            ) : (
               <img
                 src={photo.url}
                 alt={photo.label}
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                 loading="lazy"
               />
+            )}
               {/* hover label */}
               <div
                 style={{
@@ -431,22 +446,44 @@ export default function Photos() {
               gap: "20px",
             }}
           >
-            <motion.img
-              src={viewPhoto.url}
-              alt={viewPhoto.label}
-              initial={{ scale: 0.82, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 360, damping: 30 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                maxWidth: "78%",
-                maxHeight: "62%",
-                objectFit: "contain",
-                borderRadius: "14px",
-                boxShadow: "0 32px 96px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.3)",
-              }}
-            />
+            {isVideo(viewPhoto.url) ? (
+              <motion.video
+                src={viewPhoto.url}
+                controls
+                autoPlay
+                muted
+                playsInline
+                initial={{ scale: 0.82, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 360, damping: 30 }}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  maxWidth: "78%",
+                  maxHeight: "62%",
+                  objectFit: "contain",
+                  borderRadius: "14px",
+                  boxShadow: "0 32px 96px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.3)",
+                }}
+              />
+            ) : (
+              <motion.img
+                src={viewPhoto.url}
+                alt={viewPhoto.label}
+                initial={{ scale: 0.82, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 360, damping: 30 }}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  maxWidth: "78%",
+                  maxHeight: "62%",
+                  objectFit: "contain",
+                  borderRadius: "14px",
+                  boxShadow: "0 32px 96px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.3)",
+                }}
+              />
+            )}
             {/* Glass info panel */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
