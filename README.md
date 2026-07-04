@@ -25,15 +25,12 @@ pnpm dev      # dev server with hot reloading
 pnpm build    # production build → dist/
 ```
 
-## Docker Cloud Deployment
+## Docker Deployment
 
 ```bash
 # Build production image
-docker build -t YOUR_DOCKERHUB_USER/portfolio-wokorach:latest .
+docker build -t portfolio-wokorach:latest .
 
-# Push to Docker Hub
-docker push YOUR_DOCKERHUB_USER/portfolio-wokorach:latest
-
-# Run anywhere (Docker Cloud host/service)
-docker run -d --name portfolio -p 80:80 YOUR_DOCKERHUB_USER/portfolio-wokorach:latest
+# Run locally
+docker run -d --name portfolio -p 80:80 portfolio-wokorach:latest
 ```

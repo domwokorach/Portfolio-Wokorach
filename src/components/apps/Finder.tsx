@@ -175,7 +175,7 @@ const FileIcon = ({ item, size = 56 }: { item: FileItem; size?: number }) => {
     );
   }
 
-  let customImg = "/img/icons/codefile.png";
+  let customImg = item.icon || "/img/icons/folder-dock.png";
   if (["mp3", "wav", "m4a", "flac", "audio"].includes(item.ext || "")) {
     customImg = "/img/icons/audio_Tahoe.png";
   } else if (["mp4", "mov", "avi", "mkv", "video"].includes(item.ext || "")) {
