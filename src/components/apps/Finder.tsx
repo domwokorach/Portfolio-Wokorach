@@ -15,7 +15,21 @@ interface FileItem {
   date: string;
   icon: string;
   color?: string;
+  url?: string;
   children?: FileItem[];
+}
+
+interface SidebarItem {
+  id: string;
+  label: string;
+  icon?: string;
+  parent?: string;
+  tagColor?: string;
+}
+
+interface SidebarSection {
+  title: string;
+  items: SidebarItem[];
 }
 
 // ─── Mock Filesystem ─────────────────────────────────────────────────────────
@@ -25,11 +39,13 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       id: "desktop",
       name: "Desktop",
       kind: "folder",
+      ext: "pdf",
       date: "Today",
-      icon: "/img/icons/sf-icons/desktop.svg",
+      // icon: "/img/icons/sf-icons/desktop.svg",
+      icon: "/img/icons/sf-icons/pdf.svg",
       color: "#4A90E2",
       children: [
-        { id: "readme", name: "README.md", kind: "file", ext: "md", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/doc.svg" },
+        { id: "readme", name: "resume.pdf", kind: "file", ext: "pdf", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/pdf.svg", url: "/resume.pdf", },
         { id: "notes", name: "notes.txt", kind: "file", ext: "txt", size: "1 KB", date: "Yesterday", icon: "/img/icons/sf-icons/doc.svg" },
       ],
     },
@@ -96,7 +112,7 @@ const FILESYSTEM: Record<string, FileItem[]> = {
   ],
 };
 
-const SIDEBAR_SECTIONS = [
+const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
     title: "",
     items: [
@@ -225,6 +241,12 @@ export default function Finder() {
     }
   };
 
+  const openFile = (item: FileItem) => {
+    if (item.url) {
+      window.open(item.url, "_blank", "noopener,noreferrer");
+    }
+  };
+
   const goBack = () => {
     if (pathStack.length <= 1) return;
     const newStack = pathStack.slice(0, -1);
@@ -324,6 +346,9 @@ export default function Finder() {
                       setSelected(item.id);
                     }
                   }}
+                  onDoubleClick={() => {
+                    if (item.kind === "file") openFile(item);
+                  }}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -393,7 +418,10 @@ export default function Finder() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: i * 0.025, duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
           onClick={() => setSelected(item.id)}
-          onDoubleClick={() => navigate(item)}
+          onDoubleClick={() => {
+            if (item.kind === "folder") navigate(item);
+            else openFile(item);
+          }}
           style={{
             display: "flex",
             flexDirection: "column",
@@ -480,7 +508,10 @@ export default function Finder() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.02, duration: 0.2 }}
           onClick={() => setSelected(item.id)}
-          onDoubleClick={() => navigate(item)}
+          onDoubleClick={() => {
+            if (item.kind === "folder") navigate(item);
+            else openFile(item);
+          }}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 80px 80px 80px",
@@ -588,7 +619,7 @@ export default function Finder() {
             {mobileView === "sidebar" ? "Done" : "Browse"}
           </button>
         )}
-        
+
         {/* Back / Forward */}
         <button
           onClick={goBack}
@@ -754,7 +785,7 @@ export default function Finder() {
               >
                 {section.title}
               </div>
-              {section.items.map((item: any) => {
+              {section.items.map((item) => {
                 const active = location === item.id || (item.id === "home" && location === "home");
                 return (
                   <motion.button

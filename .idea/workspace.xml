@@ -9,7 +9,7 @@
   <component name="ChangeListManager">
     <list default="true" id="7139ec4d-f033-4434-96f0-bcc56a374c4e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/apps/Photos.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/apps/Photos.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/apps/Finder.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/apps/Finder.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -170,6 +170,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public/img/icons/sf-icons" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -193,7 +198,11 @@
       <workItem from="1783083795405" duration="5000" />
       <workItem from="1783083820268" duration="7336000" />
       <workItem from="1783155229261" duration="33000" />
-      <workItem from="1783155274052" duration="7462000" />
+      <workItem from="1783155274052" duration="10322000" />
+      <workItem from="1783179608773" duration="36000" />
+      <workItem from="1783185925062" duration="81000" />
+      <workItem from="1783186051896" duration="1241000" />
+      <workItem from="1783192044048" duration="429000" />
     </task>
     <servers />
   </component>
@@ -206,5 +215,16 @@
     <option featureType="dependencySupport" implementationName="javascript:npm:unocss" />
     <option featureType="dependencySupport" implementationName="javascript:npm:vite" />
     <option featureType="dependencySupport" implementationName="executable:kubectl" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
