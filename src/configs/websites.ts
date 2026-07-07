@@ -2,7 +2,7 @@ import type { WebsitesData } from "~/types";
 
 const websites: WebsitesData = {
   favorites: {
-    title: "SNS Links",
+    title: "Contact links",
     sites: [
       {
         id: "my-email",
@@ -43,31 +43,31 @@ const websites: WebsitesData = {
     ],
   },
   freq: {
-    title: "Frequently Visited",
+    title: "Visited my projects",
     sites: [
       {
-        id: "hacker-news",
-        title: "Hacker News",
-        img: "img/sites/hacker.svg",
-        link: "https://news.ycombinator.com/",
+        id: "wokorach-weather",
+        title: "Weather",
+        img: "/img/sites/weather.svg",
+        link: "https://wokorach-weather.vercel.app/",
       },
       {
-        id: "github",
-        title: "Github",
-        img: "img/sites/github.svg",
-        link: "https://github.com/",
+        id: "fifa-world-cup-26-sigma",
+        title: "FIFA World Cup 26 Sigma",
+        img: "img/sites/WC26.svg",
+        link: "https://fifa-world-cup-26-sigma.vercel.app/",
       },
       {
-        id: "twitter",
-        title: "Twitter",
-        img: "img/sites/twitter.svg",
-        link: "https://www.twitter.com/",
+        id: "wokorach-gemini-ai",
+        title: "Gemini AI",
+        img: "img/sites/gemini.svg",
+        link: "https://wokorach-gemini-ai.vercel.app/",
       },
       // {
-      //   id: "leetcode",
-      //   title: "LeetCode",
-      //   img: "img/sites/leetcode.svg",
-      //   link: "https://leetcode.com/",
+      //   id: "twitter",
+      //   title: "Twitter",
+      //   img: "img/sites/twitter.svg",
+      //   link: "https://www.twitter.com/",
       // },
       // {
       //   id: "GeeksforGeeks",
