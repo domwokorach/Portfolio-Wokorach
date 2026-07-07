@@ -70,7 +70,7 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       icon: "/img/icons/sf-icons/download.svg",
       color: "#7B68EE",
       children: [
-        { id: "react-zip", name: "react-18.zip", kind: "file", ext: "zip", size: "2.1 MB", date: "Today", icon: "/img/icons/sf-icons/doc.svg", url: "https://github.com/domwokorach/domwokorach/archive/refs/heads/master.zip", },
+        { id: "master-zip", name: "master.zip", kind: "file", ext: "zip", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/doc.svg", url: "https://github.com/domwokorach/domwokorach/archive/refs/heads/master.zip", },
         { id: "wallpaper", name: "macOS_Tahoe.jpg", kind: "file", ext: "jpg", size: "4.8 MB", date: "Today", icon: "/img/icons/sf-icons/image.svg", url: "/macOS_Tahoe.jpg" },
       ],
     },
