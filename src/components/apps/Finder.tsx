@@ -57,8 +57,8 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       icon: "/img/icons/sf-icons/folder.svg",
       color: "#F5A623",
       children: [
-        { id: "resume", name: "Dominic_Resume.pdf", kind: "file", ext: "pdf", size: "340 KB", date: "Jun 1", icon: "/img/icons/sf-icons/doc.svg" },
-        { id: "cover", name: "CoverLetter.docx", kind: "file", ext: "docx", size: "28 KB", date: "Jun 2", icon: "/img/icons/sf-icons/doc.svg" },
+        { id: "resume", name: "Dominic_Resume.pdf", kind: "file", ext: "pdf", size: "340 KB", date: "Jun 1", icon: "/img/icons/sf-icons/doc.svg", url: "/resume.pdf" },
+        { id: "cover", name: "CoverLetter.docx", kind: "file", ext: "docx", size: "28 KB", date: "Jun 2", icon: "/img/icons/sf-icons/doc.svg", url: "/Cover_Letter.pdf" },
         { id: "projects-folder", name: "Projects", kind: "folder", date: "Jun 3", icon: "/img/icons/sf-icons/folder.svg", color: "#F5A623" },
       ],
     },
