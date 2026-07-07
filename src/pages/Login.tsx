@@ -5,20 +5,16 @@ import moment from "moment";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Login(props: MacActions) {
-  const [password, setPassword] = useState("");
-  const [sign, setSign] = useState("Press enter to login");
   const dark = useStore((state) => state.dark);
   const getWallpaper = useStore((state) => state.getWallpaper);
   const activeWallpaper = getWallpaper();
   const [isloginOpen, setIsLoginOpen] = useState(false);
   const [time, setTime] = useState(moment().format("h:mm"));
-  const [period, setPeriod] = useState(moment().format("A"));
   const [date, setDate] = useState(moment().format("dddd, MMMM D"));
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(moment().format("h:mm"));
-      setPeriod(moment().format("A"));
       setDate(moment().format("dddd, MMMM D"));
     }, 1000);
 
@@ -29,10 +25,6 @@ export default function Login(props: MacActions) {
     const keyCode = e.key;
     if (keyCode === "Enter" || keyCode === "Space" || keyCode === "Tab")
       props.setLogin(true);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setPassword(e.target.value);
   };
 
   return (
@@ -279,8 +271,9 @@ export default function Login(props: MacActions) {
             >
               <div
                 style={{
-                  fontSize: '13px',
-                  fontWeight: 300,
+                  width: '100%',
+                  textAlign: 'center',
+                  fontSize: '16px',
                   color: 'rgba(255,255,255,0.6)',
                   letterSpacing: '0.5px',
                   animation: 'subtlePulse 3s ease-in-out infinite',
