@@ -202,6 +202,7 @@ export default function Finder() {
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<FileItem | null>(null);
 
   const size = useWindowSize();
   const isMobile = size.winWidth < 768;
@@ -249,9 +250,18 @@ export default function Finder() {
       window.dispatchEvent(new CustomEvent("desktop:openApp", { detail: item.appId }));
       return;
     }
+    if (isImageFile(item) && item.url) {
+      setPreviewImage(item);
+      return;
+    }
     if (item.url) {
       window.open(item.url, "_blank", "noopener,noreferrer");
     }
+  };
+
+  const isImageFile = (item: FileItem) => {
+    const imageExts = ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"];
+    return item.kind === "file" && imageExts.includes((item.ext ?? "").toLowerCase());
   };
 
   const goBack = () => {
@@ -351,6 +361,7 @@ export default function Finder() {
                       setPathStack(pathStack.slice(0, colIdx + 1));
                       setLocation(segId);
                       setSelected(item.id);
+                      if (isImageFile(item)) openFile(item);
                     }
                   }}
                   onDoubleClick={() => {
@@ -424,7 +435,10 @@ export default function Finder() {
           initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: i * 0.025, duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
-          onClick={() => setSelected(item.id)}
+          onClick={() => {
+            setSelected(item.id);
+            if (isImageFile(item)) openFile(item);
+          }}
           onDoubleClick={() => {
             if (item.kind === "folder") navigate(item);
             else openFile(item);
@@ -514,7 +528,10 @@ export default function Finder() {
           initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: i * 0.02, duration: 0.2 }}
-          onClick={() => setSelected(item.id)}
+          onClick={() => {
+            setSelected(item.id);
+            if (isImageFile(item)) openFile(item);
+          }}
           onDoubleClick={() => {
             if (item.kind === "folder") navigate(item);
             else openFile(item);
@@ -933,6 +950,95 @@ export default function Finder() {
           );
         })}
       </div>
+
+      {/* Image preview popup */}
+      <AnimatePresence>
+        {previewImage?.url && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPreviewImage(null)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(8, 10, 16, 0.62)",
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 2000,
+              padding: "20px",
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.16 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: "relative",
+                width: "min(88vw, 640px)",
+                maxHeight: "85vh",
+                borderRadius: "16px",
+                overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.22)",
+                boxShadow: "0 22px 70px rgba(0,0,0,0.45)",
+                background: "rgba(20,24,32,0.92)",
+              }}
+            >
+              <button
+                onClick={() => setPreviewImage(null)}
+                title="Close"
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                  width: 30,
+                  height: 30,
+                  borderRadius: "999px",
+                  border: "none",
+                  cursor: "pointer",
+                  background: "rgba(0,0,0,0.45)",
+                  color: "#fff",
+                  fontSize: "16px",
+                  lineHeight: 1,
+                  zIndex: 2,
+                }}
+              >
+                ×
+              </button>
+
+              <img
+                src={previewImage.url}
+                alt={previewImage.name}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: "76vh",
+                  objectFit: "contain",
+                  background: "#0f1117",
+                }}
+              />
+
+              <div
+                style={{
+                  padding: "10px 14px",
+                  fontSize: "12px",
+                  color: "rgba(255,255,255,0.9)",
+                  borderTop: "1px solid rgba(255,255,255,0.12)",
+                  background: "rgba(0,0,0,0.18)",
+                }}
+              >
+                {previewImage.name}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
