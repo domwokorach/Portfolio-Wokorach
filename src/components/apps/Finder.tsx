@@ -83,7 +83,7 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       icon: "/img/icons/sf-icons/image.svg",
       color: "#FF6B6B",
       children: [
-        { id: "avatar", name: "avatar.png", kind: "file", ext: "png", size: "120 KB", date: "May 28", icon: "/img/icons/sf-icons/image.svg" },
+        { id: "avatar", name: "avatar.png", kind: "file", ext: "png", size: "120 KB", date: "May 28", icon: "/img/icons/sf-icons/avatar.svg", url: "/img/icons/sf-icons/avatar.svg" },
       ],
     },
     {
