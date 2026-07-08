@@ -8,8 +8,7 @@ import AboutThisMacModal from "~/components/AboutThisMacModal";
 import CalendarWidget from "~/components/widgets/CalendarWidget";
 import WeatherWidget from "~/components/widgets/WeatherWidget";
 import ContextMenu from "~/components/menus/ContextMenu";
-import { FolderIcon, FolderHomeIcon, FolderDockIcon, PdfIcon } from "~/components/DesktopIcons";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { useWindowSize } from "~/hooks";
 
 interface DesktopState {
@@ -73,62 +72,6 @@ export default function Desktop(props: MacActions) {
     useStore.getState().setSafariUrl(link);
     window.dispatchEvent(new CustomEvent("launchpad:openSafari"));
   };
-
-  // Listen for cross-component events and global keyboard shortcuts
-  useEffect(() => {
-    const handleOpenSafari = () => {
-      toggleLaunchpad(false);
-      openApp("safari");
-    };
-    const handleOpenLaunchpad = () => toggleLaunchpad(true);
-    
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // System independent Command key (Cmd on Mac, Ctrl on Windows/Linux)
-      const isCmdOrCtrl = e.metaKey || e.ctrlKey;
-
-      // Spotlight: Cmd/Ctrl + Space
-      if (isCmdOrCtrl && e.code === 'Space') {
-        e.preventDefault();
-        toggleSpotlight();
-      }
-
-      // Full screen: Cmd/Ctrl + F OR F11
-      if ((isCmdOrCtrl && e.key.toLowerCase() === 'f') || e.key === 'F11') {
-        e.preventDefault();
-        if (isFullScreen()) {
-          exitFullScreen();
-          useStore.getState().toggleFullScreen(false);
-        } else {
-          enterFullScreen();
-          useStore.getState().toggleFullScreen(true);
-        }
-      }
-
-      // Brightness Down: Cmd/Ctrl + Down Arrow OR F1
-      if ((isCmdOrCtrl && e.key === 'ArrowDown') || e.key === 'F1') {
-        e.preventDefault();
-        const currentBrightness = useStore.getState().brightness as number;
-        useStore.getState().setBrightness(Math.max(currentBrightness - 10, 1));
-      }
-
-      // Brightness Up: Cmd/Ctrl + Up Arrow OR F2
-      if ((isCmdOrCtrl && e.key === 'ArrowUp') || e.key === 'F2') {
-        e.preventDefault();
-        const currentBrightness = useStore.getState().brightness as number;
-        useStore.getState().setBrightness(Math.min(currentBrightness + 10, 100));
-      }
-    };
-
-    window.addEventListener("launchpad:openSafari", handleOpenSafari);
-    window.addEventListener("siri:openLaunchpad", handleOpenLaunchpad);
-    window.addEventListener("keydown", handleKeyDown);
-    
-    return () => {
-      window.removeEventListener("launchpad:openSafari", handleOpenSafari);
-      window.removeEventListener("siri:openLaunchpad", handleOpenLaunchpad);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [state]);  // re-bind when state updates so closures are fresh
 
   const toggleLaunchpad = (target: boolean): void => {
     setState((prev) => ({ ...prev, showLaunchpad: target }));
@@ -215,6 +158,65 @@ export default function Desktop(props: MacActions) {
     });
   };
 
+  // Listen for cross-component events and global keyboard shortcuts
+  useEffect(() => {
+    const handleOpenSafari = () => {
+      toggleLaunchpad(false);
+      openApp("safari");
+    };
+    const handleOpenLaunchpad = () => toggleLaunchpad(true);
+    const handleOpenApp = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      if (customEvent.detail) {
+        openApp(customEvent.detail);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+
+      if (isCmdOrCtrl && e.code === "Space") {
+        e.preventDefault();
+        toggleSpotlight();
+      }
+
+      if ((isCmdOrCtrl && e.key.toLowerCase() === "f") || e.key === "F11") {
+        e.preventDefault();
+        if (isFullScreen()) {
+          exitFullScreen();
+          useStore.getState().toggleFullScreen(false);
+        } else {
+          enterFullScreen();
+          useStore.getState().toggleFullScreen(true);
+        }
+      }
+
+      if ((isCmdOrCtrl && e.key === "ArrowDown") || e.key === "F1") {
+        e.preventDefault();
+        const currentBrightness = useStore.getState().brightness as number;
+        useStore.getState().setBrightness(Math.max(currentBrightness - 10, 1));
+      }
+
+      if ((isCmdOrCtrl && e.key === "ArrowUp") || e.key === "F2") {
+        e.preventDefault();
+        const currentBrightness = useStore.getState().brightness as number;
+        useStore.getState().setBrightness(Math.min(currentBrightness + 10, 100));
+      }
+    };
+
+    window.addEventListener("launchpad:openSafari", handleOpenSafari);
+    window.addEventListener("siri:openLaunchpad", handleOpenLaunchpad);
+    window.addEventListener("desktop:openApp", handleOpenApp);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("launchpad:openSafari", handleOpenSafari);
+      window.removeEventListener("siri:openLaunchpad", handleOpenLaunchpad);
+      window.removeEventListener("desktop:openApp", handleOpenApp);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [state]);
+
   const renderAppWindows = () => {
     return apps.map((app) => {
       if (!app.desktop) return null;
@@ -266,7 +268,7 @@ export default function Desktop(props: MacActions) {
     });
   };
 
-  const bgStyle: any = {
+  const bgStyle: React.CSSProperties = {
     backgroundImage: `url(${dark ? activeWallpaper.night : activeWallpaper.day})`,
     backgroundSize: "cover",
     backgroundPosition: "center",

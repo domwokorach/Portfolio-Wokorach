@@ -16,6 +16,7 @@ interface FileItem {
   icon: string;
   color?: string;
   url?: string;
+  appId?: string;
   children?: FileItem[];
 }
 
@@ -46,7 +47,7 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       color: "#4A90E2",
       children: [
         { id: "readme", name: "resume.pdf", kind: "file", ext: "pdf", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/pdf.svg", url: "/resume.pdf", },
-        { id: "notes", name: "notes.txt", kind: "file", ext: "txt", size: "1 KB", date: "Yesterday", icon: "/img/icons/sf-icons/doc.svg" },
+        { id: "notes", name: "notes.txt", kind: "file", ext: "txt", size: "1 KB", date: "Yesterday", icon: "/img/icons/sf-icons/notes.svg", appId: "notes" },
       ],
     },
     {
@@ -57,8 +58,8 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       icon: "/img/icons/sf-icons/folder.svg",
       color: "#F5A623",
       children: [
-        { id: "resume", name: "Dominic_Resume.pdf", kind: "file", ext: "pdf", size: "340 KB", date: "Jun 1", icon: "/img/icons/sf-icons/doc.svg", url: "/resume.pdf" },
-        { id: "cover", name: "CoverLetter.docx", kind: "file", ext: "docx", size: "28 KB", date: "Jun 2", icon: "/img/icons/sf-icons/doc.svg", url: "/Cover_Letter.pdf" },
+        { id: "resume", name: "Dominic_Resume.pdf", kind: "file", ext: "pdf", size: "340 KB", date: "Jun 1", icon: "/img/icons/sf-icons/pdf.svg", url: "/resume.pdf" },
+        { id: "cover", name: "CoverLetter.docx", kind: "file", ext: "docx", size: "28 KB", date: "Jun 2", icon: "/img/icons/sf-icons/pdf.svg", url: "/Cover_Letter.pdf" },
         { id: "projects-folder", name: "Projects", kind: "folder", date: "Jun 3", icon: "/img/icons/sf-icons/folder.svg", color: "#F5A623" },
       ],
     },
@@ -70,8 +71,8 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       icon: "/img/icons/sf-icons/download.svg",
       color: "#7B68EE",
       children: [
-        { id: "master-zip", name: "master.zip", kind: "file", ext: "zip", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/doc.svg", url: "https://github.com/domwokorach/domwokorach/archive/refs/heads/master.zip", },
-        { id: "wallpaper", name: "macOS_Tahoe.jpg", kind: "file", ext: "jpg", size: "4.8 MB", date: "Today", icon: "/img/icons/sf-icons/image.svg", url: "/macOS_Tahoe.jpg" },
+        { id: "master-zip", name: "Portfolio.zip", kind: "file", ext: "zip", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/winrar.svg", url: "https://github.com/domwokorach/domwokorach/archive/refs/heads/master.zip", },
+        { id: "wallpaper", name: "macOS_Tahoe.jpg", kind: "file", ext: "jpg", size: "4.8 MB", date: "Today", icon: "/img/icons/sf-icons/Screenshot.png", url: "/Screenshot.png" },
       ],
     },
     {
@@ -242,6 +243,10 @@ export default function Finder() {
   };
 
   const openFile = (item: FileItem) => {
+    if (item.appId) {
+      window.dispatchEvent(new CustomEvent("desktop:openApp", { detail: item.appId }));
+      return;
+    }
     if (item.url) {
       window.open(item.url, "_blank", "noopener,noreferrer");
     }
