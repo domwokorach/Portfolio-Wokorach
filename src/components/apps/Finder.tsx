@@ -72,6 +72,8 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       color: "#7B68EE",
       children: [
         { id: "master-zip", name: "Portfolio.zip", kind: "file", ext: "zip", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/winrar.svg", url: "https://github.com/domwokorach/domwokorach/archive/refs/heads/master.zip", },
+        { id: "master-zip", name: "World-Cup-2026.zip", kind: "file", ext: "zip", size: "2 KB", date: "June 2026", icon: "/img/icons/sf-icons/winrar.svg", url: "https://github.com/domwokorach/FIFA-World-Cup-26/archive/refs/heads/master.zip", },
+        { id: "master-zip", name: "Wokorach-Gemini-AI.zip", kind: "file", ext: "zip", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/winrar.svg", url: "https://github.com/domwokorach/Wokorach-Gemini-AI/archive/refs/heads/master.zip", },
         { id: "wallpaper", name: "macOS_Tahoe.jpg", kind: "file", ext: "jpg", size: "4.8 MB", date: "Today", icon: "/img/icons/sf-icons/Screenshot.png", url: "/Screenshot.png" },
       ],
     },
