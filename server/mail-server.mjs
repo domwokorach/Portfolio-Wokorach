@@ -4,11 +4,13 @@ import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
+import { google } from "googleapis";
 
 dotenv.config();
 
-const PORT = Number(process.env.MAIL_API_PORT ?? 3001);
-const HOST = process.env.MAIL_API_HOST ?? "127.0.0.1";
+const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
+const PORT = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 3000;
+const HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : process.env.MAIL_API_HOST ?? "0.0.0.0";
 
 const requiredEnv = [
   "MAIL_IMAP_HOST",
@@ -42,6 +44,30 @@ function getMailConfigError() {
   }
 
   return null;
+}
+
+function getGoogleOAuthConfigError() {
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    return "GOOGLE_CLIENT_ID is missing";
+  }
+
+  if (!process.env.GOOGLE_CLIENT_SECRET) {
+    return "GOOGLE_CLIENT_SECRET is missing";
+  }
+
+  if (!process.env.GOOGLE_REDIRECT_URI) {
+    return "GOOGLE_REDIRECT_URI is missing";
+  }
+
+  return null;
+}
+
+function createGoogleOAuthClient() {
+  return new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+  );
 }
 
 const transporter = nodemailer.createTransport({
@@ -189,8 +215,103 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (requestUrl.pathname === "/api/mail/health") {
+  if (requestUrl.pathname === "/" || requestUrl.pathname === "/healthz" || requestUrl.pathname === "/api/mail/health") {
     sendJson(response, 200, { ok: true });
+    return;
+  }
+
+  if (requestUrl.pathname === "/auth/google" && request.method === "GET") {
+    const oauthConfigError = getGoogleOAuthConfigError();
+
+    if (oauthConfigError) {
+      sendJson(response, 503, { error: oauthConfigError });
+      return;
+    }
+
+    const oauth2Client = createGoogleOAuthClient();
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: "offline",
+      scope: ["https://www.googleapis.com/auth/gmail.readonly"],
+      prompt: "consent"
+    });
+
+    response.writeHead(302, { Location: authUrl });
+    response.end();
+    return;
+  }
+
+  if (requestUrl.pathname === "/oauth2callback" && request.method === "GET") {
+    try {
+      const oauthConfigError = getGoogleOAuthConfigError();
+
+      if (oauthConfigError) {
+        sendJson(response, 503, { error: oauthConfigError });
+        return;
+      }
+
+      const code = requestUrl.searchParams.get("code");
+
+      if (!code) {
+        sendJson(response, 400, { error: "Missing OAuth code" });
+        return;
+      }
+
+      const oauth2Client = createGoogleOAuthClient();
+      const { tokens } = await oauth2Client.getToken(code);
+      oauth2Client.setCredentials(tokens);
+
+      sendJson(response, 200, {
+        ok: true,
+        message: "Gmail connected",
+        refreshToken: tokens.refresh_token ?? null,
+        note: "Store refreshToken securely and set GOOGLE_REFRESH_TOKEN in Railway variables."
+      });
+    } catch (error) {
+      console.error("[mail] OAuth callback failed", error);
+      sendJson(response, 500, {
+        error: error instanceof Error ? error.message : "OAuth callback failed"
+      });
+    }
+
+    return;
+  }
+
+  if (requestUrl.pathname === "/emails" && request.method === "GET") {
+    try {
+      const oauthConfigError = getGoogleOAuthConfigError();
+
+      if (oauthConfigError) {
+        sendJson(response, 503, { error: oauthConfigError });
+        return;
+      }
+
+      if (!process.env.GOOGLE_REFRESH_TOKEN) {
+        sendJson(response, 503, { error: "GOOGLE_REFRESH_TOKEN is missing" });
+        return;
+      }
+
+      const oauth2Client = createGoogleOAuthClient();
+      oauth2Client.setCredentials({
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+      });
+
+      const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+      const result = await gmail.users.messages.list({
+        userId: "me",
+        maxResults: 10
+      });
+
+      sendJson(response, 200, {
+        ok: true,
+        messages: result.data.messages ?? []
+      });
+    } catch (error) {
+      console.error("[mail] Gmail list failed", error);
+      sendJson(response, 500, {
+        error: error instanceof Error ? error.message : "Failed to list Gmail messages"
+      });
+    }
+
     return;
   }
 
@@ -246,4 +367,9 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`[mail] API listening on http://${HOST}:${PORT}`);
+});
+
+server.on("error", (error) => {
+  console.error("[mail] Server failed to start", error);
+  process.exit(1);
 });

@@ -92,3 +92,9 @@ declare global {
   const useWindowSize: typeof import('./hooks/useWindowSize')['useWindowSize']
   const weatherWidgetTsxTmp27497: typeof import('./components/widgets/WeatherWidget.tsx.tmp.27497.eb98ea4b5b23')['default']
 }
+// for type re-export
+declare global {
+  // @ts-ignore
+  export type { Terminal } from './components/apps/Terminal'
+  import('./components/apps/Terminal')
+}

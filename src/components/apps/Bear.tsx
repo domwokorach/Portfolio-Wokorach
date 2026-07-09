@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -30,16 +31,9 @@ interface BearState extends ContentProps {
   midbarList: BearMdData[];
 }
 
-const Highlighter = (dark: boolean): any => {
-  interface codeProps {
-    node: any;
-    inline: boolean;
-    className: string;
-    children: any;
-  }
-
+const Highlighter = (dark: boolean): Components => {
   return {
-    code({ node, inline, className, children, ...props }: codeProps) {
+    code({ inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
       return !inline && match ? (
         <SyntaxHighlighter
@@ -51,7 +45,7 @@ const Highlighter = (dark: boolean): any => {
           {String(children).replace(/\n$/, "")}
         </SyntaxHighlighter>
       ) : (
-        <code className={className}>{children}</code>
+        <code className={className} {...props}>{children}</code>
       );
     }
   };
@@ -59,7 +53,7 @@ const Highlighter = (dark: boolean): any => {
 
 const Sidebar = ({ cur, setMidBar }: SidebarProps) => {
   return (
-    <div text-white>
+    <div className="text-white">
       <div className="h-12 pr-3 hstack space-x-3 justify-end">
         <span className="i-ph:cloud-slash text-xl" />
         <span className="i-ph:sliders-horizontal text-xl" />
@@ -159,7 +153,7 @@ const Content = ({ contentID, contentURL }: ContentProps) => {
             storeMd[id] = fixImageURL(text, url);
             setStoreMd({ ...storeMd });
           })
-          .catch((error) => { /* console.error(error) */ });
+          .catch(() => { /* noop */ });
       }
     },
     [storeMd]

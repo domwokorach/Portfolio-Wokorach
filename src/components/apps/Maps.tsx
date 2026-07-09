@@ -43,8 +43,8 @@ function getGoogleEmbedMapType(style: MapStyle) {
   return "roadmap";
 }
 
-function buildGoogleEmbedUrl(place: Place, zoom: number, mapStyle: MapStyle, apiKey: string) {
-  if (!apiKey.trim()) {
+function buildGoogleEmbedUrl(place: Place, zoom: number, mapStyle: MapStyle, apiKey: string, useEmbedApiKey: boolean) {
+  if (!apiKey.trim() || !useEmbedApiKey) {
     const fallback = new URLSearchParams({
       q: `${place.lat},${place.lng}`,
       z: String(clamp(zoom, 3, 20)),
@@ -66,7 +66,8 @@ function buildGoogleEmbedUrl(place: Place, zoom: number, mapStyle: MapStyle, api
 }
 
 function MapView({ apiKey, mapStyle, activePlace, zoom, onChangeZoom, onChangeMapStyle }: MapViewProps) {
-  const mapUrl = buildGoogleEmbedUrl(activePlace, zoom, mapStyle, apiKey);
+  const useEmbedApiKey = !import.meta.env.DEV;
+  const mapUrl = buildGoogleEmbedUrl(activePlace, zoom, mapStyle, apiKey, useEmbedApiKey);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
@@ -107,7 +108,7 @@ function MapView({ apiKey, mapStyle, activePlace, zoom, onChangeZoom, onChangeMa
         >
           Interactive Google Maps
         </div>
-        {!apiKey.trim() && (
+        {!apiKey.trim() && useEmbedApiKey && (
           <div
             style={{
               position: "absolute",
