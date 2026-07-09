@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface MailMessage {
@@ -8,10 +9,31 @@ interface MailMessage {
   preview: string;
   body: string;
   time: string;
+  folder?: string;
   unread?: boolean;
   starred?: boolean;
   avatar: string;
 }
+
+interface MailApiResponse {
+  messages?: MailMessage[];
+}
+
+interface DraftMessage {
+  to: string;
+  subject: string;
+  body: string;
+}
+
+const MAIL_API_URL = import.meta.env.VITE_MAIL_API_URL ?? "/api/mail";
+
+const DEFAULT_RECIPIENT = "dominic.wokorach-o@outlook.com";
+
+const EMPTY_DRAFT: DraftMessage = {
+  to: DEFAULT_RECIPIENT,
+  subject: "",
+  body: "",
+};
 
 const MESSAGES: MailMessage[] = [
   {
@@ -51,7 +73,7 @@ const MESSAGES: MailMessage[] = [
   {
     id: "4",
     from: "Dominic",
-    fromEmail: "dominic.wokorach-o@outlook.com",
+    fromEmail: "dominicolanya@me.com",
     subject: "Portfolio notes",
     preview: "Things to finish: Liquid Glass polish, macOS 27 branding update, new apps...",
     body: "Things to finish:\n• Liquid Glass polish\n• macOS 26 branding update\n• Add Mail + App Store to dock\n• Improve launchpad grid\n• Dynamic Island interactions",
@@ -77,17 +99,144 @@ export default function Mail() {
   const [activeFolder, setActiveFolder] = useState("Inbox");
   const [search, setSearch] = useState("");
   const [composing, setComposing] = useState(false);
+  const [messages, setMessages] = useState<MailMessage[]>(MESSAGES);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [draft, setDraft] = useState<DraftMessage>(EMPTY_DRAFT);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [localSentMessages, setLocalSentMessages] = useState<MailMessage[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadMessages = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `${MAIL_API_URL}/messages?folder=${encodeURIComponent(activeFolder)}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Mail API returned ${response.status}`);
+        }
+
+        const data = (await response.json()) as MailApiResponse | MailMessage[];
+        const nextMessages = Array.isArray(data)
+          ? data
+          : Array.isArray(data.messages)
+            ? data.messages
+            : MESSAGES;
+
+        setMessages(nextMessages);
+        if (!nextMessages.some((message) => message.id === selected)) {
+          setSelected(nextMessages[0]?.id ?? "");
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setError(err instanceof Error ? err.message : "Failed to load mail");
+          setMessages(MESSAGES);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadMessages();
+
+    return () => controller.abort();
+  }, [activeFolder, selected]);
+
+  const messagesForView =
+    activeFolder === "Sent" ? [...localSentMessages, ...messages] : messages;
+
+  const visibleMessages = messagesForView.filter(
+    (m) => activeFolder === "Inbox" || (m.folder ?? "Inbox") === activeFolder
+  );
 
   const filtered = search.trim()
-    ? MESSAGES.filter(
+    ? visibleMessages.filter(
         (m) =>
           m.subject.toLowerCase().includes(search.toLowerCase()) ||
           m.from.toLowerCase().includes(search.toLowerCase()) ||
           m.preview.toLowerCase().includes(search.toLowerCase())
       )
-    : MESSAGES;
+    : visibleMessages;
 
-  const activeMsg = MESSAGES.find((m) => m.id === selected);
+  const activeMsg = messagesForView.find((m) => m.id === selected);
+
+  const openCompose = () => {
+    setDraft(EMPTY_DRAFT);
+    setSendError(null);
+    setComposing(true);
+  };
+
+  const closeCompose = () => {
+    setComposing(false);
+    setSendError(null);
+    setSending(false);
+  };
+
+  const sendDraft = async () => {
+    if (!draft.to.trim() || !draft.body.trim()) {
+      setSendError("Add a recipient and a message before sending.");
+      return;
+    }
+
+    setSending(true);
+    setSendError(null);
+
+    try {
+      const response = await fetch(`${MAIL_API_URL}/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: draft.to.trim(),
+          subject: draft.subject.trim() || "Portfolio message",
+          text: draft.body.trim(),
+        }),
+      });
+
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(payload.error ?? `Mail API returned ${response.status}`);
+      }
+
+      const sentMessage: MailMessage = {
+        id: `sent-${Date.now()}`,
+        from: "Dominic",
+        fromEmail: DEFAULT_RECIPIENT,
+        subject: draft.subject.trim() || "Portfolio message",
+        preview: draft.body.trim().slice(0, 120),
+        body: draft.body.trim(),
+        time: new Intl.DateTimeFormat("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        }).format(new Date()),
+        folder: "Sent",
+        avatar: "A",
+      };
+
+      setLocalSentMessages((currentMessages) => [sentMessage, ...currentMessages]);
+      setMessages((currentMessages) => [sentMessage, ...currentMessages]);
+      setActiveFolder("Sent");
+      setSelected(sentMessage.id);
+      setDraft(EMPTY_DRAFT);
+      setComposing(false);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : "Failed to send message");
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div
@@ -156,14 +305,14 @@ export default function Mail() {
                   textAlign: "center",
                 }}
               >
-                {MESSAGES.filter((m) => m.unread).length}
+                {messages.filter((m) => m.unread).length}
               </span>
             )}
           </div>
         ))}
         <div style={{ flex: 1 }} />
         <button
-          onClick={() => setComposing(true)}
+          onClick={openCompose}
           style={{
             margin: "8px 12px",
             background: "#007AFF",
@@ -223,6 +372,17 @@ export default function Mail() {
               }}
             />
           </div>
+          {(loading || error) && (
+            <div
+              style={{
+                marginTop: "8px",
+                fontSize: "11px",
+                color: error ? "#d92d20" : "rgba(0,0,0,0.45)",
+              }}
+            >
+              {error ? `Mail backend unavailable: ${error}` : "Loading mail from backend..."}
+            </div>
+          )}
         </div>
 
         <div style={{ overflowY: "auto", flex: 1 }}>
@@ -453,7 +613,7 @@ export default function Mail() {
             >
               <span style={{ fontSize: "13px", fontWeight: 600, color: "#1c1c1e" }}>New Message</span>
               <button
-                onClick={() => setComposing(false)}
+                onClick={closeCompose}
                 style={{
                   background: "none",
                   border: "none",
@@ -467,32 +627,56 @@ export default function Mail() {
                 ×
               </button>
             </div>
-            {["To", "Subject"].map((label) => (
-              <div
-                key={label}
+            <div
+              style={{
+                padding: "8px 14px",
+                borderBottom: "0.5px solid rgba(0,0,0,0.06)",
+                display: "flex",
+                gap: "8px",
+                alignItems: "center",
+              }}
+            >
+              <span style={{ fontSize: "12px", color: "rgba(0,0,0,0.4)", width: "46px" }}>To:</span>
+              <input
+                value={draft.to}
+                onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, to: event.target.value }))}
                 style={{
-                  padding: "8px 14px",
-                  borderBottom: "0.5px solid rgba(0,0,0,0.06)",
-                  display: "flex",
-                  gap: "8px",
-                  alignItems: "center",
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  fontSize: "13px",
+                  background: "transparent",
+                  color: "#1c1c1e",
                 }}
-              >
-                <span style={{ fontSize: "12px", color: "rgba(0,0,0,0.4)", width: "46px" }}>{label}:</span>
-                <input
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    outline: "none",
-                    fontSize: "13px",
-                    background: "transparent",
-                    color: "#1c1c1e",
-                  }}
-                />
-              </div>
-            ))}
+              />
+            </div>
+            <div
+              style={{
+                padding: "8px 14px",
+                borderBottom: "0.5px solid rgba(0,0,0,0.06)",
+                display: "flex",
+                gap: "8px",
+                alignItems: "center",
+              }}
+            >
+              <span style={{ fontSize: "12px", color: "rgba(0,0,0,0.4)", width: "46px" }}>Subject:</span>
+              <input
+                value={draft.subject}
+                onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, subject: event.target.value }))}
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  fontSize: "13px",
+                  background: "transparent",
+                  color: "#1c1c1e",
+                }}
+              />
+            </div>
             <textarea
               placeholder="Write your message..."
+              value={draft.body}
+              onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, body: event.target.value }))}
               style={{
                 flex: 1,
                 border: "none",
@@ -506,6 +690,17 @@ export default function Mail() {
                 height: "180px",
               }}
             />
+            {sendError && (
+              <div
+                style={{
+                  padding: "0 14px 8px",
+                  fontSize: "11px",
+                  color: "#d92d20",
+                }}
+              >
+                {sendError}
+              </div>
+            )}
             <div
               style={{
                 padding: "8px 14px",
@@ -515,8 +710,11 @@ export default function Mail() {
               }}
             >
               <button
+                type="button"
+                onClick={sendDraft}
+                disabled={sending}
                 style={{
-                  background: "#007AFF",
+                  background: sending ? "rgba(0,122,255,0.55)" : "#007AFF",
                   color: "#fff",
                   border: "none",
                   borderRadius: "7px",
@@ -526,7 +724,7 @@ export default function Mail() {
                   cursor: "pointer",
                 }}
               >
-                Send
+                {sending ? "Sending..." : "Send"}
               </button>
             </div>
           </motion.div>

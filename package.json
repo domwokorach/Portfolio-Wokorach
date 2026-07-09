@@ -18,6 +18,9 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite --host",
+    "dev:ui": "vite --host",
+    "mail:server": "node server/mail-server.mjs",
+    "test": "npm run lint",
     "lint": "eslint .",
     "prepare": "husky",
     "serve": "vite preview --host"
@@ -36,9 +39,13 @@
     "@milkdown/react": "^7.3.6",
     "@rooks/use-raf": "^4.11.2",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
     "framer-motion": "^11.1.7",
+    "imapflow": "^1.0.182",
     "katex": "^0.16.10",
+    "mailparser": "^3.7.2",
     "moment": "^2.30.1",
+    "nodemailer": "^6.10.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",

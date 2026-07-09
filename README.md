@@ -25,6 +25,25 @@ pnpm dev      # dev server with hot reloading
 pnpm build    # production build → dist/
 ```
 
+## Google Maps API Key
+
+Create a `.env` file from `.env.example` and set:
+
+```bash
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_embed_api_key
+```
+
+Enable these Google Cloud APIs for your project:
+
+- Maps Embed API
+- Places API (New) (optional, if you later migrate search to Google Places)
+
+Recommended key restrictions:
+
+- Application restriction: HTTP referrers (web sites)
+- Website restrictions: your production domain and local dev origin (`http://localhost:*`)
+- API restriction: limit key usage to Maps Embed API
+
 ## Docker Deployment
 
 ```bash

@@ -1,88 +1,132 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-const PLACES = [
-  { id: "1", name: "Home, London, UK", type: "City", lat: 26.285, lng: 73.006, color: "#007AFF" },
-  { id: "2", name: "London, UK", type: "City", lat: 26.292, lng: 73.014, color: "#FF9500" },
-  { id: "3", name: "Mehrangarh Fort", type: "Landmark", lat: 26.298, lng: 72.978, color: "#FF3B30" },
-  { id: "4", name: "Umaid Bhawan", type: "Palace", lat: 26.280, lng: 73.022, color: "#AF52DE" },
-];
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? "";
 
-type MapStyle = "standard" | "satellite" | "transit";
+type Place = {
+  id: string;
+  name: string;
+  type: string;
+  lat: number;
+  lng: number;
+  color: string;
+};
+
+const PLACES = [
+  { id: "1", name: "London, UK", type: "City", lat: 51.5074, lng: -0.1278, color: "#007AFF" },
+] satisfies Place[];
+
+type MapStyle = "standard" | "satellite" | "terrain";
 
 type MapViewProps = {
+  apiKey: string;
   mapStyle: MapStyle;
-  activePlace: (typeof PLACES)[number];
-  onSelectPlace: (place: (typeof PLACES)[number]) => void;
+  activePlace: Place;
+  zoom: number;
+  onChangeZoom: (nextZoom: number) => void;
   onChangeMapStyle: (style: MapStyle) => void;
 };
 
-function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: MapViewProps) {
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(value, max));
+}
+
+function getGoogleMapType(style: MapStyle) {
+  if (style === "satellite") return "k";
+  if (style === "terrain") return "p";
+  return "m";
+}
+
+function getGoogleEmbedMapType(style: MapStyle) {
+  if (style === "satellite") return "satellite";
+  if (style === "terrain") return "terrain";
+  return "roadmap";
+}
+
+function buildGoogleEmbedUrl(place: Place, zoom: number, mapStyle: MapStyle, apiKey: string) {
+  if (!apiKey.trim()) {
+    const fallback = new URLSearchParams({
+      q: `${place.lat},${place.lng}`,
+      z: String(clamp(zoom, 3, 20)),
+      output: "embed",
+      t: getGoogleMapType(mapStyle),
+    });
+
+    return `https://maps.google.com/maps?${fallback.toString()}`;
+  }
+
+  const params = new URLSearchParams({
+    key: apiKey,
+    q: `${place.lat},${place.lng}`,
+    zoom: String(clamp(zoom, 3, 20)),
+    maptype: getGoogleEmbedMapType(mapStyle),
+  });
+
+  return `https://www.google.com/maps/embed/v1/place?${params.toString()}`;
+}
+
+function MapView({ apiKey, mapStyle, activePlace, zoom, onChangeZoom, onChangeMapStyle }: MapViewProps) {
+  const mapUrl = buildGoogleEmbedUrl(activePlace, zoom, mapStyle, apiKey);
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}>
-      {/* Map background */}
       <div
         style={{
           width: "100%",
           height: "100%",
-          background:
-            mapStyle === "satellite"
-              ? "linear-gradient(145deg, #1a2a1a, #0a1f0a, #152515)"
-              : mapStyle === "transit"
-              ? "linear-gradient(145deg, #e8f0fe, #d2e3fc, #c2d7f8)"
-              : "linear-gradient(145deg, #e8e8e0, #d4d4c8, #c8c8b8)",
+          background: "#d4dde3",
           position: "relative",
         }}
       >
-        {/* Roads */}
-        <svg
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-          viewBox="0 0 400 300"
-          preserveAspectRatio="xMidYMid slice"
+        <iframe
+          title="Google Maps"
+          src={mapUrl}
+          style={{
+            width: "100%",
+            height: "100%",
+            border: "none",
+          }}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            top: 10,
+            left: 10,
+            background: "rgba(255,255,255,0.92)",
+            borderRadius: "10px",
+            padding: "5px 9px",
+            fontSize: "11px",
+            color: "rgba(0,0,0,0.65)",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+            zIndex: 400,
+          }}
         >
-          {/* Main roads */}
-          <line x1="0" y1="150" x2="400" y2="150" stroke={mapStyle === "satellite" ? "rgba(255,255,255,0.3)" : "white"} strokeWidth="6" />
-          <line x1="200" y1="0" x2="200" y2="300" stroke={mapStyle === "satellite" ? "rgba(255,255,255,0.3)" : "white"} strokeWidth="6" />
-          <line x1="0" y1="80" x2="400" y2="220" stroke={mapStyle === "satellite" ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.8)"} strokeWidth="3" />
-          <line x1="0" y1="220" x2="400" y2="80" stroke={mapStyle === "satellite" ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.8)"} strokeWidth="3" />
-          {/* Blocks */}
-          {[60, 130, 270, 340].map((x) =>
-            [50, 110, 190, 250].map((y) => (
-              <rect
-                key={`${x}-${y}`}
-                x={x}
-                y={y}
-                width={50}
-                height={40}
-                rx={4}
-                fill={
-                  mapStyle === "satellite"
-                    ? "rgba(60,80,60,0.6)"
-                    : mapStyle === "transit"
-                    ? "rgba(200,215,240,0.8)"
-                    : "rgba(210,205,185,0.9)"
-                }
-              />
-            ))
-          )}
-          {/* Water */}
-          <ellipse cx="320" cy="230" rx="60" ry="40" fill={mapStyle === "satellite" ? "rgba(20,60,100,0.7)" : "rgba(140,190,230,0.7)"} />
+          Interactive Google Maps
+        </div>
+        {!apiKey.trim() && (
+          <div
+            style={{
+              position: "absolute",
+              top: 40,
+              left: 10,
+              background: "rgba(255,149,0,0.95)",
+              color: "#1c1c1e",
+              borderRadius: "10px",
+              padding: "6px 9px",
+              fontSize: "11px",
+              fontWeight: 600,
+              zIndex: 400,
+              boxShadow: "0 2px 10px rgba(0,0,0,0.12)",
+            }}
+          >
+            Add VITE_GOOGLE_MAPS_API_KEY to .env for official Google Maps Embed API.
+          </div>
+        )}
 
-          {/* Place pins */}
-          {PLACES.map((place, i) => {
-            const x = 80 + i * 80;
-            const y = 60 + (i % 2) * 80;
-            const isActive = activePlace.id === place.id;
-            return (
-              <g key={place.id} onClick={() => onSelectPlace(place)} style={{ cursor: "pointer" }}>
-                <circle cx={x} cy={y} r={isActive ? 14 : 10} fill={place.color} opacity={isActive ? 1 : 0.8} />
-                <circle cx={x} cy={y} r={isActive ? 7 : 5} fill="white" />
-                {isActive && <circle cx={x} cy={y} r={22} fill="none" stroke={place.color} strokeWidth="2" opacity="0.4" />}
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* Map style switcher */}
         <div
           style={{
             position: "absolute",
@@ -95,9 +139,10 @@ function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: Map
             padding: "3px",
             backdropFilter: "blur(10px)",
             boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+            zIndex: 400,
           }}
         >
-          {(["standard", "satellite", "transit"] as const).map((s) => (
+          {(["standard", "satellite", "terrain"] as const).map((s) => (
             <button
               key={s}
               onClick={() => onChangeMapStyle(s)}
@@ -110,7 +155,6 @@ function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: Map
                 cursor: "pointer",
                 color: mapStyle === s ? "white" : "#1c1c1e",
                 fontWeight: mapStyle === s ? 600 : 400,
-                textTransform: "capitalize",
                 transition: "all 0.15s ease",
               }}
             >
@@ -119,7 +163,6 @@ function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: Map
           ))}
         </div>
 
-        {/* Zoom controls */}
         <div
           style={{
             position: "absolute",
@@ -132,11 +175,13 @@ function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: Map
             overflow: "hidden",
             backdropFilter: "blur(10px)",
             boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+            zIndex: 400,
           }}
         >
-          {["+", "−"].map((btn) => (
+          {(["+", "−"] as const).map((btn) => (
             <button
               key={btn}
+              onClick={() => onChangeZoom(btn === "+" ? zoom + 1 : zoom - 1)}
               style={{
                 background: "transparent",
                 border: "none",
@@ -174,6 +219,7 @@ function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: Map
             display: "flex",
             alignItems: "center",
             gap: "10px",
+            zIndex: 400,
           }}
         >
           <div
@@ -205,6 +251,10 @@ function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: Map
               cursor: "pointer",
               flexShrink: 0,
             }}
+            onClick={() => {
+              const destination = `https://www.google.com/maps/dir/?api=1&destination=${activePlace.lat},${activePlace.lng}`;
+              window.open(destination, "_blank", "noopener,noreferrer");
+            }}
           >
             Directions
           </button>
@@ -214,13 +264,94 @@ function MapView({ mapStyle, activePlace, onSelectPlace, onChangeMapStyle }: Map
   );
 }
 
+function placeFromNominatim(result: {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+  type?: string;
+}) {
+  const palette = ["#007AFF", "#FF9500", "#FF3B30", "#AF52DE", "#34C759", "#5AC8FA"];
+  const color = palette[result.place_id % palette.length];
+
+  return {
+    id: String(result.place_id),
+    name: result.display_name,
+    type: result.type ? result.type[0].toUpperCase() + result.type.slice(1) : "Place",
+    lat: Number(result.lat),
+    lng: Number(result.lon),
+    color,
+  } satisfies Place;
+}
+
 export default function Maps() {
   const [search, setSearch] = useState("");
   const [activePlace, setActivePlace] = useState(PLACES[0]);
   const [mapStyle, setMapStyle] = useState<MapStyle>("standard");
+  const [zoom, setZoom] = useState(13);
+  const [searchResults, setSearchResults] = useState<Place[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const filtered = search.trim()
-    ? PLACES.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+  useEffect(() => {
+    const query = search.trim();
+
+    if (query.length < 2) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&q=${encodeURIComponent(query)}`,
+          {
+            signal: controller.signal,
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Search failed with status ${response.status}`);
+        }
+
+        const payload = (await response.json()) as Array<{
+          place_id: number;
+          display_name: string;
+          lat: string;
+          lon: string;
+          type?: string;
+        }>;
+
+        const nextResults = payload.map(placeFromNominatim);
+        setSearchResults(nextResults);
+
+        if (nextResults.length > 0) {
+          setActivePlace(nextResults[0]);
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        console.error("[maps] Failed to search OpenStreetMap", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 350);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeout);
+    };
+  }, [search]);
+
+  const hasSearchQuery = search.trim().length >= 2;
+  const filtered = hasSearchQuery
+    ? searchResults
     : PLACES;
 
   return (
@@ -285,8 +416,30 @@ export default function Maps() {
             padding: "4px 14px 4px",
           }}
         >
-          Favourites
+          {hasSearchQuery ? "Search Results" : "Favourites"}
         </div>
+        {isSearching && (
+          <div
+            style={{
+              fontSize: "11px",
+              color: "rgba(0,0,0,0.45)",
+              padding: "4px 14px",
+            }}
+          >
+            Searching OpenStreetMap...
+          </div>
+        )}
+        {!isSearching && hasSearchQuery && filtered.length === 0 && (
+          <div
+            style={{
+              fontSize: "11px",
+              color: "rgba(0,0,0,0.45)",
+              padding: "4px 14px",
+            }}
+          >
+            No places found.
+          </div>
+        )}
         {filtered.map((place) => (
           <button
             key={place.id}
@@ -341,9 +494,11 @@ export default function Maps() {
       {/* Map */}
       <div style={{ flex: 1, position: "relative" }}>
         <MapView
+          apiKey={GOOGLE_MAPS_API_KEY}
           mapStyle={mapStyle}
           activePlace={activePlace}
-          onSelectPlace={setActivePlace}
+          zoom={zoom}
+          onChangeZoom={(next) => setZoom(clamp(next, 3, 18))}
           onChangeMapStyle={setMapStyle}
         />
       </div>
