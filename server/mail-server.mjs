@@ -11,36 +11,71 @@ dotenv.config();
 const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
 const PORT = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 3000;
 const HOST = process.env.NODE_ENV === "production" ? "0.0.0.0" : process.env.MAIL_API_HOST ?? "0.0.0.0";
+const MAIL_PRIVACY_MODE = process.env.MAIL_PRIVACY_MODE !== "false";
 
-const requiredEnv = [
-  "MAIL_IMAP_HOST",
-  "MAIL_IMAP_PORT",
-  "MAIL_IMAP_SECURE",
-  "MAIL_SMTP_HOST",
-  "MAIL_SMTP_PORT",
-  "MAIL_SMTP_SECURE",
-  "MAIL_USER",
-  "MAIL_PASS",
-  "MAIL_FROM"
-];
-
-for (const key of requiredEnv) {
-  if (!process.env[key]) {
-    console.warn(`[mail] Missing ${key}`);
+function redactMessages(messages) {
+  if (!MAIL_PRIVACY_MODE) {
+    return messages;
   }
+
+  return messages.map((message) => ({
+    ...message,
+    from: "Private Sender",
+    fromEmail: "hidden@private.local",
+    subject: "Private message",
+    preview: "Message details are hidden for privacy.",
+    body: "Message details are hidden for privacy.",
+    avatar: "🔒",
+    starred: false
+  }));
 }
 
-function getMailConfigError() {
+function isGmailAccount() {
+  const mailUser = process.env.MAIL_USER?.toLowerCase() ?? "";
+  const smtpHost = process.env.MAIL_SMTP_HOST?.toLowerCase() ?? "";
+  const imapHost = process.env.MAIL_IMAP_HOST?.toLowerCase() ?? "";
+
+  return mailUser.endsWith("@gmail.com") || smtpHost.includes("gmail.com") || imapHost.includes("gmail.com");
+}
+
+function hasGoogleOAuthCredentials() {
+  return Boolean(
+    process.env.GOOGLE_CLIENT_ID &&
+      process.env.GOOGLE_CLIENT_SECRET &&
+      process.env.GOOGLE_REDIRECT_URI &&
+      process.env.GOOGLE_REFRESH_TOKEN
+  );
+}
+
+function shouldUseGoogleMailApi() {
+  return isGmailAccount() && hasGoogleOAuthCredentials();
+}
+
+function getMailConfigError({ requireIncomingMail = false } = {}) {
   if (!process.env.MAIL_USER) {
     return "MAIL_USER is missing";
   }
 
-  if (!process.env.MAIL_PASS) {
-    return "MAIL_PASS is missing. Use an iCloud app-specific password in your .env file.";
-  }
-
   if (!process.env.MAIL_FROM) {
     return "MAIL_FROM is missing";
+  }
+
+  if (shouldUseGoogleMailApi()) {
+    return null;
+  }
+
+  if (requireIncomingMail) {
+    if (!process.env.MAIL_IMAP_HOST) {
+      return "MAIL_IMAP_HOST is missing";
+    }
+
+    if (!process.env.MAIL_IMAP_PORT) {
+      return "MAIL_IMAP_PORT is missing";
+    }
+  }
+
+  if (!process.env.MAIL_PASS) {
+    return "MAIL_PASS is missing. Use an app password or configure Google OAuth variables for Gmail.";
   }
 
   return null;
@@ -70,15 +105,46 @@ function createGoogleOAuthClient() {
   );
 }
 
-const transporter = nodemailer.createTransport({
-  host: process.env.MAIL_SMTP_HOST,
-  port: Number(process.env.MAIL_SMTP_PORT ?? 587),
-  secure: process.env.MAIL_SMTP_SECURE === "true",
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS
+function createTransporter() {
+  if (shouldUseGoogleMailApi()) {
+    return nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user: process.env.MAIL_USER,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        refreshToken: process.env.GOOGLE_REFRESH_TOKEN
+      }
+    });
   }
-});
+
+  return nodemailer.createTransport({
+    host: process.env.MAIL_SMTP_HOST,
+    port: Number(process.env.MAIL_SMTP_PORT ?? 587),
+    secure: process.env.MAIL_SMTP_SECURE === "true",
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS
+    }
+  });
+}
+
+async function checkMailAuthHealth() {
+  const mailConfigError = getMailConfigError();
+
+  if (mailConfigError) {
+    throw new Error(mailConfigError);
+  }
+
+  const transporter = createTransporter();
+  await transporter.verify();
+
+  return {
+    ok: true,
+    mode: shouldUseGoogleMailApi() ? "gmail-oauth2" : "smtp"
+  };
+}
 
 const folderMap = {
   Inbox: ["INBOX"],
@@ -87,6 +153,28 @@ const folderMap = {
   Starred: ["Flagged"],
   Trash: ["Trash", "Deleted Messages", "Deleted Items"]
 };
+
+const gmailLabelMap = {
+  Inbox: ["INBOX"],
+  Sent: ["SENT"],
+  Drafts: ["DRAFT"],
+  Starred: ["STARRED"],
+  Trash: ["TRASH"]
+};
+
+const requiredEnv = [
+  "MAIL_USER",
+  "MAIL_FROM",
+  ...(shouldUseGoogleMailApi()
+    ? ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REDIRECT_URI", "GOOGLE_REFRESH_TOKEN"]
+    : ["MAIL_IMAP_HOST", "MAIL_IMAP_PORT", "MAIL_IMAP_SECURE", "MAIL_SMTP_HOST", "MAIL_SMTP_PORT", "MAIL_SMTP_SECURE", "MAIL_PASS"])
+];
+
+for (const key of requiredEnv) {
+  if (!process.env[key]) {
+    console.warn(`[mail] Missing ${key}`);
+  }
+}
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
@@ -125,7 +213,134 @@ function parseAddress(address) {
   };
 }
 
+function parseAddressHeader(value) {
+  if (!value) {
+    return { name: "Unknown", email: "" };
+  }
+
+  const email = value.match(/<([^>]+)>/)?.[1] ?? value.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] ?? "";
+  const name = value
+    .replace(/<[^>]+>/g, "")
+    .replace(/^["']|["']$/g, "")
+    .trim();
+
+  return {
+    name: name || email || "Unknown",
+    email
+  };
+}
+
+function getHeaderValue(headers, name) {
+  return headers.find((header) => header.name?.toLowerCase() === name.toLowerCase())?.value ?? "";
+}
+
+function decodeBase64Url(value) {
+  return Buffer.from(value.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+}
+
+function stripHtml(html) {
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function findBodyData(payload, mimeType) {
+  if (!payload) {
+    return null;
+  }
+
+  if (payload.mimeType === mimeType && payload.body?.data) {
+    return payload.body.data;
+  }
+
+  for (const part of payload.parts ?? []) {
+    const nested = findBodyData(part, mimeType);
+    if (nested) {
+      return nested;
+    }
+  }
+
+  return null;
+}
+
+function extractGmailBody(payload) {
+  const plainText = findBodyData(payload, "text/plain");
+
+  if (plainText) {
+    return decodeBase64Url(plainText).trim();
+  }
+
+  const htmlText = findBodyData(payload, "text/html");
+  if (htmlText) {
+    return stripHtml(decodeBase64Url(htmlText));
+  }
+
+  return "";
+}
+
+function createAuthenticatedGoogleClient() {
+  const oauth2Client = createGoogleOAuthClient();
+  oauth2Client.setCredentials({
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+  });
+  return oauth2Client;
+}
+
+async function listGmailMessages(folderName) {
+  const gmail = google.gmail({
+    version: "v1",
+    auth: createAuthenticatedGoogleClient()
+  });
+  const labelIds = gmailLabelMap[folderName] ?? gmailLabelMap.Inbox;
+  const result = await gmail.users.messages.list({
+    userId: "me",
+    labelIds,
+    maxResults: 20
+  });
+  const messageRefs = result.data.messages ?? [];
+
+  if (!messageRefs.length) {
+    return [];
+  }
+
+  const detailedMessages = await Promise.all(
+    messageRefs.map(({ id }) =>
+      gmail.users.messages.get({
+        userId: "me",
+        id,
+        format: "full"
+      })
+    )
+  );
+
+  return detailedMessages.map(({ data }) => {
+    const headers = data.payload?.headers ?? [];
+    const fromHeader = parseAddressHeader(getHeaderValue(headers, "from"));
+    const subject = getHeaderValue(headers, "subject") || "(No subject)";
+    const body = extractGmailBody(data.payload);
+    const preview = body.slice(0, 120) || data.snippet || "No preview available.";
+    const internalDate = data.internalDate ? new Date(Number(data.internalDate)) : null;
+    const labelIds = data.labelIds ?? [];
+
+    return {
+      id: data.id ?? "",
+      from: fromHeader.name,
+      fromEmail: fromHeader.email,
+      subject,
+      preview,
+      body: body || data.snippet || preview,
+      time: formatTime(internalDate),
+      folder: folderName,
+      unread: labelIds.includes("UNREAD"),
+      starred: labelIds.includes("STARRED"),
+      avatar: getMessageAvatar(fromHeader.name || fromHeader.email)
+    };
+  });
+}
+
 async function listMessages(folderName) {
+  if (shouldUseGoogleMailApi()) {
+    return listGmailMessages(folderName);
+  }
+
   const client = new ImapFlow({
     host: process.env.MAIL_IMAP_HOST,
     port: Number(process.env.MAIL_IMAP_PORT ?? 993),
@@ -134,6 +349,11 @@ async function listMessages(folderName) {
       user: process.env.MAIL_USER,
       pass: process.env.MAIL_PASS
     }
+  });
+
+  // ImapFlow emits socket/auth errors asynchronously; handle them to avoid process crashes.
+  client.on("error", (error) => {
+    console.error("[mail] IMAP client error", error);
   });
 
   const mailboxCandidates = folderMap[folderName] ?? folderMap.Inbox;
@@ -215,8 +435,22 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (requestUrl.pathname === "/" || requestUrl.pathname === "/healthz" || requestUrl.pathname === "/api/mail/health") {
+  if (requestUrl.pathname === "/" || requestUrl.pathname === "/healthz") {
     sendJson(response, 200, { ok: true });
+    return;
+  }
+
+  if (requestUrl.pathname === "/api/mail/health" && request.method === "GET") {
+    try {
+      const health = await checkMailAuthHealth();
+      sendJson(response, 200, health);
+    } catch (error) {
+      sendJson(response, 503, {
+        ok: false,
+        error: error instanceof Error ? error.message : "Mail authentication check failed"
+      });
+    }
+
     return;
   }
 
@@ -231,7 +465,7 @@ const server = http.createServer(async (request, response) => {
     const oauth2Client = createGoogleOAuthClient();
     const authUrl = oauth2Client.generateAuthUrl({
       access_type: "offline",
-      scope: ["https://www.googleapis.com/auth/gmail.readonly"],
+      scope: ["https://mail.google.com/"],
       prompt: "consent"
     });
 
@@ -240,7 +474,7 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (requestUrl.pathname === "/oauth2callback" && request.method === "GET") {
+  if ((requestUrl.pathname === "/oauth2callback" || requestUrl.pathname === "/oauth2/callback") && request.method === "GET") {
     try {
       const oauthConfigError = getGoogleOAuthConfigError();
 
@@ -290,20 +524,10 @@ const server = http.createServer(async (request, response) => {
         return;
       }
 
-      const oauth2Client = createGoogleOAuthClient();
-      oauth2Client.setCredentials({
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-      });
-
-      const gmail = google.gmail({ version: "v1", auth: oauth2Client });
-      const result = await gmail.users.messages.list({
-        userId: "me",
-        maxResults: 10
-      });
-
       sendJson(response, 200, {
         ok: true,
-        messages: result.data.messages ?? []
+        messages: redactMessages(await listGmailMessages("Inbox")),
+        privacyMode: MAIL_PRIVACY_MODE
       });
     } catch (error) {
       console.error("[mail] Gmail list failed", error);
@@ -319,8 +543,18 @@ const server = http.createServer(async (request, response) => {
     const folder = requestUrl.searchParams.get("folder") ?? "Inbox";
 
     try {
+      const mailConfigError = getMailConfigError({ requireIncomingMail: true });
+
+      if (mailConfigError) {
+        sendJson(response, 503, { error: mailConfigError });
+        return;
+      }
+
       const messages = await listMessages(folder);
-      sendJson(response, 200, { messages });
+      sendJson(response, 200, {
+        messages: redactMessages(messages),
+        privacyMode: MAIL_PRIVACY_MODE
+      });
     } catch (error) {
       console.error("[mail] Failed to load messages", error);
       sendJson(response, 500, {
@@ -343,6 +577,7 @@ const server = http.createServer(async (request, response) => {
       }
 
       const body = await readBody(request);
+      const transporter = createTransporter();
       const result = await transporter.sendMail({
         from: process.env.MAIL_FROM,
         to: body.to ?? process.env.MAIL_FROM,

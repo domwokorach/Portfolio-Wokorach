@@ -8,12 +8,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7139ec4d-f033-4434-96f0-bcc56a374c4e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/publish.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/publish.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/vercel.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/img/icons/sf-icons/test.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/apps/Finder.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/apps/Finder.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/mail-server.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/server/mail-server.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/apps/Mail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/apps/Mail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,24 +39,24 @@
     &quot;assignee&quot;: &quot;domwokorach&quot;
   }
 }</component>
-  <component name="GitHubPullRequestState"><![CDATA[{
-  "prStates": [
+  <component name="GitHubPullRequestState">{
+  &quot;prStates&quot;: [
     {
-      "id": {
-        "id": "PR_kwDORcr0fc7r3_vw",
-        "number": 2
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDORcr0fc7r3_vw&quot;,
+        &quot;number&quot;: 2
       },
-      "lastSeen": 1783088390212
+      &quot;lastSeen&quot;: 1783088390212
     },
     {
-      "id": {
-        "id": "PR_kwDORcr0fc7tn5oI",
-        "number": 4
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDORcr0fc7tn5oI&quot;,
+        &quot;number&quot;: 4
       },
-      "lastSeen": 1783192952355
+      &quot;lastSeen&quot;: 1783192952355
     }
   ]
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/domwokorach/Portfolio-Wokorach.git&quot;,
@@ -189,7 +190,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.25134.101" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.26222.58" />
       </set>
     </attachedChunks>
   </component>
@@ -214,6 +215,7 @@
       <workItem from="1783185925062" duration="81000" />
       <workItem from="1783186051896" duration="1241000" />
       <workItem from="1783192044048" duration="1854000" />
+      <workItem from="1784119714150" duration="875000" />
     </task>
     <servers />
   </component>

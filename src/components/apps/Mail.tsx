@@ -27,6 +27,10 @@ interface DraftMessage {
 
 const MAIL_API_URL = import.meta.env.VITE_MAIL_API_URL ?? "/api/mail";
 
+const MAIL_API_CANDIDATES = Array.from(
+  new Set([MAIL_API_URL, "/api/mail"].map((url) => url.replace(/\/$/, "")))
+);
+
 const DEFAULT_RECIPIENT = "dominic.wokorach-o@outlook.com";
 
 const EMPTY_DRAFT: DraftMessage = {
@@ -94,6 +98,21 @@ const MESSAGES: MailMessage[] = [
 
 const FOLDERS = ["Inbox", "Sent", "Drafts", "Starred", "Trash"];
 
+async function fetchMailApi(path: string, init?: RequestInit) {
+  let lastError: Error | null = null;
+
+  for (const baseUrl of MAIL_API_CANDIDATES) {
+    try {
+      const response = await fetch(`${baseUrl}${path}`, init);
+      return response;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("Network request failed");
+    }
+  }
+
+  throw lastError ?? new Error("Network request failed");
+}
+
 export default function Mail() {
   const [selected, setSelected] = useState<string>(MESSAGES[0].id);
   const [activeFolder, setActiveFolder] = useState("Inbox");
@@ -115,10 +134,9 @@ export default function Mail() {
       setError(null);
 
       try {
-        const response = await fetch(
-          `${MAIL_API_URL}/messages?folder=${encodeURIComponent(activeFolder)}`,
-          { signal: controller.signal }
-        );
+        const response = await fetchMailApi(`/messages?folder=${encodeURIComponent(activeFolder)}`, {
+          signal: controller.signal,
+        });
 
         if (!response.ok) {
           throw new Error(`Mail API returned ${response.status}`);
@@ -137,7 +155,12 @@ export default function Mail() {
         }
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Failed to load mail");
+          const message = err instanceof Error ? err.message : "Failed to load mail";
+          setError(
+            message === "Failed to fetch"
+              ? "Cannot reach mail API. Run the backend server or use /api/mail in dev."
+              : message
+          );
           setMessages(MESSAGES);
         }
       } finally {
@@ -192,7 +215,17 @@ export default function Mail() {
     setSendError(null);
 
     try {
-      const response = await fetch(`${MAIL_API_URL}/send`, {
+      const healthResponse = await fetchMailApi("/health");
+      const healthPayload = (await healthResponse.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+      };
+
+      if (!healthResponse.ok || healthPayload.ok === false) {
+        throw new Error(healthPayload.error ?? "Mail authentication failed");
+      }
+
+      const response = await fetchMailApi("/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -232,7 +265,12 @@ export default function Mail() {
       setDraft(EMPTY_DRAFT);
       setComposing(false);
     } catch (err) {
-      setSendError(err instanceof Error ? err.message : "Failed to send message");
+      const message = err instanceof Error ? err.message : "Failed to send message";
+      setSendError(
+        message === "Failed to fetch"
+          ? "Cannot reach mail API. Check VITE_MAIL_API_URL or start the mail server."
+          : message
+      );
     } finally {
       setSending(false);
     }

@@ -63,12 +63,12 @@ const websites: WebsitesData = {
         img: "img/sites/gemini.svg",
         link: "https://wokorach-gemini-ai.vercel.app/",
       },
-      // {
-      //   id: "twitter",
-      //   title: "Twitter",
-      //   img: "img/sites/twitter.svg",
-      //   link: "https://www.twitter.com/",
-      // },
+      {
+        id: "ui-ux-halifax-piggy-bank",
+        title: "UI/UX - Halifax Piggy Bank",
+        img: "img/sites/halifax-piggy-bank.svg",
+        link: "https://xd.adobe.com/view/24335fc2-505b-4b60-6c6c-37d0d258bf9d/",
+      },
       // {
       //   id: "GeeksforGeeks",
       //   title: "GeeksforGeeks",

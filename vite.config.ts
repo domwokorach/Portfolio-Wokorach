@@ -7,6 +7,7 @@ import type { Connect, Plugin, ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react";
 import unocss from "unocss/vite";
 import autoImport from "unplugin-auto-import/vite";
+import nodemailer from "nodemailer";
 
 type MailEnv = {
   MAIL_USER?: string;
@@ -15,6 +16,9 @@ type MailEnv = {
   MAIL_SMTP_HOST?: string;
   MAIL_SMTP_PORT?: string;
   MAIL_SMTP_SECURE?: string;
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  GOOGLE_REFRESH_TOKEN?: string;
 };
 
 type SocketLike = net.Socket | tls.TLSSocket;
@@ -26,8 +30,19 @@ const mailEnv: MailEnv = {
   MAIL_FROM: appEnv.MAIL_FROM,
   MAIL_SMTP_HOST: appEnv.MAIL_SMTP_HOST,
   MAIL_SMTP_PORT: appEnv.MAIL_SMTP_PORT,
-  MAIL_SMTP_SECURE: appEnv.MAIL_SMTP_SECURE
+  MAIL_SMTP_SECURE: appEnv.MAIL_SMTP_SECURE,
+  GOOGLE_CLIENT_ID: appEnv.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: appEnv.GOOGLE_CLIENT_SECRET,
+  GOOGLE_REFRESH_TOKEN: appEnv.GOOGLE_REFRESH_TOKEN
 };
+
+function isGmailSmtpHost() {
+  return (mailEnv.MAIL_SMTP_HOST ?? "").toLowerCase().includes("gmail.com");
+}
+
+function hasGoogleOAuthCredentials() {
+  return Boolean(mailEnv.GOOGLE_CLIENT_ID && mailEnv.GOOGLE_CLIENT_SECRET && mailEnv.GOOGLE_REFRESH_TOKEN);
+}
 
 const DEV_MESSAGES = [
   {
@@ -69,6 +84,13 @@ const sentMessages: Array<{
 
 function parseBool(value?: string) {
   return value === "true";
+}
+
+function formatDate() {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(new Date());
 }
 
 function sendJson(response: ServerResponse, statusCode: number, payload: unknown) {
@@ -131,6 +153,17 @@ async function authenticateSmtp(socket: SocketLike, user: string, pass: string) 
   const shouldTryLogin =
     reply.code === 504 ||
     reply.message.toLowerCase().includes("unrecognized authentication type");
+
+  const isGmailSecondFactorError =
+    reply.code === 534 ||
+    reply.message.toLowerCase().includes("invalidsecondfactor") ||
+    reply.message.toLowerCase().includes("application-specific password required");
+
+  if (isGmailSecondFactorError) {
+    throw new Error(
+      "Gmail blocked SMTP sign-in. Use a Google App Password in MAIL_PASS (not your normal account password), or run the standalone mail backend with OAuth2."
+    );
+  }
 
   if (!shouldTryLogin) {
     if (reply.code === 535) {
@@ -276,6 +309,97 @@ async function sendMailViaSmtp(payload: { to: string; subject: string; text: str
   activeSocket.destroy();
 }
 
+async function sendMailViaGmailOAuth(payload: { to: string; subject: string; text: string }) {
+  const user = mailEnv.MAIL_USER ?? "";
+  const from = mailEnv.MAIL_FROM ?? user;
+
+  if (!user || !from) {
+    throw new Error("MAIL_USER or MAIL_FROM is missing in .env");
+  }
+
+  if (!hasGoogleOAuthCredentials()) {
+    throw new Error(
+      "GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, or GOOGLE_REFRESH_TOKEN is missing for Gmail OAuth2"
+    );
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      type: "OAuth2",
+      user,
+      clientId: mailEnv.GOOGLE_CLIENT_ID,
+      clientSecret: mailEnv.GOOGLE_CLIENT_SECRET,
+      refreshToken: mailEnv.GOOGLE_REFRESH_TOKEN
+    }
+  });
+
+  await transporter.sendMail({
+    from,
+    to: payload.to,
+    subject: payload.subject,
+    text: payload.text
+  });
+}
+
+async function sendMail(payload: { to: string; subject: string; text: string }) {
+  const shouldUseGmailOAuth = isGmailSmtpHost() && hasGoogleOAuthCredentials();
+
+  if (shouldUseGmailOAuth) {
+    await sendMailViaGmailOAuth(payload);
+    return;
+  }
+
+  await sendMailViaSmtp(payload);
+}
+
+async function checkMailAuthHealth() {
+  const shouldUseGmailOAuth = isGmailSmtpHost() && hasGoogleOAuthCredentials();
+
+  if (shouldUseGmailOAuth) {
+    const user = mailEnv.MAIL_USER ?? "";
+
+    if (!user) {
+      throw new Error("MAIL_USER is missing for Gmail OAuth2");
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user,
+        clientId: mailEnv.GOOGLE_CLIENT_ID,
+        clientSecret: mailEnv.GOOGLE_CLIENT_SECRET,
+        refreshToken: mailEnv.GOOGLE_REFRESH_TOKEN
+      }
+    });
+
+    await (transporter as unknown as { verify: () => Promise<unknown> }).verify();
+    return { ok: true, mode: "gmail-oauth2" as const };
+  }
+
+  const host = mailEnv.MAIL_SMTP_HOST ?? "";
+  const user = mailEnv.MAIL_USER ?? "";
+  const pass = mailEnv.MAIL_PASS ?? "";
+
+  if (!host || !user || !pass) {
+    throw new Error("MAIL_SMTP_HOST, MAIL_USER, or MAIL_PASS is missing in .env");
+  }
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port: Number(mailEnv.MAIL_SMTP_PORT ?? 587),
+    secure: parseBool(mailEnv.MAIL_SMTP_SECURE),
+    auth: {
+      user,
+      pass
+    }
+  });
+
+  await (transporter as unknown as { verify: () => Promise<unknown> }).verify();
+  return { ok: true, mode: "smtp" as const };
+}
+
 function createMailApiMiddleware() {
   return async (request: IncomingMessage, response: ServerResponse, next: Connect.NextFunction) => {
     if (!request.url?.startsWith("/api/mail")) {
@@ -290,6 +414,20 @@ function createMailApiMiddleware() {
     if (request.method === "OPTIONS") {
       response.statusCode = 204;
       response.end();
+      return;
+    }
+
+    if (request.url.startsWith("/api/mail/health") && request.method === "GET") {
+      try {
+        const health = await checkMailAuthHealth();
+        sendJson(response, 200, health);
+      } catch (error) {
+        sendJson(response, 503, {
+          ok: false,
+          error: error instanceof Error ? error.message : "Mail authentication check failed"
+        });
+      }
+
       return;
     }
 
@@ -320,7 +458,7 @@ function createMailApiMiddleware() {
           return;
         }
 
-        await sendMailViaSmtp({ to, subject, text });
+        await sendMail({ to, subject, text });
 
         sentMessages.unshift({
           id: `sent-${Date.now()}`,
