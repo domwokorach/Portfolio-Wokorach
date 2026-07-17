@@ -77,15 +77,15 @@ const websites: WebsitesData = {
       },
       {
         id: "fx-risk-option-dashboard",
-        title: "FX Risk Option Dashboard",
+        title: "UI/UX design tools Figma",
         img: "img/sites/fx-risk.svg",
         link: "https://dazzle-shred-18160730.figma.site/",
       },
       {
         id: "real-time-fx-risk-option-dashboard",
-        title: "Real Time FX Risk Option Dashboard",
+        title: "Realtime FX Risk",
         img: "img/sites/fx-risk.svg",
-        link: "https://fx-option-daskboard.vercel.app/",
+        link: "https://fx-risk-dashboard.vercel.app/",
       },
     ],
   },
