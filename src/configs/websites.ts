@@ -69,12 +69,24 @@ const websites: WebsitesData = {
         img: "img/sites/halifax-piggy-bank.svg",
         link: "https://xd.adobe.com/view/24335fc2-505b-4b60-6c6c-37d0d258bf9d/",
       },
-      // {
-      //   id: "GeeksforGeeks",
-      //   title: "GeeksforGeeks",
-      //   img: "img/sites/gfg.png",
-      //   link: "https://www.geeksforgeeks.org/",
-      // },
+      {
+        id: "portfolio-figma",
+        title: "Portfolio Figma",
+        img: "img/sites/figma.svg",
+        link: "https://www.figma.com/proto/zSyAkhn7B1M7Rd9AjinkaN/Portfolio--Community-?node-id=1-2&p=f&t=EKQNjHOCOpGam0HO-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=1%3A2",
+      },
+      {
+        id: "fx-risk-option-dashboard",
+        title: "FX Risk Option Dashboard",
+        img: "img/sites/fx-risk.svg",
+        link: "https://dazzle-shred-18160730.figma.site/",
+      },
+      {
+        id: "real-time-fx-risk-option-dashboard",
+        title: "Real Time FX Risk Option Dashboard",
+        img: "img/sites/fx-risk.svg",
+        link: "https://fx-option-daskboard.vercel.app/",
+      },
     ],
   },
 };
