@@ -29,5 +29,5 @@ Contact me by:
 
 ## Resume
 
-- download: [English](https://drive.google.com/file/d/1EDQQZQvAWodAMgEdycBP7E_6UmmVlz-x/view?usp=sharing)
+- download: [English](https://drive.google.com/file/d/1ONzCLtme8wtBotdwO-MnxSMq94z39-dz/view?usp=drive_link)
 
