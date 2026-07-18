@@ -35,21 +35,21 @@ const bear: BearData[] = [
     icon: "i-ph:git-branch",
     md: [
       {
-        id: "paytm-web",
-        title: "PaytmWeb",
-        file: "https://raw.githubusercontent.com/aakashsharma003/PaytmWeb/main/README.md",
-        icon: "i-ph:credit-card",
-        excerpt: "A demonstration Project For Paytm transactions...",
-        link: "https://github.com/aakashsharma003/paytm-web"
+        id: "weather-application",
+        title: "Weather Application",
+        file: "https://raw.githubusercontent.com/domwokorach/wokorach-weather/master/README.md",
+        icon: "i-ph:cloud-sun",
+        excerpt: "A weather application built with React...",
+        link: "https://github.com/domwokorach/wokorach-weather"
       },
-      {
-        id: "portfolio-macos",
-        title: "Portfolio macOS",
-        file: "https://raw.githubusercontent.com/aakashsharma003/macOS-Portfolio/main/README.md",
-        icon: "i-ph:desktop",
-        excerpt: "My portfolio website simulating macOS's GUI...",
-        link: "https://github.com/aakashsharma003/macos-portfolio"
-      },
+      // {
+      //   id: "fifa-world-cup-26-sigma",
+      //   title: "FIFA World Cup 26 Sigma",
+      //   file: "https://github.com/domwokorach/FIFA-World-Cup-26/edit/master/README.md",
+      //   icon: "i-ph:desktop",
+      //   excerpt: "FIFA World Cup 26 Sigma project...",
+      //   link: "https://github.com/domwokorach/fifa-world-cup-26-sigma"
+      // },
       {
         id: "medium-2.0",
         title: "Medium 2.0",
@@ -60,27 +60,19 @@ const bear: BearData[] = [
       },
       {
         id: "attendance-web",
-        title: "Mbm Attendance Web",
-        file: "https://raw.githubusercontent.com/aakashsharma003/Mbm-Attendance-Application/main/README.md",
+        title: "Gemini AI",
+        file: "https://raw.githubusercontent.com/domwokorach/wokorach-gemini-ai/master/README.md",
         icon: "i-ph:clipboard-text",
-        excerpt: "A attendance website for mbm university...",
-        link: "https://github.com/aakashsharma003/Mbm-Attendance-Application"
+        excerpt: "An AI application built with Gemini...",
+        link: "https://github.com/domwokorach/wokorach-gemini-ai"
       },
       {
-        id: "aero-pay",
-        title: "AeroPay",
-        file: "https://raw.githubusercontent.com/aakashsharma003/AeroPay/main/README.md",
-        icon: "i-ph:money",
-        excerpt: "A payment transactions simulator...",
-        link: "https://github.com/aakashsharma003/AeroPay"
-      },
-      {
-        id: "rasl",
-        title: "rasl",
-        file: "https://raw.githubusercontent.com/Open-Source-Collab-Community/rasl/main/README.md",
-        icon: "i-ph:headphones",
-        excerpt: "A audio streaming library...",
-        link: "https://github.com/Open-Source-Collab-Community/rasl"
+        id: "fx-risk",
+        title: "FX Risk",
+        file: "https://raw.githubusercontent.com/domwokorach/fx-risk-dashboard/master/README.md",
+        icon: "i-ph:figma-logo",
+        excerpt: "A financial risk management dashboard...",
+        link: "https://fx-risk-dashboard.vercel.app/"
       }
     ]
   }
