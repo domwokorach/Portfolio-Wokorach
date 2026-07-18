@@ -65,8 +65,8 @@ const websites: WebsitesData = {
       },
       {
         id: "ui-ux-halifax-piggy-bank",
-        title: "UI/UX - Halifax Piggy Bank",
-        img: "img/sites/halifax-piggy-bank.svg",
+        title: "UI/UX Piggy Bank",
+        img: "img/sites/piggybank.svg",
         link: "https://xd.adobe.com/view/24335fc2-505b-4b60-6c6c-37d0d258bf9d/",
       },
       {
@@ -77,14 +77,14 @@ const websites: WebsitesData = {
       },
       {
         id: "fx-risk-option-dashboard",
-        title: "UI/UX design tools Figma",
-        img: "img/sites/fx-risk.svg",
+        title: "FX Design tools",
+        img: "img/sites/figma.svg",
         link: "https://dazzle-shred-18160730.figma.site/",
       },
       {
         id: "real-time-fx-risk-option-dashboard",
-        title: "Realtime FX Risk",
-        img: "img/sites/fx-risk.svg",
+        title: "FX Risk",
+        img: "img/sites/financial-risk.svg",
         link: "https://fx-risk-dashboard.vercel.app/",
       },
     ],
