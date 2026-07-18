@@ -4,7 +4,7 @@
 
 Hey there! 👋
 
-I'm Dominic Frontend and Software Engineer).
+I'm Dominic Frontend and Software Engineer.
 
 🚀 Passionate about Open Source, I've contributed to various organizations, helping build and improve projects that benefit the community. Coding for Open Source is not just a hobby for me — *it's a way of life!*
 
