@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 type WeatherKind = "sunny" | "partly-cloudy" | "cloudy" | "moon";
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY as string;
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
 
 type WeatherSnapshot = {
   location: string;
@@ -12,25 +13,51 @@ type WeatherSnapshot = {
   low: number;
   humidity: number;
   wind: number;
+  windGust: number;
+  windDeg: number;
+  feelsLike: number;
+  pressure: number;
+  visibilityKm: number;
+  sunrise: string;
+  sunset: string;
+  uvIndex: number | null;
+  airQuality: number | null;
   icon: WeatherKind;
 };
 
 type ForecastSnapshot = {
   hourly: HourlyEntry[];
   daily: ForecastEntry[];
+  precipitationTodayMm: number;
+  peakRainChance: number;
+  peakRainHour: string;
+  nextWetDay: string | null;
 };
 
 type OwmCurrentResponse = {
   cod: number | string;
   name: string;
+  coord: {
+    lat: number;
+    lon: number;
+  };
   main: {
     temp: number;
     temp_max: number;
     temp_min: number;
+    feels_like: number;
     humidity: number;
+    pressure: number;
   };
   wind: {
     speed: number;
+    deg?: number;
+    gust?: number;
+  };
+  visibility?: number;
+  sys: {
+    sunrise: number;
+    sunset: number;
   };
   weather: Array<{
     description: string;
@@ -50,11 +77,31 @@ type OwmForecastEntry = {
   weather: Array<{
     icon: string;
   }>;
+  rain?: {
+    "3h"?: number;
+  };
+  snow?: {
+    "3h"?: number;
+  };
 };
 
 type OwmForecastResponse = {
   cod: string;
   list: OwmForecastEntry[];
+};
+
+type OwmAirPollutionResponse = {
+  list: Array<{
+    main: {
+      aqi: number;
+    };
+  }>;
+};
+
+type OwmOneCallResponse = {
+  current?: {
+    uvi?: number;
+  };
 };
 
 type CityRow = {
@@ -128,8 +175,17 @@ const DEFAULT_WEATHER: WeatherSnapshot = {
   condition: "Mostly Sunny",
   high: 25,
   low: 14,
-  humidity: 0,
-  wind: 0,
+  humidity: 42,
+  wind: 12,
+  windGust: 20,
+  windDeg: 20,
+  feelsLike: 16,
+  pressure: 1014,
+  visibilityKm: 10,
+  sunrise: "05:09",
+  sunset: "21:04",
+  uvIndex: null,
+  airQuality: null,
   icon: "sunny",
 };
 
@@ -142,6 +198,38 @@ function owmIconToLocal(icon: string): WeatherKind {
 
 function formatWeatherCondition(value: string) {
   return value.replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function formatClockFromUnix(unixSeconds: number) {
+  return new Date(unixSeconds * 1000).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function windDirection(deg: number) {
+  const directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+  const index = Math.round((((deg % 360) + 360) % 360) / 22.5) % 16;
+  return directions[index];
+}
+
+function uvCategory(uvIndex: number | null) {
+  if (uvIndex === null) return "Unavailable";
+  if (uvIndex < 3) return "Low";
+  if (uvIndex < 6) return "Moderate";
+  if (uvIndex < 8) return "High";
+  if (uvIndex < 11) return "Very High";
+  return "Extreme";
+}
+
+function airQualityCategory(aqi: number | null) {
+  if (aqi === null) return "Unavailable";
+  if (aqi === 1) return "Good";
+  if (aqi === 2) return "Fair";
+  if (aqi === 3) return "Moderate";
+  if (aqi === 4) return "Poor";
+  return "Very Poor";
 }
 
 function isLocalSearch(value: string) {
@@ -200,6 +288,83 @@ function toDailyForecast(list: OwmForecastEntry[]): ForecastEntry[] {
   });
 }
 
+function toForecastInsights(list: OwmForecastEntry[]) {
+  if (list.length === 0) {
+    return {
+      precipitationTodayMm: 0,
+      peakRainChance: 0,
+      peakRainHour: "Now",
+      nextWetDay: null,
+    };
+  }
+
+  const todayKey = list[0].dt_txt.slice(0, 10);
+  const precipitationTodayMm = Number(
+    list
+      .filter((entry) => entry.dt_txt.slice(0, 10) === todayKey)
+      .reduce((total, entry) => total + (entry.rain?.["3h"] ?? 0) + (entry.snow?.["3h"] ?? 0), 0)
+      .toFixed(1)
+  );
+
+  const upcoming = list.slice(0, 8);
+  const peak = upcoming.reduce((best, entry) => {
+    if (entry.pop > best.pop) {
+      return entry;
+    }
+
+    return best;
+  }, upcoming[0]);
+
+  const nextWet = list.find((entry) => entry.dt_txt.slice(0, 10) !== todayKey && entry.pop >= 0.35);
+
+  return {
+    precipitationTodayMm,
+    peakRainChance: Math.round((peak?.pop ?? 0) * 100),
+    peakRainHour: peak ? formatClockFromUnix(peak.dt) : "Now",
+    nextWetDay: nextWet
+      ? new Date(`${nextWet.dt_txt.slice(0, 10)}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" })
+      : null,
+  };
+}
+
+async function fetchAirQualityByCoords(lat: number, lon: number, signal?: AbortSignal): Promise<number | null> {
+  const response = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`, { signal });
+  if (!response.ok) {
+    return null;
+  }
+
+  const json = (await response.json()) as OwmAirPollutionResponse;
+  return json.list?.[0]?.main?.aqi ?? null;
+}
+
+async function fetchUvIndexByCoords(lat: number, lon: number, signal?: AbortSignal): Promise<number | null> {
+  const response = await fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${API_KEY}`, { signal });
+  if (!response.ok) {
+    return null;
+  }
+
+  const json = (await response.json()) as OwmOneCallResponse;
+  const raw = json.current?.uvi;
+  if (typeof raw !== "number" || Number.isNaN(raw)) {
+    return null;
+  }
+
+  return Math.round(raw * 10) / 10;
+}
+
+async function enrichExtraMetrics(base: WeatherSnapshot, lat: number, lon: number, signal?: AbortSignal): Promise<WeatherSnapshot> {
+  const [airQuality, uvIndex] = await Promise.all([
+    fetchAirQualityByCoords(lat, lon, signal),
+    fetchUvIndexByCoords(lat, lon, signal),
+  ]);
+
+  return {
+    ...base,
+    airQuality,
+    uvIndex,
+  };
+}
+
 async function fetchWeatherByCity(query: string, signal?: AbortSignal): Promise<WeatherSnapshot | null> {
   const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(query)}&units=metric&appid=${API_KEY}`, { signal });
   const json = (await response.json()) as OwmCurrentResponse;
@@ -208,7 +373,7 @@ async function fetchWeatherByCity(query: string, signal?: AbortSignal): Promise<
     return null;
   }
 
-  return {
+  const payload: WeatherSnapshot = {
     location: json.name,
     temp: Math.round(json.main.temp),
     condition: formatWeatherCondition(json.weather[0].description),
@@ -216,8 +381,19 @@ async function fetchWeatherByCity(query: string, signal?: AbortSignal): Promise<
     low: Math.round(json.main.temp_min),
     humidity: Math.round(json.main.humidity),
     wind: Math.round(json.wind.speed * 3.6),
+    windGust: Math.round((json.wind.gust ?? json.wind.speed) * 3.6),
+    windDeg: Math.round(json.wind.deg ?? 0),
+    feelsLike: Math.round(json.main.feels_like),
+    pressure: Math.round(json.main.pressure),
+    visibilityKm: Math.round(((json.visibility ?? 10000) / 1000) * 10) / 10,
+    sunrise: formatClockFromUnix(json.sys.sunrise),
+    sunset: formatClockFromUnix(json.sys.sunset),
+    uvIndex: null,
+    airQuality: null,
     icon: owmIconToLocal(json.weather[0].icon),
   };
+
+  return enrichExtraMetrics(payload, json.coord.lat, json.coord.lon, signal);
 }
 
 async function fetchWeatherByCoords(lat: number, lon: number, signal?: AbortSignal): Promise<WeatherSnapshot | null> {
@@ -228,7 +404,7 @@ async function fetchWeatherByCoords(lat: number, lon: number, signal?: AbortSign
     return null;
   }
 
-  return {
+  const payload: WeatherSnapshot = {
     location: json.name,
     temp: Math.round(json.main.temp),
     condition: formatWeatherCondition(json.weather[0].description),
@@ -236,8 +412,19 @@ async function fetchWeatherByCoords(lat: number, lon: number, signal?: AbortSign
     low: Math.round(json.main.temp_min),
     humidity: Math.round(json.main.humidity),
     wind: Math.round(json.wind.speed * 3.6),
+    windGust: Math.round((json.wind.gust ?? json.wind.speed) * 3.6),
+    windDeg: Math.round(json.wind.deg ?? 0),
+    feelsLike: Math.round(json.main.feels_like),
+    pressure: Math.round(json.main.pressure),
+    visibilityKm: Math.round(((json.visibility ?? 10000) / 1000) * 10) / 10,
+    sunrise: formatClockFromUnix(json.sys.sunrise),
+    sunset: formatClockFromUnix(json.sys.sunset),
+    uvIndex: null,
+    airQuality: null,
     icon: owmIconToLocal(json.weather[0].icon),
   };
+
+  return enrichExtraMetrics(payload, lat, lon, signal);
 }
 
 async function fetchForecastByCity(query: string, signal?: AbortSignal): Promise<ForecastSnapshot | null> {
@@ -248,9 +435,15 @@ async function fetchForecastByCity(query: string, signal?: AbortSignal): Promise
     return null;
   }
 
+  const insights = toForecastInsights(json.list);
+
   return {
     hourly: toHourlyEntries(json.list),
     daily: toDailyForecast(json.list),
+    precipitationTodayMm: insights.precipitationTodayMm,
+    peakRainChance: insights.peakRainChance,
+    peakRainHour: insights.peakRainHour,
+    nextWetDay: insights.nextWetDay,
   };
 }
 
@@ -262,9 +455,15 @@ async function fetchForecastByCoords(lat: number, lon: number, signal?: AbortSig
     return null;
   }
 
+  const insights = toForecastInsights(json.list);
+
   return {
     hourly: toHourlyEntries(json.list),
     daily: toDailyForecast(json.list),
+    precipitationTodayMm: insights.precipitationTodayMm,
+    peakRainChance: insights.peakRainChance,
+    peakRainHour: insights.peakRainHour,
+    nextWetDay: insights.nextWetDay,
   };
 }
 
@@ -317,11 +516,12 @@ function WeatherIcon({ type, size = 20 }: { type: WeatherKind; size?: number }) 
 type LeftSidebarProps = {
   search: string;
   onSearchChange: (value: string) => void;
+  onSelectCity: (city: string) => void;
   loading: boolean;
   liveWeather: WeatherSnapshot;
 };
 
-function LeftSidebar({ search, onSearchChange, loading, liveWeather }: LeftSidebarProps) {
+function LeftSidebar({ search, onSearchChange, onSelectCity, loading, liveWeather }: LeftSidebarProps) {
   const [selected, setSelected] = useState("London");
   const trimmedSearch = search.trim();
   const showLiveCard = trimmedSearch.length >= 2 || isLocalSearch(trimmedSearch);
@@ -348,7 +548,7 @@ function LeftSidebar({ search, onSearchChange, loading, liveWeather }: LeftSideb
     : filteredCities;
 
   return (
-    <div style={{ width: 205, minWidth: 205, padding: 10, display: "flex", flexDirection: "column", gap: 10, background: "linear-gradient(180deg, rgba(22,38,59,0.88), rgba(17,29,45,0.84))", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
+    <div className="weather-sidebar" style={{ width: 205, minWidth: 205, padding: 10, display: "flex", flexDirection: "column", gap: 10, background: "linear-gradient(180deg, rgba(22,38,59,0.88), rgba(17,29,45,0.84))", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
       <div className="macos-toolbar" style={{ borderRadius: 14, padding: "8px 10px", display: "flex", alignItems: "center", gap: 8 }}>
         <span className="i-ph:magnifying-glass-bold" style={{ width: 14, height: 14, color: "rgba(255,255,255,0.7)" }} />
         <input
@@ -382,14 +582,17 @@ function LeftSidebar({ search, onSearchChange, loading, liveWeather }: LeftSideb
         <button style={{ width: "100%", marginTop: 12, border: "none", borderRadius: 12, padding: "9px 12px", background: "rgba(255,255,255,0.84)", color: "#26384f", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Go to Settings</button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, overflow: "hidden" }}>
+      <div className="weather-sidebar-cities" style={{ display: "flex", flexDirection: "column", gap: 8, overflow: "auto" }}>
         {sidebarCities.length > 0 ? sidebarCities.map((city) => {
           const active = selected === city.name || city.active;
 
           return (
             <button
               key={city.name}
-              onClick={() => setSelected(city.name)}
+              onClick={() => {
+                setSelected(city.name);
+                onSelectCity(city.name);
+              }}
               style={{
                 cursor: "pointer",
                 textAlign: "left",
@@ -429,6 +632,10 @@ export default function Weather() {
   const [weather, setWeather] = useState<WeatherSnapshot>(DEFAULT_WEATHER);
   const [liveHourly, setLiveHourly] = useState<HourlyEntry[]>(HERO_HOURLY);
   const [liveForecast, setLiveForecast] = useState<ForecastEntry[]>(FORECAST);
+  const [todayPrecipitationMm, setTodayPrecipitationMm] = useState(0);
+  const [peakRainChance, setPeakRainChance] = useState(0);
+  const [peakRainHour, setPeakRainHour] = useState("Now");
+  const [nextWetDay, setNextWetDay] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -437,17 +644,15 @@ export default function Weather() {
     }
 
     const trimmed = search.trim();
-
-    if (trimmed.length < 2 && !isLocalSearch(trimmed)) {
-      return;
-    }
+    const localMode = isLocalSearch(trimmed);
+    const cityQuery = trimmed.length >= 2 ? trimmed : DEFAULT_WEATHER.location;
 
     const controller = new AbortController();
-    const timeout = window.setTimeout(async () => {
+    const run = async () => {
       try {
         setLoading(true);
 
-        const nextPayload = isLocalSearch(trimmed)
+        const nextPayload = localMode
           ? await getBrowserLocation().then(async (position) => {
             const [current, forecast] = await Promise.all([
               fetchWeatherByCoords(position.coords.latitude, position.coords.longitude, controller.signal),
@@ -457,8 +662,8 @@ export default function Weather() {
             return { current, forecast };
           })
           : await Promise.all([
-            fetchWeatherByCity(trimmed, controller.signal),
-            fetchForecastByCity(trimmed, controller.signal),
+            fetchWeatherByCity(cityQuery, controller.signal),
+            fetchForecastByCity(cityQuery, controller.signal),
           ]).then(([current, forecast]) => ({ current, forecast }));
 
         if (nextPayload.current) {
@@ -468,46 +673,74 @@ export default function Weather() {
         if (nextPayload.forecast) {
           setLiveHourly(nextPayload.forecast.hourly);
           setLiveForecast(nextPayload.forecast.daily);
+          setTodayPrecipitationMm(nextPayload.forecast.precipitationTodayMm);
+          setPeakRainChance(nextPayload.forecast.peakRainChance);
+          setPeakRainHour(nextPayload.forecast.peakRainHour);
+          setNextWetDay(nextPayload.forecast.nextWetDay);
         }
       } catch {
-        setWeather(DEFAULT_WEATHER);
-        setLiveHourly(HERO_HOURLY);
-        setLiveForecast(FORECAST);
+        if (!weather.location) {
+          setWeather(DEFAULT_WEATHER);
+          setLiveHourly(HERO_HOURLY);
+          setLiveForecast(FORECAST);
+          setTodayPrecipitationMm(0);
+          setPeakRainChance(0);
+          setPeakRainHour("Now");
+          setNextWetDay(null);
+        }
       } finally {
         setLoading(false);
       }
+    };
+
+    const timeout = window.setTimeout(() => {
+      void run();
     }, 350);
+
+    const refresh = window.setInterval(() => {
+      void run();
+    }, 600000);
 
     return () => {
       controller.abort();
       window.clearTimeout(timeout);
+      window.clearInterval(refresh);
     };
-  }, [search]);
+  }, [search, weather.location]);
 
-  const useDefault = search.trim().length < 2 && !isLocalSearch(search);
-  const activeWeather = useDefault ? DEFAULT_WEATHER : weather;
-  const activeHourly = useDefault ? HERO_HOURLY : liveHourly;
-  const activeForecast = useDefault ? FORECAST : liveForecast;
+  const activeWeather = weather;
+  const activeHourly = liveHourly;
+  const activeForecast = liveForecast;
+  const activeUvLabel = uvCategory(activeWeather.uvIndex);
+  const activeAqiLabel = airQualityCategory(activeWeather.airQuality);
+  const rainSummary = peakRainChance > 0
+    ? `Rain chance peaks at ${peakRainChance}% around ${peakRainHour}.`
+    : `Dry window expected. Wind gusts up to ${activeWeather.windGust} km/h.`;
+  const mapQuery = encodeURIComponent(`${activeWeather.location}`);
+  const mapZoom = /london/i.test(activeWeather.location) ? 11 : 8;
+  const googleMapEmbedSrc = GOOGLE_MAPS_API_KEY
+    ? `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_API_KEY}&q=${mapQuery}&zoom=${mapZoom}&maptype=roadmap`
+    : "";
 
   return (
     <div className="weather-macos-screen" style={{ height: "100%", padding: 10, overflow: "hidden" }}>
       <div className="weather-shell" style={{ height: "100%", borderRadius: 28, display: "flex", overflow: "hidden" }}>
-        <LeftSidebar search={search} onSearchChange={setSearch} loading={loading} liveWeather={activeWeather} />
+        <LeftSidebar search={search} onSearchChange={setSearch} onSelectCity={setSearch} loading={loading} liveWeather={activeWeather} />
 
-        <div style={{ flex: 1, position: "relative", padding: 20, overflow: "auto", background: "linear-gradient(180deg, rgba(97,152,209,0.95), rgba(116,168,219,0.92))" }}>
+        <div className="weather-main" style={{ flex: 1, position: "relative", padding: 20, overflow: "auto", background: "linear-gradient(180deg, rgba(97,152,209,0.95), rgba(116,168,219,0.92))" }}>
           <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(circle at 14% 6%, rgba(255,255,255,0.76) 0, rgba(255,255,255,0.26) 5%, transparent 14%), radial-gradient(circle at 35% 15%, rgba(255,255,255,0.14) 0, transparent 10%)" }} />
 
-          <div style={{ position: "relative", zIndex: 1, maxWidth: 955, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", paddingTop: 2, marginBottom: 18, color: "#fff" }}>
-              <div style={{ fontSize: 28, fontWeight: 500, lineHeight: 1.05 }}>{activeWeather.location}</div>
-              <div style={{ fontSize: 68, fontWeight: 200, letterSpacing: "-4px", lineHeight: 0.9 }}>{activeWeather.temp}°</div>
-              <div style={{ fontSize: 18, fontWeight: 500, marginTop: 2 }}>{activeWeather.condition}</div>
+          <div className="weather-main-inner" style={{ position: "relative", zIndex: 1, maxWidth: 955, margin: "0 auto" }}>
+            <div className="weather-hero-head" style={{ textAlign: "center", paddingTop: 2, marginBottom: 18, color: "#fff" }}>
+              <div className="weather-hero-location" style={{ fontSize: 28, fontWeight: 500, lineHeight: 1.05 }}>{activeWeather.location}</div>
+              <div className="weather-hero-temp" style={{ fontSize: 68, fontWeight: 200, letterSpacing: "-4px", lineHeight: 0.9 }}>{activeWeather.temp}°</div>
+              <div className="weather-hero-condition" style={{ fontSize: 18, fontWeight: 500, marginTop: 2 }}>{activeWeather.condition}</div>
               <div style={{ fontSize: 13, fontWeight: 700, marginTop: 2 }}>H:{activeWeather.high}° L:{activeWeather.low}°</div>
             </div>
 
             <div style={{ borderRadius: 18, padding: "8px 12px 12px", marginBottom: 14, background: "linear-gradient(180deg, rgba(49,122,196,0.84), rgba(48,110,184,0.8))", border: "1px solid rgba(255,255,255,0.08)", color: "#fff" }}>
-              <div style={{ fontSize: 11, opacity: 0.82, marginBottom: 10 }}>Partly cloudy conditions expected around 09:00. Wind gusts are up to 11 mph.</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(18, minmax(0, 1fr))", gap: 6, alignItems: "end" }}>
+              <div style={{ fontSize: 11, opacity: 0.82, marginBottom: 10 }}>{rainSummary}</div>
+              <div className="weather-hourly-grid" style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(activeHourly.length, 1)}, minmax(0, 1fr))`, gap: 6, alignItems: "end" }}>
                 {activeHourly.map((entry) => (
                   <div key={entry.hour} style={{ textAlign: "center" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.88, marginBottom: 10 }}>{entry.hour}</div>
@@ -518,7 +751,7 @@ export default function Weather() {
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1.25fr 1fr 1.18fr", gap: 12, alignItems: "start" }}>
+            <div className="weather-desktop-panels" style={{ display: "grid", gridTemplateColumns: "1.25fr 1fr 1.18fr", gap: 12, alignItems: "start" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div className="tile tile-dark" style={{ padding: 14, minHeight: 250 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 8 }}>10-DAY FORECAST</div>
@@ -542,29 +775,29 @@ export default function Weather() {
 
                 <div className="tile tile-dark" style={{ padding: 14, minHeight: 140 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>UV INDEX</div>
-                  <div style={{ fontSize: 30, fontWeight: 200, lineHeight: 1 }}>0</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>Low</div>
+                  <div style={{ fontSize: 30, fontWeight: 200, lineHeight: 1 }}>{activeWeather.uvIndex ?? "--"}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>{activeUvLabel}</div>
                   <div style={{ height: 4, borderRadius: 999, marginTop: 14, background: "linear-gradient(90deg, #50d17c, #ffd150, #ff9b2f, #ff3b30, #d02dff)" }} />
-                  <div style={{ marginTop: 10, fontSize: 11, lineHeight: 1.4, opacity: 0.82 }}>Use sun protection. 10:00–17:00.</div>
+                  <div style={{ marginTop: 10, fontSize: 11, lineHeight: 1.4, opacity: 0.82 }}>Pressure {activeWeather.pressure} hPa · Visibility {activeWeather.visibilityKm} km.</div>
                 </div>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div className="tile tile-dark" style={{ padding: 14, minHeight: 180 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>AIR POLLUTION</div>
-                  <div style={{ fontSize: 30, fontWeight: 300, lineHeight: 1 }}>2</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>Low</div>
+                  <div style={{ fontSize: 30, fontWeight: 300, lineHeight: 1 }}>{activeWeather.airQuality ?? "--"}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>{activeAqiLabel}</div>
                   <div style={{ height: 4, borderRadius: 999, marginTop: 16, background: "linear-gradient(90deg, #50d17c 0%, #ffd150 25%, #ff9b2f 55%, #ff3b30 80%, #d02dff 100%)" }} />
-                  <div style={{ marginTop: 10, fontSize: 11, lineHeight: 1.45, opacity: 0.82 }}>Air quality index is 2, which is similar to yesterday at about this time.</div>
+                  <div style={{ marginTop: 10, fontSize: 11, lineHeight: 1.45, opacity: 0.82 }}>Live AQI from OpenWeather air pollution endpoint.</div>
                 </div>
 
                 <div className="tile tile-dark" style={{ padding: 14, minHeight: 190 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>WIND</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "center" }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 12, color: "rgba(255,255,255,0.82)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}><span>Wind</span><span>4 mph</span></div>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}><span>Gusts</span><span>11 mph</span></div>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}><span>Direction</span><span>16° NNE</span></div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}><span>Wind</span><span>{activeWeather.wind} km/h</span></div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}><span>Gusts</span><span>{activeWeather.windGust} km/h</span></div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}><span>Direction</span><span>{activeWeather.windDeg}° {windDirection(activeWeather.windDeg)}</span></div>
                     </div>
                     <div style={{ width: 84, height: 84, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.14)", position: "relative", display: "grid", placeItems: "center" }}>
                       <div style={{ position: "absolute", inset: 14, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.16)" }} />
@@ -572,8 +805,8 @@ export default function Weather() {
                       <div style={{ position: "absolute", bottom: 10, left: "50%", width: 2, height: 14, background: "#fff", transform: "translateX(-50%)" }} />
                       <div style={{ position: "absolute", left: 10, top: "50%", width: 14, height: 2, background: "#fff", transform: "translateY(-50%)" }} />
                       <div style={{ position: "absolute", right: 10, top: "50%", width: 14, height: 2, background: "#fff", transform: "translateY(-50%)" }} />
-                      <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1 }}>4<br />mph</div>
-                      <div style={{ position: "absolute", top: 10, right: 16, transform: "rotate(20deg)", width: 2, height: 26, background: "#fff", borderRadius: 999 }} />
+                      <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1 }}>{activeWeather.wind}<br />km/h</div>
+                      <div style={{ position: "absolute", top: 10, right: 16, transform: `rotate(${activeWeather.windDeg}deg)`, width: 2, height: 26, background: "#fff", borderRadius: 999 }} />
                     </div>
                   </div>
                 </div>
@@ -583,30 +816,35 @@ export default function Weather() {
                 <div className="tile tile-dark" style={{ padding: 14, minHeight: 250, position: "relative", overflow: "hidden" }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>PRECIPITATION</div>
                   <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 72% 28%, rgba(0,0,0,0.16), transparent 26%), linear-gradient(145deg, rgba(77,81,86,0.96), rgba(57,62,66,0.98))" }} />
-                  <div style={{ position: "relative", zIndex: 1, height: 198, borderRadius: 16, background: "linear-gradient(180deg, rgba(24,28,34,0.92), rgba(33,37,44,0.96))", border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden", padding: 16 }}>
-                    <div style={{ position: "absolute", inset: 16, opacity: 0.36, backgroundImage: "linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-                    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ width: 82, height: 82, borderRadius: "50%", background: "rgba(109,162,223,0.92)", border: "1px solid rgba(255,255,255,0.16)", display: "grid", placeItems: "center", boxShadow: "0 14px 30px rgba(0,0,0,0.24)" }}>
-                        <div style={{ width: 18, height: 18, borderRadius: "50%", background: "rgba(255,255,255,0.2)" }} />
-                        <div style={{ position: "absolute", bottom: 12, left: "50%", transform: "translateX(-50%)", width: 10, height: 28, borderRadius: "50% 50% 60% 60%", background: "#79b7f1" }} />
+                  <div style={{ position: "relative", zIndex: 1, height: 198, borderRadius: 16, background: "linear-gradient(180deg, rgba(24,28,34,0.92), rgba(33,37,44,0.96))", border: "1px solid rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                    {googleMapEmbedSrc ? (
+                      <iframe
+                        title={`Weather map for ${activeWeather.location}`}
+                        src={googleMapEmbedSrc}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        style={{ width: "100%", height: "100%", border: "none", filter: "saturate(0.9) contrast(1.02)" }}
+                      />
+                    ) : (
+                      <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: "rgba(255,255,255,0.72)", fontSize: 12, padding: 16, textAlign: "center" }}>
+                        Google Maps API key missing. Add VITE_GOOGLE_MAPS_API_KEY to show live map.
                       </div>
-                    </div>
-                    <div style={{ position: "absolute", left: 14, top: 14, color: "rgba(255,255,255,0.8)", fontSize: 12 }}>North Sea</div>
-                    <div style={{ position: "absolute", right: 14, top: 14, color: "rgba(255,255,255,0.72)", fontSize: 12 }}>DENMARK</div>
-                    <div style={{ position: "absolute", left: 14, bottom: 14, color: "rgba(255,255,255,0.72)", fontSize: 12 }}>0 mm</div>
-                    <div style={{ position: "absolute", right: 14, bottom: 14, color: "rgba(255,255,255,0.72)", fontSize: 12 }}>Next expected is &lt;1 mm on Sat.</div>
+                    )}
+                    <div style={{ position: "absolute", left: 14, top: 12, color: "rgba(255,255,255,0.88)", fontSize: 12, fontWeight: 600, textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>{activeWeather.location}</div>
+                    <div style={{ position: "absolute", left: 14, bottom: 14, color: "rgba(255,255,255,0.72)", fontSize: 12 }}>{todayPrecipitationMm} mm</div>
+                    <div style={{ position: "absolute", right: 14, bottom: 14, color: "rgba(255,255,255,0.72)", fontSize: 12 }}>{nextWetDay ? `Next higher rain chance on ${nextWetDay}.` : "No major rain event expected soon."}</div>
                   </div>
                 </div>
 
                 <div className="tile tile-dark" style={{ padding: 14, minHeight: 138 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>FEELS LIKE</div>
-                  <div style={{ fontSize: 30, fontWeight: 300, lineHeight: 1 }}>16°</div>
-                  <div style={{ marginTop: 10, fontSize: 11, lineHeight: 1.45, opacity: 0.82 }}>It feels warmer than the actual temperature.</div>
+                  <div style={{ fontSize: 30, fontWeight: 300, lineHeight: 1 }}>{activeWeather.feelsLike}°</div>
+                  <div style={{ marginTop: 10, fontSize: 11, lineHeight: 1.45, opacity: 0.82 }}>{activeWeather.feelsLike >= activeWeather.temp ? "It feels warmer than the actual temperature." : "It feels cooler than the actual temperature."}</div>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12, marginTop: 12 }}>
+            <div className="weather-compact-panels" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12, marginTop: 12 }}>
               <div className="tile tile-dark" style={{ minHeight: 248 }}>
                 <div style={{ padding: 14 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>10-DAY FORECAST</div>
@@ -632,27 +870,27 @@ export default function Weather() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
                 <div className="tile tile-dark" style={{ minHeight: 120, padding: 14 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>UV INDEX</div>
-                  <div style={{ fontSize: 28, fontWeight: 300, lineHeight: 1 }}>0</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>Low</div>
+                  <div style={{ fontSize: 28, fontWeight: 300, lineHeight: 1 }}>{activeWeather.uvIndex ?? "--"}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, marginTop: 2 }}>{activeUvLabel}</div>
                   <div style={{ height: 4, borderRadius: 999, marginTop: 12, background: "linear-gradient(90deg, #50d17c, #ffd150, #ff9b2f, #ff3b30, #d02dff)" }} />
-                  <div style={{ marginTop: 8, fontSize: 11, lineHeight: 1.35, opacity: 0.82 }}>Use sun protection.</div>
+                  <div style={{ marginTop: 8, fontSize: 11, lineHeight: 1.35, opacity: 0.82 }}>Use sun protection when UV is moderate or above.</div>
                 </div>
 
                 <div className="tile tile-dark" style={{ minHeight: 120, padding: 14 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>SUNSET</div>
-                  <div style={{ fontSize: 30, fontWeight: 300, lineHeight: 1 }}>21:04</div>
-                  <div style={{ marginTop: 8, fontSize: 11, opacity: 0.82 }}>Sunrise: 05:09</div>
+                  <div style={{ fontSize: 30, fontWeight: 300, lineHeight: 1 }}>{activeWeather.sunset}</div>
+                  <div style={{ marginTop: 8, fontSize: 11, opacity: 0.82 }}>Sunrise: {activeWeather.sunrise}</div>
                 </div>
 
                 <div className="tile tile-dark" style={{ minHeight: 120, padding: 14 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>FEELS LIKE</div>
-                  <div style={{ fontSize: 28, fontWeight: 300, lineHeight: 1 }}>16°</div>
-                  <div style={{ marginTop: 8, fontSize: 11, opacity: 0.82 }}>It feels warmer than the actual temperature.</div>
+                  <div style={{ fontSize: 28, fontWeight: 300, lineHeight: 1 }}>{activeWeather.feelsLike}°</div>
+                  <div style={{ marginTop: 8, fontSize: 11, opacity: 0.82 }}>Humidity is {activeWeather.humidity}%.</div>
                 </div>
 
                 <div className="tile tile-dark" style={{ minHeight: 120, padding: 14 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.7, marginBottom: 10 }}>PRECIPITATION</div>
-                  <div style={{ fontSize: 28, fontWeight: 300, lineHeight: 1 }}>0 mm</div>
+                  <div style={{ fontSize: 28, fontWeight: 300, lineHeight: 1 }}>{todayPrecipitationMm} mm</div>
                   <div style={{ marginTop: 8, fontSize: 11, opacity: 0.82 }}>Today</div>
                 </div>
               </div>

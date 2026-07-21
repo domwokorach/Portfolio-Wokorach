@@ -321,7 +321,7 @@ const Safari = ({ width }: SafariProps) => {
       </div>
 
       {/* browser content */}
-      <div style={{ flex: 1, position: "relative", zIndex: 0 }}>
+      <div style={{ flex: 1, height: "100%", position: "relative", zIndex: 0 }}>
         {wifi ? (
           goURL === "" ? (
           <NavPage setGoURL={setGoURL} width={effectiveWidth} />

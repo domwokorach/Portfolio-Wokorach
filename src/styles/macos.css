@@ -100,3 +100,91 @@
 .tile-stocks {
   background: linear-gradient(180deg, rgba(63, 63, 63, 0.95), rgba(45, 45, 45, 0.98));
 }
+
+.weather-main {
+  min-width: 0;
+}
+
+.weather-main-inner {
+  max-width: 955px;
+}
+
+.weather-sidebar-cities {
+  min-height: 0;
+}
+
+.weather-hourly-grid {
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.weather-hourly-grid > div {
+  min-width: 46px;
+}
+
+.weather-compact-panels {
+  display: none !important;
+}
+
+@media (max-width: 1260px) {
+  .weather-shell {
+    border-radius: 22px !important;
+  }
+
+  .weather-main {
+    padding: 14px !important;
+  }
+
+  .weather-main-inner {
+    max-width: 100%;
+  }
+
+  .weather-desktop-panels {
+    display: none !important;
+  }
+
+  .weather-compact-panels {
+    display: grid !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .weather-macos-screen {
+    padding: 6px !important;
+  }
+
+  .weather-shell {
+    flex-direction: column;
+    border-radius: 18px !important;
+  }
+
+  .weather-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .weather-sidebar-cities {
+    max-height: 200px;
+  }
+
+  .weather-hero-location {
+    font-size: 22px !important;
+  }
+
+  .weather-hero-temp {
+    font-size: 50px !important;
+    letter-spacing: -2px !important;
+  }
+
+  .weather-hero-condition {
+    font-size: 16px !important;
+  }
+
+  .weather-compact-panels {
+    grid-template-columns: 1fr !important;
+  }
+}
