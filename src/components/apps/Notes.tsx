@@ -15,10 +15,10 @@ interface Note {
 const INITIAL_NOTES: Note[] = [
   {
     id: "1",
-    title: "macOS Tahoe",
-    body: "The Chevrolet Tahoe is a line of full-size SUVs from Chevrolet marketed since the 1995 model year.",
-    date: "Thursday",
-    dateISO: "2025-09-11",
+    title: "Write test me!",
+    body: "You can write a test note here. This is a sample note to demonstrate the Notes app functionality.",
+    date: "Today",
+    dateISO: "2026-09-12",
     pinned: true,
     color: "#FFCC00",
   },
@@ -97,6 +97,100 @@ function groupNotes(notes: Note[]): { bucket: string; notes: Note[] }[] {
   return DATE_BUCKET_ORDER.filter((b) => map[b]?.length).map((b) => ({ bucket: b, notes: map[b] }));
 }
 
+type NoteRowProps = {
+  note: Note;
+  selected: boolean;
+  onSelect: () => void;
+};
+
+function NoteRow({ note, selected, onSelect }: NoteRowProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      onClick={onSelect}
+      style={{
+        padding: "9px 14px",
+        borderRadius: "8px",
+        margin: "1px 6px",
+        cursor: "default",
+        background: selected ? "rgba(255,204,0,0.22)" : "transparent",
+        transition: "background 0.15s ease",
+        display: "flex",
+        gap: "8px",
+        alignItems: "flex-start",
+      }}
+      onMouseEnter={(e) => {
+        if (!selected)
+          (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.04)";
+      }}
+      onMouseLeave={(e) => {
+        if (!selected)
+          (e.currentTarget as HTMLElement).style.background = "transparent";
+      }}
+    >
+      {note.color && (
+        <div style={{ width: 3, borderRadius: 2, background: note.color, alignSelf: "stretch", flexShrink: 0 }} />
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: "13px",
+            fontWeight: 600,
+            color: "#1c1c1e",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {note.title || "Untitled"}
+        </div>
+        <div style={{ display: "flex", gap: "6px", marginTop: "1px" }}>
+          <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.4)", flexShrink: 0 }}>{note.date}</span>
+          <span
+            style={{
+              fontSize: "11px",
+              color: "rgba(0,0,0,0.35)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {note.body.slice(0, 28) || "No additional text"}
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function GroupHeader({ label }: { label: string }) {
+  return (
+    <div
+      style={{
+        fontSize: "12px",
+        fontWeight: 700,
+        color: "rgba(0,0,0,0.4)",
+        padding: "8px 14px 3px",
+        letterSpacing: "0.01em",
+      }}
+    >
+      {label}
+    </div>
+  );
+}
+
+const TOOLBAR_ICONS = [
+  { icon: "i-ph:note-pencil", title: "New Note" },
+  { icon: "i-ph:text-aa", title: "Format" },
+  { icon: "i-ph:table", title: "Table" },
+  { icon: "i-ph:check-square", title: "Checklist" },
+  { icon: "i-ph:paperclip", title: "Attachment" },
+  { icon: "i-ph:tag", title: "Tags" },
+  { icon: "i-ph:share-network", title: "Share" },
+  { icon: "i-ph:dots-three", title: "More" },
+] as const;
+
 export default function Notes() {
   const [notes, setNotes] = useState<Note[]>(INITIAL_NOTES);
   const [selected, setSelected] = useState<string>(INITIAL_NOTES[0].id);
@@ -143,90 +237,6 @@ export default function Notes() {
       if (isMobile) setMobileView("list");
     }
   };
-
-  const NoteRow = ({ note }: { note: Note }) => (
-    <motion.div
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      onClick={() => { setSelected(note.id); if (isMobile) setMobileView("editor"); }}
-      style={{
-        padding: "9px 14px",
-        borderRadius: "8px",
-        margin: "1px 6px",
-        cursor: "default",
-        background: selected === note.id ? "rgba(255,204,0,0.22)" : "transparent",
-        transition: "background 0.15s ease",
-        display: "flex",
-        gap: "8px",
-        alignItems: "flex-start",
-      }}
-      onMouseEnter={(e) => {
-        if (selected !== note.id)
-          (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.04)";
-      }}
-      onMouseLeave={(e) => {
-        if (selected !== note.id)
-          (e.currentTarget as HTMLElement).style.background = "transparent";
-      }}
-    >
-      {note.color && (
-        <div style={{ width: 3, borderRadius: 2, background: note.color, alignSelf: "stretch", flexShrink: 0 }} />
-      )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: "13px",
-            fontWeight: 600,
-            color: "#1c1c1e",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {note.title || "Untitled"}
-        </div>
-        <div style={{ display: "flex", gap: "6px", marginTop: "1px" }}>
-          <span style={{ fontSize: "11px", color: "rgba(0,0,0,0.4)", flexShrink: 0 }}>{note.date}</span>
-          <span
-            style={{
-              fontSize: "11px",
-              color: "rgba(0,0,0,0.35)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {note.body.slice(0, 28) || "No additional text"}
-          </span>
-        </div>
-      </div>
-    </motion.div>
-  );
-
-  const GroupHeader = ({ label }: { label: string }) => (
-    <div
-      style={{
-        fontSize: "12px",
-        fontWeight: 700,
-        color: "rgba(0,0,0,0.4)",
-        padding: "8px 14px 3px",
-        letterSpacing: "0.01em",
-      }}
-    >
-      {label}
-    </div>
-  );
-
-  const toolbarIcons = [
-    { icon: "i-ph:note-pencil", title: "New Note", action: newNote },
-    { icon: "i-ph:text-aa", title: "Format" },
-    { icon: "i-ph:table", title: "Table" },
-    { icon: "i-ph:check-square", title: "Checklist" },
-    { icon: "i-ph:paperclip", title: "Attachment" },
-    { icon: "i-ph:tag", title: "Tags" },
-    { icon: "i-ph:share-network", title: "Share" },
-    { icon: "i-ph:dots-three", title: "More" },
-  ];
 
   return (
     <div
@@ -425,14 +435,20 @@ export default function Notes() {
           {pinned.length > 0 && (
             <>
               <GroupHeader label="Pinned" />
-              {pinned.map((n) => <NoteRow key={n.id} note={n} />)}
+              {pinned.map((n) => <NoteRow key={n.id} note={n} selected={selected === n.id} onSelect={() => {
+                setSelected(n.id);
+                if (isMobile) setMobileView("editor");
+              }} />)}
             </>
           )}
           <AnimatePresence>
             {groups.map(({ bucket, notes: gNotes }) => (
               <div key={bucket}>
                 <GroupHeader label={bucket} />
-                {gNotes.map((n) => <NoteRow key={n.id} note={n} />)}
+                {gNotes.map((n) => <NoteRow key={n.id} note={n} selected={selected === n.id} onSelect={() => {
+                  setSelected(n.id);
+                  if (isMobile) setMobileView("editor");
+                }} />)}
               </div>
             ))}
           </AnimatePresence>
@@ -461,11 +477,11 @@ export default function Notes() {
               background: "rgba(250,250,248,0.99)",
             }}
           >
-            {toolbarIcons.map((t) => (
+            {TOOLBAR_ICONS.map((t) => (
               <button
                 key={t.title}
                 title={t.title}
-                onClick={t.action}
+                onClick={t.title === "New Note" ? newNote : undefined}
                 style={{
                   background: "none",
                   border: "none",
