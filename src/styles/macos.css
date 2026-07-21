@@ -1,0 +1,102 @@
+/* Local macOS-style fallback for when the external macos.css package is unavailable. */
+
+:root {
+  --macos-window-bg: rgba(28, 28, 30, 0.78);
+  --macos-window-border: rgba(255, 255, 255, 0.12);
+  --macos-window-shadow: 0 24px 80px rgba(0, 0, 0, 0.28), 0 8px 28px rgba(0, 0, 0, 0.18);
+  --macos-surface-bg: rgba(255, 255, 255, 0.1);
+  --macos-surface-border: rgba(255, 255, 255, 0.08);
+  --macos-title: #f5f5f7;
+  --macos-subtitle: rgba(255, 255, 255, 0.72);
+}
+
+.macos-window {
+  background: var(--macos-window-bg);
+  border: 1px solid var(--macos-window-border);
+  border-radius: 24px;
+  box-shadow: var(--macos-window-shadow);
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+}
+
+.macos-toolbar {
+  background: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.macos-glass {
+  background: var(--macos-surface-bg);
+  border: 1px solid var(--macos-surface-border);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+
+.macos-card {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.macos-title {
+  color: var(--macos-title);
+  font-family: var(--font-display);
+}
+
+.macos-subtitle {
+  color: var(--macos-subtitle);
+}
+
+.macos-pill {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-macos-screen {
+  background: rgba(233, 228, 221, 0.92);
+}
+
+.weather-shell {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.hero-weather {
+  background: linear-gradient(180deg, #2c67a6 0%, #4d80b9 45%, #6f98c9 100%);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.tile-grid {
+  background: transparent;
+}
+
+.tile {
+  border-radius: 36px;
+  overflow: hidden;
+  min-height: 224px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.tile-dark {
+  background: linear-gradient(180deg, rgba(64, 64, 64, 0.94), rgba(42, 42, 42, 0.98));
+  color: #f5f5f7;
+}
+
+.tile-battery {
+  background: radial-gradient(circle at 28% 24%, rgba(60, 182, 95, 0.16), transparent 26%), linear-gradient(180deg, rgba(81, 72, 63, 0.92), rgba(61, 55, 55, 0.98));
+}
+
+.tile-brown {
+  background: linear-gradient(180deg, rgba(96, 68, 45, 0.94), rgba(72, 49, 38, 0.98));
+}
+
+.tile-stocks {
+  background: linear-gradient(180deg, rgba(63, 63, 63, 0.95), rgba(45, 45, 45, 0.98));
+}

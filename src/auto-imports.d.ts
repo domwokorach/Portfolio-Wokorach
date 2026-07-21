@@ -51,6 +51,7 @@ declare global {
   const Typora: typeof import('./components/apps/Typora')['default']
   const VSCode: typeof import('./components/apps/VSCode')['default']
   const VideoIcon: typeof import('./components/DesktopIcons')['VideoIcon']
+  const Weather: typeof import('./components/apps/Weather')['default']
   const WeatherWidget: typeof import('./components/widgets/WeatherWidget')['default']
   const WifiMenu: typeof import('./components/menus/WifiMenu')['default']
   const YouTube: typeof import('./components/apps/YouTube')['default']
