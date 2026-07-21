@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import websites from "~/configs/websites";
 import wallpapers from "~/configs/wallpapers";
+import { useWindowSize } from "~/hooks";
 import { checkURL } from "~/utils";
 import { useStore } from "~/stores";
 import type { SiteSectionData, SiteData } from "~/types";
@@ -24,10 +25,8 @@ interface NavSectionProps extends NavProps {
 }
 
 const NavSection = ({ width, section, setGoURL }: NavSectionProps) => {
-  const grid = width < 640 ? "grid-template-columns: repeat(4, minmax(0, 1fr))" : "grid-template-columns: repeat(9, minmax(0, 1fr))";
-
   return (
-    <div style={{ margin: "0 auto", width: "100%", maxWidth: "800px", padding: "32px 16px 0" }}>
+    <div style={{ margin: "0 auto", width: "100%", maxWidth: "800px", padding: "32px 16px 0", boxSizing: "border-box", overflowX: "hidden" }}>
       <div style={{ fontWeight: 600, marginLeft: "8px", fontSize: width < 640 ? "20px" : "24px", color: "var(--lg-text-primary, #1c1c1e)" }}>
         {section.title}
       </div>
@@ -77,6 +76,7 @@ const NavPage = ({ width, setGoURL }: NavProps) => {
         width: "100%",
         height: "100%",
         overflowY: "auto",
+        overflowX: "hidden",
         backgroundPosition: "center",
         backgroundSize: "cover",
         backgroundImage: `url(${dark ? wallpapers.night : wallpapers.day})`,
@@ -85,6 +85,7 @@ const NavPage = ({ width, setGoURL }: NavProps) => {
       <div style={{ 
           width: "100%", 
           minHeight: "100%", 
+          overflowX: "hidden",
           paddingTop: "32px", 
           background: "var(--lg-bg-tinted)", 
           backdropFilter: "var(--lg-blur-heavy)", 
@@ -102,6 +103,7 @@ const NavPage = ({ width, setGoURL }: NavProps) => {
             style={{
                 height: "64px",
                 width: "100%",
+                boxSizing: "border-box",
                 display: "flex",
                 alignItems: "center",
                 background: "rgba(255,255,255,0.4)",
@@ -115,7 +117,7 @@ const NavPage = ({ width, setGoURL }: NavProps) => {
               <span className="i-ph:shield-check-fill" style={{ fontSize: "24px", color: "#34C759" }} />
               <span style={{ fontSize: "24px", fontWeight: 700, color: "var(--lg-text-primary, #1c1c1e)" }}>{numTracker}</span>
             </div>
-            <div style={{ paddingLeft: "20px", fontSize: "14px", color: "var(--lg-text-secondary, rgba(0,0,0,0.6))" }}>
+            <div style={{ minWidth: 0, paddingLeft: "20px", fontSize: "14px", color: "var(--lg-text-secondary, rgba(0,0,0,0.6))" }}>
               In the last seven days, Safari has prevented {numTracker} trackers from profiling you.
             </div>
           </div>
@@ -151,7 +153,9 @@ const NoInternetPage = () => {
   );
 };
 
-const Safari = ({ width = 800 }: SafariProps) => {
+const Safari = ({ width }: SafariProps) => {
+  const { winWidth } = useWindowSize();
+  const effectiveWidth = width ?? winWidth;
   const wifi = useStore((state) => state.wifi);
   const safariUrl = useStore((state) => state.safariUrl);
   const setSafariUrl = useStore((state) => state.setSafariUrl);
@@ -160,17 +164,14 @@ const Safari = ({ width = 800 }: SafariProps) => {
     currentURL: ""
   });
 
-  useEffect(() => {
-    if (safariUrl) {
-      setState({
-        goURL: safariUrl,
-        currentURL: safariUrl
-      });
-      setSafariUrl("");
-    }
-  }, [safariUrl, setSafariUrl]);
+  const goURL = safariUrl || state.goURL;
+  const currentURL = safariUrl || state.currentURL;
 
   const setGoURL = (url: string) => {
+    if (safariUrl) {
+      setSafariUrl("");
+    }
+
     const isValid = checkURL(url);
 
     if (isValid) {
@@ -190,10 +191,6 @@ const Safari = ({ width = 800 }: SafariProps) => {
     const keyCode = e.key;
     if (keyCode === "Enter") setGoURL((e.target as HTMLInputElement).value);
   };
-
-  const tabTitle = state.goURL
-    ? (() => { try { return new URL(state.goURL).hostname.replace(/^www\./, ""); } catch { return state.goURL; } })()
-    : "New Tab";
 
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "var(--lg-bg)", }}>
@@ -216,7 +213,7 @@ const Safari = ({ width = 800 }: SafariProps) => {
                 style={{
                     background: "transparent",
                     border: "none",
-                    color: state.goURL === "" ? "var(--c-text-tertiary, rgba(0,0,0,0.3))" : "var(--c-text-secondary, rgba(0,0,0,0.6))",
+                    color: goURL === "" ? "var(--c-text-tertiary, rgba(0,0,0,0.3))" : "var(--c-text-secondary, rgba(0,0,0,0.6))",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -263,8 +260,14 @@ const Safari = ({ width = 800 }: SafariProps) => {
                 <span className="i-ph:shield-check" style={{ color: "var(--c-text-tertiary, rgba(0,0,0,0.4))" }} />
                 <input
                     type="text"
-                    value={state.currentURL}
-                    onChange={(e) => setState({ ...state, currentURL: e.target.value })}
+                    value={currentURL}
+                    onChange={(e) => {
+                      if (safariUrl) {
+                        setSafariUrl("");
+                      }
+
+                      setState((current) => ({ ...current, currentURL: e.target.value }));
+                    }}
                     onKeyPress={pressURL}
                     placeholder="Search or enter website name"
                     style={{
@@ -320,12 +323,12 @@ const Safari = ({ width = 800 }: SafariProps) => {
       {/* browser content */}
       <div style={{ flex: 1, position: "relative", zIndex: 0 }}>
         {wifi ? (
-            state.goURL === "" ? (
-            <NavPage setGoURL={setGoURL} width={width} />
+          goURL === "" ? (
+          <NavPage setGoURL={setGoURL} width={effectiveWidth} />
             ) : (
             <iframe
                 title={"Safari clone browser"}
-                src={state.goURL}
+            src={goURL}
                 style={{ width: "100%", height: "100%", border: "none", background: "#fff" }}
             />
             )
