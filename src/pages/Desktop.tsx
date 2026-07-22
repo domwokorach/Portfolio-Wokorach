@@ -24,6 +24,146 @@ interface DesktopState {
   showNotificationCenter: boolean;
 }
 
+interface DesktopEntry {
+  id: string;
+  name: string;
+  kind: "folder" | "file";
+  icon: string;
+  side?: "left" | "right";
+  x: number;
+  y: number;
+  openAppId?: string;
+  finderLocation?: string;
+  link?: string;
+}
+
+interface DesktopDragState {
+  id: string;
+  offsetX: number;
+  offsetY: number;
+}
+
+interface DragPoint {
+  x: number;
+  y: number;
+}
+
+const DESKTOP_STORAGE_KEY = "portfolio.desktop.entries.v1";
+const ICON_WIDTH = 74;
+const ICON_HEIGHT = 86;
+const GRID_STEP_X = 96;
+const GRID_STEP_Y = 120;
+const GRID_MIN_X = 8;
+const GRID_MIN_Y = 48;
+const GRID_RIGHT_PADDING = 8;
+const GRID_BOTTOM_PADDING = 76;
+const RENAME_INTENT_DELAY_MS = 350;
+
+function clampDesktopPosition(x: number, y: number) {
+  const maxX = Math.max(GRID_MIN_X, window.innerWidth - ICON_WIDTH - GRID_RIGHT_PADDING);
+  const maxY = Math.max(GRID_MIN_Y, window.innerHeight - ICON_HEIGHT - GRID_BOTTOM_PADDING);
+
+  return {
+    x: Math.max(GRID_MIN_X, Math.min(maxX, x)),
+    y: Math.max(GRID_MIN_Y, Math.min(maxY, y)),
+  };
+}
+
+function snapDesktopPosition(x: number, y: number) {
+  const snappedX = GRID_MIN_X + Math.round((x - GRID_MIN_X) / GRID_STEP_X) * GRID_STEP_X;
+  const snappedY = GRID_MIN_Y + Math.round((y - GRID_MIN_Y) / GRID_STEP_Y) * GRID_STEP_Y;
+  return clampDesktopPosition(snappedX, snappedY);
+}
+
+function normalizeDesktopEntries(raw: unknown): DesktopEntry[] {
+  if (!Array.isArray(raw)) return [];
+
+  return raw
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const e = entry as Partial<DesktopEntry>;
+      if (typeof e.id !== "string" || typeof e.name !== "string") return null;
+      if (e.kind !== "folder" && e.kind !== "file") return null;
+      if (typeof e.icon !== "string") return null;
+      if (typeof e.x !== "number" || typeof e.y !== "number") return null;
+
+      const pos = clampDesktopPosition(e.x, e.y);
+      return {
+        id: e.id,
+        name: e.name,
+        kind: e.kind,
+        icon: e.icon,
+        side: e.side === "left" ? "left" : e.side === "right" ? "right" : undefined,
+        x: pos.x,
+        y: pos.y,
+        openAppId: e.openAppId,
+        finderLocation: e.finderLocation,
+        link: e.link,
+      };
+    })
+    .filter((entry): entry is DesktopEntry => entry !== null);
+}
+
+function getNextDesktopFolderId(entries: DesktopEntry[]): string {
+  const prefix = "desktop-folder-";
+  const maxId = entries.reduce((acc, entry) => {
+    if (!entry.id.startsWith(prefix)) return acc;
+    const n = Number(entry.id.slice(prefix.length));
+    return Number.isFinite(n) ? Math.max(acc, n) : acc;
+  }, 0);
+  return `${prefix}${maxId + 1}`;
+}
+
+const INITIAL_DESKTOP_ENTRIES: DesktopEntry[] = [
+  {
+    id: "desktop-project-1",
+    name: "Desktop",
+    kind: "folder",
+    icon: "/img/icons/folder-generic.png",
+    side: "right",
+    x: 1160,
+    y: 128,
+    openAppId: "finder",
+    finderLocation: "desktop",
+  },
+  {
+    id: "desktop-project-2",
+    name: "Projects",
+    kind: "folder",
+    icon: "/img/icons/folder-generic.png",
+    side: "right",
+    x: 1160,
+    y: 248,
+    openAppId: "finder",
+  },
+  {
+    id: "desktop-project-3",
+    name: "Resume",
+    kind: "folder",
+    icon: "/img/icons/folder-generic.png",
+    side: "right",
+    x: 1160,
+    y: 368,
+    openAppId: "finder",
+  },
+];
+
+function getInitialDesktopEntries(): DesktopEntry[] {
+  if (typeof window === "undefined") return INITIAL_DESKTOP_ENTRIES;
+
+  try {
+    const raw = window.localStorage.getItem(DESKTOP_STORAGE_KEY);
+    if (!raw) return INITIAL_DESKTOP_ENTRIES;
+
+    const parsed = JSON.parse(raw);
+    const restoredEntries = normalizeDesktopEntries(parsed);
+    return restoredEntries.length > 0 ? restoredEntries : INITIAL_DESKTOP_ENTRIES;
+  } catch {
+    // Ignore invalid storage and keep defaults.
+    return INITIAL_DESKTOP_ENTRIES;
+  }
+}
+
 // Build the initial state map from apps config — includes ALL apps
 function buildInitialState(): Pick<DesktopState, "showApps" | "appsZ" | "maxApps" | "minApps"> {
   const showApps: { [key: string]: boolean } = {};
@@ -55,6 +195,16 @@ export default function Desktop(props: MacActions) {
   const [spotlightBtnRef, setSpotlightBtnRef] =
     useState<React.RefObject<HTMLDivElement> | null>(null);
   const [showAboutMac, setShowAboutMac] = useState(false);
+  const [desktopEntries, setDesktopEntries] = useState<DesktopEntry[]>(getInitialDesktopEntries);
+  const [dragState, setDragState] = useState<DesktopDragState | null>(null);
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  const [renamingEntryId, setRenamingEntryId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState("");
+  const dragFrameRef = React.useRef<number | null>(null);
+  const dragPointRef = React.useRef<DragPoint | null>(null);
+  const dragStartedRef = React.useRef(false);
+  const renameInputRef = React.useRef<HTMLInputElement | null>(null);
+  const renameIntentTimeoutRef = React.useRef<number | null>(null);
 
   const { dark, brightness, getWallpaper } = useStore((s) => ({
     dark: s.dark,
@@ -217,6 +367,24 @@ export default function Desktop(props: MacActions) {
     };
   }, [state]);
 
+  useEffect(() => {
+    window.localStorage.setItem(DESKTOP_STORAGE_KEY, JSON.stringify(desktopEntries));
+  }, [desktopEntries]);
+
+  useEffect(() => {
+    if (!renamingEntryId || !renameInputRef.current) return;
+    renameInputRef.current.focus();
+    renameInputRef.current.select();
+  }, [renamingEntryId]);
+
+  useEffect(() => {
+    return () => {
+      if (renameIntentTimeoutRef.current !== null) {
+        window.clearTimeout(renameIntentTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const renderAppWindows = () => {
     return apps.map((app) => {
       if (!app.desktop) return null;
@@ -278,9 +446,155 @@ export default function Desktop(props: MacActions) {
 
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0 });
 
+  const openDesktopEntry = (entry: DesktopEntry) => {
+    if (entry.openAppId) {
+      openApp(entry.openAppId);
+
+      if (entry.openAppId === "finder" && entry.finderLocation) {
+        window.setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("finder:openLocation", { detail: entry.finderLocation }));
+        }, 0);
+      }
+
+      return;
+    }
+
+    if (entry.link) {
+      window.open(entry.link, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const createDesktopFolder = () => {
+    const baseName = "New Folder";
+    let name = baseName;
+    let index = 2;
+
+    while (desktopEntries.some((entry) => entry.name.toLowerCase() === name.toLowerCase())) {
+      name = `${baseName} ${index}`;
+      index += 1;
+    }
+
+    const rightColumnCount = desktopEntries.filter((entry) => entry.side !== "left").length;
+    const nextPosition = snapDesktopPosition(1160, 128 + rightColumnCount * GRID_STEP_Y);
+    const folder: DesktopEntry = {
+      id: getNextDesktopFolderId(desktopEntries),
+      name,
+      kind: "folder",
+      icon: "/img/icons/folder-generic.png",
+      side: "right",
+      x: nextPosition.x,
+      y: nextPosition.y,
+      openAppId: "finder",
+    };
+
+    setDesktopEntries((prev) => [folder, ...prev]);
+    setRenamingEntryId(folder.id);
+    setRenameDraft(folder.name);
+  };
+
+  const commitRename = (entryId: string) => {
+    const trimmed = renameDraft.trim();
+    if (!trimmed) {
+      setRenamingEntryId(null);
+      setRenameDraft("");
+      return;
+    }
+
+    setDesktopEntries((prev) => {
+      const nameExists = prev.some((entry) => (
+        entry.id !== entryId && entry.name.toLowerCase() === trimmed.toLowerCase()
+      ));
+      if (nameExists) {
+        let counter = 2;
+        let fallbackName = `${trimmed} ${counter}`;
+        while (prev.some((entry) => (
+          entry.id !== entryId && entry.name.toLowerCase() === fallbackName.toLowerCase()
+        ))) {
+          counter += 1;
+          fallbackName = `${trimmed} ${counter}`;
+        }
+
+        return prev.map((entry) => entry.id === entryId ? { ...entry, name: fallbackName } : entry);
+      }
+
+      return prev.map((entry) => entry.id === entryId ? { ...entry, name: trimmed } : entry);
+    });
+
+    setRenamingEntryId(null);
+    setRenameDraft("");
+  };
+
+  const startRename = (entry: DesktopEntry) => {
+    setRenamingEntryId(entry.id);
+    setRenameDraft(entry.name);
+    setSelectedEntryId(entry.id);
+  };
+
+  const clearRenameIntentTimeout = () => {
+    if (renameIntentTimeoutRef.current !== null) {
+      window.clearTimeout(renameIntentTimeoutRef.current);
+      renameIntentTimeoutRef.current = null;
+    }
+  };
+
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     setContextMenu({ show: true, x: e.clientX, y: e.clientY });
+  };
+
+  const beginDragEntry = (e: React.MouseEvent, entry: DesktopEntry) => {
+    if (isMobile || e.button !== 0) return;
+    setContextMenu((current) => ({ ...current, show: false }));
+    dragStartedRef.current = false;
+    setDragState({
+      id: entry.id,
+      offsetX: e.clientX - entry.x,
+      offsetY: e.clientY - entry.y,
+    });
+  };
+
+  const moveDraggedEntry = (e: React.MouseEvent) => {
+    if (!dragState) return;
+
+    const nextPos = clampDesktopPosition(e.clientX - dragState.offsetX, e.clientY - dragState.offsetY);
+    const nextX = nextPos.x;
+    const nextY = nextPos.y;
+
+    dragPointRef.current = { x: nextX, y: nextY };
+    dragStartedRef.current = true;
+
+    if (dragFrameRef.current !== null) return;
+
+    dragFrameRef.current = window.requestAnimationFrame(() => {
+      const point = dragPointRef.current;
+      if (point) {
+        setDesktopEntries((prev) => prev.map((entry) => (
+          entry.id === dragState.id ? { ...entry, x: point.x, y: point.y } : entry
+        )));
+      }
+      dragFrameRef.current = null;
+    });
+  };
+
+  const endDragEntry = () => {
+    if (dragFrameRef.current !== null) {
+      window.cancelAnimationFrame(dragFrameRef.current);
+      dragFrameRef.current = null;
+    }
+    dragPointRef.current = null;
+    if (dragState) {
+      if (dragStartedRef.current) {
+        setDesktopEntries((prev) => prev.map((entry) => {
+          if (entry.id !== dragState.id) return entry;
+          const snapped = snapDesktopPosition(entry.x, entry.y);
+          return { ...entry, x: snapped.x, y: snapped.y };
+        }));
+      }
+      setDragState(null);
+    }
+    window.setTimeout(() => {
+      dragStartedRef.current = false;
+    }, 0);
   };
 
   return (
@@ -288,6 +602,15 @@ export default function Desktop(props: MacActions) {
       className="size-full overflow-hidden bg-center bg-cover"
       style={bgStyle}
       onContextMenu={handleContextMenu}
+      onClick={() => {
+        clearRenameIntentTimeout();
+        if (!dragState && !renamingEntryId) {
+          setSelectedEntryId(null);
+        }
+      }}
+      onMouseMove={moveDraggedEntry}
+      onMouseUp={endDragEntry}
+      onMouseLeave={endDragEntry}
     >
       {/* Top Menu Bar */}
       <TopBar
@@ -329,19 +652,115 @@ export default function Desktop(props: MacActions) {
         </div>
       </div>
 
-      {/* Desktop Icons - top-right */}
+      {/* Desktop Icons */}
       <div
         style={{
           position: "fixed",
-          top: 48,
-          right: 24,
+          inset: 0,
           zIndex: 55,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 24,
+          pointerEvents: "none",
         }}
       >
+        {desktopEntries.map((entry) => (
+          <button
+            key={entry.id}
+            onDoubleClick={() => {
+              clearRenameIntentTimeout();
+              if (!dragStartedRef.current) {
+                openDesktopEntry(entry);
+              }
+            }}
+            onMouseDown={(e) => beginDragEntry(e, entry)}
+            title={entry.name}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (dragStartedRef.current) return;
+
+              const isSelected = selectedEntryId === entry.id;
+              if (isSelected && renamingEntryId !== entry.id) {
+                clearRenameIntentTimeout();
+                renameIntentTimeoutRef.current = window.setTimeout(() => {
+                  startRename(entry);
+                  renameIntentTimeoutRef.current = null;
+                }, RENAME_INTENT_DELAY_MS);
+              } else {
+                clearRenameIntentTimeout();
+                setSelectedEntryId(entry.id);
+              }
+
+              if (renamingEntryId === entry.id) {
+                e.stopPropagation();
+              }
+            }}
+            style={{
+              position: "absolute",
+              left: entry.x,
+              top: entry.y,
+              background: "transparent",
+              border: "none",
+              cursor: dragState?.id === entry.id ? "grabbing" : "grab",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 6,
+              width: 74,
+              padding: 0,
+              pointerEvents: "auto",
+              userSelect: "none",
+              transition: dragState?.id === entry.id ? "none" : "transform 0.12s ease-out",
+              transform: "translateZ(0)",
+            }}
+          >
+            <img src={entry.icon} alt={entry.kind} style={{ width: 52, height: 52, objectFit: "contain", filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.32))" }} />
+            {renamingEntryId === entry.id ? (
+              <input
+                ref={renameInputRef}
+                value={renameDraft}
+                onChange={(e) => setRenameDraft(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                onBlur={() => commitRename(entry.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    commitRename(entry.id);
+                  }
+                  if (e.key === "Escape") {
+                    setRenamingEntryId(null);
+                    setRenameDraft("");
+                  }
+                }}
+                style={{
+                  width: 72,
+                  fontSize: 11,
+                  lineHeight: 1.25,
+                  textAlign: "center",
+                  color: "#111",
+                  background: "rgba(255,255,255,0.95)",
+                  border: "1px solid rgba(0,0,0,0.25)",
+                  borderRadius: 4,
+                  outline: "none",
+                  padding: "1px 4px",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.35)",
+                }}
+              />
+            ) : (
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "#fff",
+                  textAlign: "center",
+                  lineHeight: 1.25,
+                  textShadow: "0 1px 3px rgba(0,0,0,0.65)",
+                  maxWidth: 72,
+                  borderRadius: 4,
+                  padding: "1px 4px",
+                  background: selectedEntryId === entry.id ? "rgba(10,132,255,0.55)" : "transparent",
+                }}
+              >
+                {entry.name}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
       {isMobile && (
@@ -412,6 +831,7 @@ export default function Desktop(props: MacActions) {
         show={contextMenu.show}
         onClose={() => setContextMenu({ ...contextMenu, show: false })}
         openApp={openApp}
+        onCreateFolder={createDesktopFolder}
       />
     </div>
   );

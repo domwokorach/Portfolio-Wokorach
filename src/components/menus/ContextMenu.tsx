@@ -7,9 +7,51 @@ interface ContextMenuProps {
   show: boolean;
   onClose: () => void;
   openApp: (id: string) => void;
+  onCreateFolder: () => void;
 }
 
-export default function ContextMenu({ x, y, show, onClose, openApp }: ContextMenuProps) {
+interface MenuItemProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  hint?: string;
+  onClose: () => void;
+  itemStyle: React.CSSProperties;
+}
+
+function MenuItem({ children, onClick, disabled = false, hint, onClose, itemStyle }: MenuItemProps) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      className="text-black dark:text-white"
+      style={{
+        ...itemStyle,
+        background: hovered && !disabled ? "var(--accent-blue)" : "transparent",
+        color: hovered && !disabled ? "#fff" : "inherit",
+        opacity: disabled ? 0.5 : 1,
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!disabled && onClick) {
+          onClick();
+          onClose();
+        }
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span>{children}</span>
+      {hint && (
+        <span style={{ fontSize: "12px", opacity: hovered && !disabled ? 0.9 : 0.5, marginLeft: "auto", fontFamily: "var(--font-system)", letterSpacing: "1px" }}>
+          {hint}
+        </span>
+      )}
+    </div>
+  );
+}
+
+export default function ContextMenu({ x, y, show, onClose, openApp, onCreateFolder }: ContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useClickOutside(ref, onClose);
@@ -30,37 +72,6 @@ export default function ContextMenu({ x, y, show, onClose, openApp }: ContextMen
     margin: "1px 5px",
   };
 
-  const MenuItem = ({ children, onClick, disabled = false, hint }: { children: React.ReactNode; onClick?: () => void; disabled?: boolean; hint?: string }) => {
-    const [hovered, setHovered] = useState(false);
-    return (
-      <div
-        className="text-black dark:text-white"
-        style={{
-          ...itemStyle,
-          background: hovered && !disabled ? "var(--accent-blue)" : "transparent",
-          color: hovered && !disabled ? "#fff" : "inherit",
-          opacity: disabled ? 0.5 : 1,
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!disabled && onClick) {
-            onClick();
-            onClose();
-          }
-        }}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-      >
-        <span>{children}</span>
-        {hint && (
-          <span style={{ fontSize: "12px", opacity: hovered && !disabled ? 0.9 : 0.5, marginLeft: "auto", fontFamily: "var(--font-system)", letterSpacing: "1px" }}>
-            {hint}
-          </span>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div
       ref={ref}
@@ -76,16 +87,16 @@ export default function ContextMenu({ x, y, show, onClose, openApp }: ContextMen
         fontWeight: 400,
       }}
     >
-      <MenuItem disabled>New Folder</MenuItem>
+      <MenuItem onClick={onCreateFolder} onClose={onClose} itemStyle={itemStyle}>New Folder</MenuItem>
       <div className="h-px bg-gray-300 dark:bg-white/10 my-1 mx-2" />
-      <MenuItem disabled>Get Info</MenuItem>
-      <MenuItem onClick={() => openApp("system-settings")}>Change Desktop Background...</MenuItem>
+      <MenuItem disabled onClose={onClose} itemStyle={itemStyle}>Get Info</MenuItem>
+      <MenuItem onClick={() => openApp("system-settings")} onClose={onClose} itemStyle={itemStyle}>Change Desktop Background...</MenuItem>
       <div className="h-px bg-gray-300 dark:bg-white/10 my-1 mx-2" />
-      <MenuItem disabled>Use Stacks</MenuItem>
-      <MenuItem disabled>Sort By</MenuItem>
-      <MenuItem disabled>Clean Up</MenuItem>
-      <MenuItem disabled>Clean Up By</MenuItem>
-      <MenuItem disabled>Show View Options</MenuItem>
+      <MenuItem disabled onClose={onClose} itemStyle={itemStyle}>Use Stacks</MenuItem>
+      <MenuItem disabled onClose={onClose} itemStyle={itemStyle}>Sort By</MenuItem>
+      <MenuItem disabled onClose={onClose} itemStyle={itemStyle}>Clean Up</MenuItem>
+      <MenuItem disabled onClose={onClose} itemStyle={itemStyle}>Clean Up By</MenuItem>
+      <MenuItem disabled onClose={onClose} itemStyle={itemStyle}>Show View Options</MenuItem>
     </div>
   );
 }

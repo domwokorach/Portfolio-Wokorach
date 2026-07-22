@@ -87,11 +87,17 @@ const websites: WebsitesData = {
         img: "img/sites/financial-risk.svg",
         link: "https://fx-risk-dashboard.vercel.app/",
       },
-            {
+      {
         id: "management-system",
         title: "Management System",
         img: "img/sites/system.svg",
         link: "https://school-management-system-ruddy-three.vercel.app/",
+      },
+      {
+        id: "UX-UI-Travel",
+        title: "UX/UI Travel",
+        img: "img/sites/travel.svg",
+        link: "https://ui-ux-travel.vercel.app/",
       },
     ],
   },

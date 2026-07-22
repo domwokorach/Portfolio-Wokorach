@@ -34,7 +34,7 @@ interface SidebarSection {
 }
 
 // ─── Mock Filesystem ─────────────────────────────────────────────────────────
-const FILESYSTEM: Record<string, FileItem[]> = {
+const INITIAL_FILESYSTEM: Record<string, FileItem[]> = {
   home: [
     {
       id: "desktop",
@@ -48,6 +48,8 @@ const FILESYSTEM: Record<string, FileItem[]> = {
       children: [
         { id: "readme", name: "resume.pdf", kind: "file", ext: "pdf", size: "2 KB", date: "Today", icon: "/img/icons/sf-icons/pdf.svg", url: "/resume.pdf", },
         { id: "notes", name: "notes.txt", kind: "file", ext: "txt", size: "1 KB", date: "Yesterday", icon: "/img/icons/sf-icons/notes.svg", appId: "notes" },
+        { id: "cover-letter", name: "CoverLetter.pdf", kind: "file", ext: "pdf", size: "28 KB", date: "Today", icon: "/img/icons/sf-icons/pdf.svg", url: "/Cover_Letter.pdf" },
+        { id: "dominic-resume", name: "Dominic_resume.pdf", kind: "file", ext: "pdf", size: "340 KB", date: "Today", icon: "/img/icons/sf-icons/pdf.svg", url: "/resume.pdf" },
       ],
     },
     {
@@ -114,6 +116,42 @@ const FILESYSTEM: Record<string, FileItem[]> = {
     },
   ],
 };
+
+function findItemById(items: FileItem[], id: string): FileItem | undefined {
+  for (const item of items) {
+    if (item.id === id) return item;
+    if (item.children?.length) {
+      const found = findItemById(item.children, id);
+      if (found) return found;
+    }
+  }
+
+  return undefined;
+}
+
+function flattenItems(items: FileItem[]): FileItem[] {
+  return items.flatMap((item) => [item, ...(item.children ? flattenItems(item.children) : [])]);
+}
+
+function addChildToFolder(items: FileItem[], targetId: string, child: FileItem): FileItem[] {
+  return items.map((item) => {
+    if (item.id === targetId && item.kind === "folder") {
+      return {
+        ...item,
+        children: [child, ...(item.children ?? [])],
+      };
+    }
+
+    if (!item.children?.length) {
+      return item;
+    }
+
+    return {
+      ...item,
+      children: addChildToFolder(item.children, targetId, child),
+    };
+  });
+}
 
 const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
@@ -198,6 +236,7 @@ const FileIcon = ({ item, size = 56 }: { item: FileItem; size?: number }) => {
 export default function Finder() {
   const [location, setLocation] = useState<string>("home");
   const [pathStack, setPathStack] = useState<string[]>(["home"]);
+  const [fileSystem, setFileSystem] = useState<Record<string, FileItem[]>>(INITIAL_FILESYSTEM);
   const [viewMode, setViewMode] = useState<ViewMode>("icons");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [search, setSearch] = useState("");
@@ -208,25 +247,21 @@ export default function Finder() {
   const isMobile = size.winWidth < 768;
   const [mobileView, setMobileView] = useState<"sidebar" | "content">("content");
 
+  const getChildrenOf = (id: string): FileItem[] => {
+    if (id === "home") return fileSystem.home;
+    const found = findItemById(fileSystem.home, id);
+    return found?.children ?? [];
+  };
+
   // Get current items
   const currentItems = (): FileItem[] => {
     if (search.trim()) {
       const q = search.toLowerCase();
-      return Object.values(FILESYSTEM)
-        .flat()
-        .flatMap((f) => [f, ...(f.children ?? [])])
+      return flattenItems(fileSystem.home)
         .filter((f) => f.name.toLowerCase().includes(q));
     }
 
-    const rootItem = FILESYSTEM.home.find((f) => f.id === location);
-    if (location === "home") return FILESYSTEM.home;
-    if (rootItem?.children) return rootItem.children;
-    // nested
-    for (const root of FILESYSTEM.home) {
-      const nested = root.children?.find((c) => c.id === location);
-      if (nested?.children) return nested.children;
-    }
-    return [];
+    return getChildrenOf(location);
   };
 
   const sorted = [...currentItems()].sort((a, b) => {
@@ -274,15 +309,86 @@ export default function Finder() {
 
   const goForward = () => { };
 
+  useEffect(() => {
+    const handleOpenLocation = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      const nextLocation = customEvent.detail;
+      if (!nextLocation) return;
+
+      if (nextLocation === "home") {
+        setPathStack(["home"]);
+        setLocation("home");
+        setSelected(null);
+        return;
+      }
+
+      const target = findItemById(fileSystem.home, nextLocation);
+      if (!target || target.kind !== "folder") {
+        return;
+      }
+
+      const isRootChild = fileSystem.home.some((item) => item.id === nextLocation);
+      setPathStack(isRootChild ? ["home", nextLocation] : ["home"]);
+      setLocation(nextLocation);
+      setSelected(null);
+      setSearch("");
+      setMobileView("content");
+    };
+
+    window.addEventListener("finder:openLocation", handleOpenLocation);
+
+    return () => {
+      window.removeEventListener("finder:openLocation", handleOpenLocation);
+    };
+  }, [fileSystem]);
+
   const locationLabel = () => {
     if (location === "home") return "Dominic";
-    const item = FILESYSTEM.home.find((f) => f.id === location);
-    if (item) return item.name;
-    for (const root of FILESYSTEM.home) {
-      const nested = root.children?.find((c) => c.id === location);
-      if (nested) return nested.name;
+    return findItemById(fileSystem.home, location)?.name ?? location;
+  };
+
+  const createFolder = () => {
+    const siblingItems = getChildrenOf(location);
+    const baseName = "New Folder";
+    let name = baseName;
+    let index = 2;
+    const baseId = `folder-${location}-`;
+    let idIndex = 1;
+
+    while (siblingItems.some((item) => item.name.toLowerCase() === name.toLowerCase())) {
+      name = `${baseName} ${index}`;
+      index += 1;
     }
-    return location;
+
+    while (siblingItems.some((item) => item.id === `${baseId}${idIndex}`)) {
+      idIndex += 1;
+    }
+
+    const folder: FileItem = {
+      id: `${baseId}${idIndex}`,
+      name,
+      kind: "folder",
+      date: "Today",
+      icon: "/img/icons/sf-icons/folder.svg",
+      color: "#4A90E2",
+      children: [],
+    };
+
+    setFileSystem((prev) => {
+      if (location === "home") {
+        return {
+          ...prev,
+          home: [folder, ...prev.home],
+        };
+      }
+
+      return {
+        ...prev,
+        home: addChildToFolder(prev.home, location, folder),
+      };
+    });
+
+    setSelected(folder.id);
   };
 
   // ── Sidebar click handler ─────────────────────────────────────────────────
@@ -307,16 +413,6 @@ export default function Finder() {
   // ── Render items ──────────────────────────────────────────────────────────
 
   // Helpers shared by Columns (miller) view
-  const getChildrenOf = (id: string): FileItem[] => {
-    if (id === "home") return FILESYSTEM.home;
-    const root = FILESYSTEM.home.find((f) => f.id === id);
-    if (root?.children) return root.children;
-    for (const r of FILESYSTEM.home) {
-      const nested = r.children?.find((c) => c.id === id);
-      if (nested?.children) return nested.children;
-    }
-    return [];
-  };
 
   const sortItems = (items: FileItem[]) =>
     [...items].sort((a, b) => {
@@ -684,6 +780,7 @@ export default function Finder() {
           {toolbarBtn("Icons", "⊞", viewMode === "icons", () => setViewMode("icons"))}
           {toolbarBtn("List", "≡", viewMode === "list", () => setViewMode("list"))}
           {toolbarBtn("Columns", "⊟", viewMode === "columns", () => setViewMode("columns"))}
+          {toolbarBtn("New Folder", "📁", false, createFolder)}
         </div>
 
         {/* Sort */}
@@ -751,7 +848,7 @@ export default function Finder() {
           const label =
             seg === "home"
               ? "Dominic"
-              : FILESYSTEM.home.find((f) => f.id === seg)?.name ?? seg;
+              : findItemById(fileSystem.home, seg)?.name ?? seg;
           const isActive = i === pathStack.length - 1;
           return (
             <button
@@ -923,7 +1020,7 @@ export default function Finder() {
           const label =
             seg === "home"
               ? "Dominic"
-              : FILESYSTEM.home.find((f) => f.id === seg)?.name ??
+              : findItemById(fileSystem.home, seg)?.name ??
               seg;
           return (
             <React.Fragment key={seg}>
