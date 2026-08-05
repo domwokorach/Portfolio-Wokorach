@@ -16,7 +16,6 @@ I'm Dominic Frontend and Software Engineer.
 
 Let's build something amazing together! 🌟
 
-
 ## Contact
 
 Contact me by:
@@ -26,8 +25,6 @@ Contact me by:
 - Linkedin: [dominic](https://www.linkedin.com/in/dominic-w-3673523b/)
 - Personal Website: [dev.me](https://portfolio-wokorach.vercel.app/)
 
-
 ## Resume
 
 - download: [English](https://drive.google.com/file/d/1ONzCLtme8wtBotdwO-MnxSMq94z39-dz/view?usp=drive_link)
-
