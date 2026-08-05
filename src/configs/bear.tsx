@@ -73,6 +73,30 @@ const bear: BearData[] = [
         icon: "i-ph:figma-logo",
         excerpt: "A financial risk management dashboard...",
         link: "https://fx-risk-dashboard.vercel.app/"
+      },
+      {
+        id: "ui-ux-travel",
+        title: "UI/UX Travel",
+        file: "https://raw.githubusercontent.com/domwokorach/UI-UX-Travel/refs/heads/master/README.md",
+        icon: "i-ph:figma-logo",
+        excerpt: "A UI/UX travel project built with Figma...",
+        link: "https://vercel.com/domwokorachs-projects/ui-ux-travel/B8nDe9XyZ4JuHcXczpYr8k1CBrmW"
+      },
+      {
+        id: "system-management",
+        title: "System Management",
+        file: "https://raw.githubusercontent.com/domwokorach/School-Management-System/refs/heads/master/README.md",
+        icon: "i-ph:figma-logo",
+        excerpt: "A system management project built with Figma...",
+        link: "https://school-management-system-ruddy-three.vercel.app/"
+      },
+      {
+        id: "cloud-storage",
+        title: "Cloud Storage",
+        file: "https://raw.githubusercontent.com/domwokorach/Cloud-Drive/refs/heads/master/README.md",
+        icon: "i-ph:figma-logo",
+        excerpt: "A cloud storage project built with Figma...",
+        link: "https://cloud-storage.vercel.app/"
       }
     ]
   }
