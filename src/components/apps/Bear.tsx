@@ -33,11 +33,18 @@ interface BearState extends ContentProps {
 
 const Highlighter = (dark: boolean): Components => {
   return {
-    code({ inline, className, children, ...props }) {
+    code(rendererProps) {
+      const { className, children, ref: _ref, style: _style, ...props } = rendererProps;
+      void _ref;
+      void _style;
       const match = /language-(\w+)/.exec(className || "");
-      return !inline && match ? (
+      const syntaxStyle: { [key: string]: React.CSSProperties } = dark
+        ? (dracula as unknown as { [key: string]: React.CSSProperties })
+        : (prism as unknown as { [key: string]: React.CSSProperties });
+
+      return match ? (
         <SyntaxHighlighter
-          style={dark ? dracula : prism}
+          style={syntaxStyle}
           language={match[1]}
           PreTag="div"
           {...props}
@@ -91,11 +98,11 @@ const Middlebar = ({ items, cur, setContent }: MiddlebarProps) => {
             <div className="-mt-1 w-10 vstack text-c-500">
               <span className={item.icon} />
             </div>
-            <span className="relative flex-1 font-bold" text="gray-900 dark:gray-100">
+            <span className="relative flex-1 font-bold text-gray-900 dark:text-gray-100">
               {item.title}
               {item.link && (
                 <a
-                  pos="absolute top-1 right-4"
+                  className="absolute top-1 right-4"
                   href={item.link}
                   target="_blank"
                   rel="noreferrer"
@@ -105,7 +112,7 @@ const Middlebar = ({ items, cur, setContent }: MiddlebarProps) => {
               )}
             </span>
           </div>
-          <div className="flex-1 ml-10" p="b-2 r-1" text="sm c-500" border="b c-300">
+          <div className="flex-1 ml-10 pb-2 pr-1 text-sm text-c-500 border-b border-c-300">
             {item.excerpt}
           </div>
         </li>
@@ -212,14 +219,14 @@ const Bear = () => {
       <div className="w-44 overflow-auto" style={{ background: "var(--lg-bg-tinted)", backdropFilter: "var(--lg-blur-menu)" }}>
         <Sidebar cur={state.curSidebar} setMidBar={setMidBar} />
       </div>
-      <div className="w-60 overflow-auto" bg="gray-50 dark:gray-800" border="r c-300">
+      <div className="w-60 overflow-auto bg-gray-50 dark:bg-gray-800 border-r border-c-300">
         <Middlebar
           items={state.midbarList}
           cur={state.curMidbar}
           setContent={setContent}
         />
       </div>
-      <div className="flex-1 overflow-auto" bg="gray-50 dark:gray-800">
+      <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-800">
         <Content contentID={state.contentID} contentURL={state.contentURL} />
       </div>
     </div>
