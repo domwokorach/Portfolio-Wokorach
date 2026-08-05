@@ -12,8 +12,8 @@ Built with [React](https://reactjs.org/), [Zustand](https://zustand-demo.pmnd.rs
 
 ## Little Previews
 
-<img width="1583" height="883" alt="image" src="https://github.com/user-attachments/assets/1ff2961d-316a-4a86-be16-4754c42badc3" />
-<img width="1597" height="883" alt="Screenshot from 2026-06-11 16-49-36" src="https://github.com/user-attachments/assets/bbfe9948-cead-49e0-95ab-8cc3b17c46b1" />
+![image](https://github.com/user-attachments/assets/1ff2961d-316a-4a86-be16-4754c42badc3)
+![Screenshot from 2026-06-11 16-49-36](https://github.com/user-attachments/assets/bbfe9948-cead-49e0-95ab-8cc3b17c46b1)
 
 &nbsp;
 
