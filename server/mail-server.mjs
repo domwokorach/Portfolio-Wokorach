@@ -2,6 +2,7 @@ import http from "node:http";
 import { URL } from "node:url";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
 import { google } from "googleapis";
@@ -162,13 +163,15 @@ const gmailLabelMap = {
   Trash: ["TRASH"]
 };
 
-const requiredEnv = [
-  "MAIL_USER",
-  "MAIL_FROM",
-  ...(shouldUseGoogleMailApi()
-    ? ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REDIRECT_URI", "GOOGLE_REFRESH_TOKEN"]
-    : ["MAIL_IMAP_HOST", "MAIL_IMAP_PORT", "MAIL_IMAP_SECURE", "MAIL_SMTP_HOST", "MAIL_SMTP_PORT", "MAIL_SMTP_SECURE", "MAIL_PASS"])
-];
+const requiredEnv = process.env.RESEND_API_KEY
+  ? []
+  : [
+      "MAIL_USER",
+      "MAIL_FROM",
+      ...(shouldUseGoogleMailApi()
+        ? ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REDIRECT_URI", "GOOGLE_REFRESH_TOKEN"]
+        : ["MAIL_IMAP_HOST", "MAIL_IMAP_PORT", "MAIL_IMAP_SECURE", "MAIL_SMTP_HOST", "MAIL_SMTP_PORT", "MAIL_SMTP_SECURE", "MAIL_PASS"])
+    ];
 
 for (const key of requiredEnv) {
   if (!process.env[key]) {
@@ -441,6 +444,11 @@ const server = http.createServer(async (request, response) => {
   }
 
   if (requestUrl.pathname === "/api/mail/health" && request.method === "GET") {
+    if (process.env.RESEND_API_KEY) {
+      sendJson(response, 200, { ok: true, mode: "resend" });
+      return;
+    }
+
     try {
       const health = await checkMailAuthHealth();
       sendJson(response, 200, health);
@@ -567,16 +575,49 @@ const server = http.createServer(async (request, response) => {
 
   if (requestUrl.pathname === "/api/mail/send" && request.method === "POST") {
     try {
-      const mailConfigError = getMailConfigError();
+      const body = await readBody(request);
 
-      if (mailConfigError) {
-        sendJson(response, 503, {
-          error: mailConfigError
+      if (process.env.RESEND_API_KEY) {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const from = process.env.CONTACT_FROM_EMAIL || "onboarding@resend.dev";
+        const to = process.env.CONTACT_TO_EMAIL || body.to;
+        const senderEmail = typeof body.replyTo === "string" && body.replyTo.includes("@")
+          ? body.replyTo
+          : null;
+
+        const { data, error } = await resend.emails.send({
+          from,
+          to,
+          // lets you hit Reply directly to the visitor in your email client
+          replyTo: senderEmail ?? undefined,
+          subject: body.subject ?? "Portfolio message",
+          text: body.text ?? "",
+          html: body.html ?? undefined
         });
+        if (error) throw new Error(error.message);
+
+        // Auto-reply requires a verified domain; skip for the test sender
+        if (senderEmail && from !== "onboarding@resend.dev") {
+          const { error: replyError } = await resend.emails.send({
+            from,
+            to: senderEmail,
+            subject: "Re: " + (body.subject ?? "Portfolio message"),
+            text: "Thank you for your email. I will get back to you within 3\u20135 working days.\n\nKind regards,\n\nDominic"
+          });
+          if (replyError) console.error("[mail] Auto-reply failed", replyError.message);
+        }
+
+        sendJson(response, 200, { ok: true, messageId: data.id });
         return;
       }
 
-      const body = await readBody(request);
+      const mailConfigError = getMailConfigError();
+
+      if (mailConfigError) {
+        sendJson(response, 503, { error: mailConfigError });
+        return;
+      }
+
       const transporter = createTransporter();
       const result = await transporter.sendMail({
         from: process.env.MAIL_FROM,

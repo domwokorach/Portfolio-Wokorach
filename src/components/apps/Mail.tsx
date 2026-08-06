@@ -23,6 +23,7 @@ interface DraftMessage {
   to: string;
   subject: string;
   body: string;
+  email: string;
 }
 
 const MAIL_API_URL = import.meta.env.VITE_MAIL_API_URL ?? "/api/mail";
@@ -37,6 +38,7 @@ const EMPTY_DRAFT: DraftMessage = {
   to: DEFAULT_RECIPIENT,
   subject: "",
   body: "",
+  email: "",
 };
 
 const MESSAGES: MailMessage[] = [
@@ -120,7 +122,6 @@ export default function Mail() {
   const [composing, setComposing] = useState(false);
   const [messages, setMessages] = useState<MailMessage[]>(MESSAGES);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState<DraftMessage>(EMPTY_DRAFT);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
@@ -131,7 +132,6 @@ export default function Mail() {
 
     const loadMessages = async () => {
       setLoading(true);
-      setError(null);
 
       try {
         const response = await fetchMailApi(`/messages?folder=${encodeURIComponent(activeFolder)}`, {
@@ -153,14 +153,8 @@ export default function Mail() {
         if (!nextMessages.some((message) => message.id === selected)) {
           setSelected(nextMessages[0]?.id ?? "");
         }
-      } catch (err) {
+      } catch {
         if (!controller.signal.aborted) {
-          const message = err instanceof Error ? err.message : "Failed to load mail";
-          setError(
-            message === "Failed to fetch"
-              ? "Cannot reach mail API. Run the backend server or use /api/mail in dev."
-              : message
-          );
           setMessages(MESSAGES);
         }
       } finally {
@@ -233,7 +227,10 @@ export default function Mail() {
         body: JSON.stringify({
           to: draft.to.trim(),
           subject: draft.subject.trim() || "Portfolio message",
-          text: draft.body.trim(),
+          text: draft.email.trim()
+            ? `From: ${draft.email.trim()}\n\n${draft.body.trim()}`
+            : draft.body.trim(),
+          replyTo: draft.email.trim() || undefined,
         }),
       });
 
@@ -410,15 +407,15 @@ export default function Mail() {
               }}
             />
           </div>
-          {(loading || error) && (
+          {loading && (
             <div
               style={{
                 marginTop: "8px",
                 fontSize: "11px",
-                color: error ? "#d92d20" : "rgba(0,0,0,0.45)",
+                color: "rgba(0,0,0,0.45)",
               }}
             >
-              {error ? `Mail backend unavailable: ${error}` : "Loading mail from backend..."}
+              Loading mail from backend...
             </div>
           )}
         </div>
@@ -678,6 +675,30 @@ export default function Mail() {
               <input
                 value={draft.to}
                 onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, to: event.target.value }))}
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  fontSize: "13px",
+                  background: "transparent",
+                  color: "#1c1c1e",
+                }}
+              />
+            </div>
+            <div
+              style={{
+                padding: "8px 14px",
+                borderBottom: "0.5px solid rgba(0,0,0,0.06)",
+                display: "flex",
+                gap: "8px",
+                alignItems: "center",
+              }}
+            >
+              <span style={{ fontSize: "12px", color: "rgba(0,0,0,0.4)", width: "46px" }}>From:</span>
+              <input
+                placeholder="Your email address"
+                value={draft.email}
+                onChange={(event) => setDraft((currentDraft) => ({ ...currentDraft, email: event.target.value }))}
                 style={{
                   flex: 1,
                   border: "none",
