@@ -209,16 +209,6 @@ export default function Mail() {
     setSendError(null);
 
     try {
-      const healthResponse = await fetchMailApi("/health");
-      const healthPayload = (await healthResponse.json().catch(() => ({}))) as {
-        ok?: boolean;
-        error?: string;
-      };
-
-      if (!healthResponse.ok || healthPayload.ok === false) {
-        throw new Error(healthPayload.error ?? "Mail authentication failed");
-      }
-
       const response = await fetchMailApi("/send", {
         method: "POST",
         headers: {
