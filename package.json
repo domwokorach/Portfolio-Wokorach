@@ -23,7 +23,7 @@
     "mail:server": "node server/mail-server.mjs",
     "test": "npm run lint",
     "lint": "eslint .",
-    "prepare": "husky || true",
+    "prepare": "command -v husky >/dev/null 2>&1 && husky || true",
     "serve": "vite preview --host"
   },
   "lint-staged": {
