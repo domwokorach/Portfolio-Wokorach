@@ -1,4 +1,4 @@
 {
-  "installCommand": "HUSKY=0 pnpm install --no-frozen-lockfile",
+  "installCommand": "HUSKY=0 pnpm install --no-frozen-lockfile --prod=false",
   "buildCommand": "pnpm build"
 }
