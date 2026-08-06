@@ -28,10 +28,15 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prod=false
 
       - name: Build site
         run: pnpm build
+
+      - name: notify vercel
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: "Vercel - portfolio-wokorach: lint"
 
       - name: Deploy to Vercel (Production)
         if: github.ref == 'refs/heads/master' && github.event_name == 'push'
