@@ -15,11 +15,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          driver: cloud
-          endpoint: "domolanya/portfolio-wokorach"
       - name: Build image
         uses: docker/build-push-action@v6
         with:
           tags: "portfolio-wokorach:latest"
-          outputs: type=cacheonly
+          load: true
